@@ -1,0 +1,20 @@
+[tool.enscons]
+name = "conda-package-streaming"
+version = "0.0.1"
+author = "Anaconda Distribution Team"
+author_email = "distribution_team@anaconda.com"
+src_root = ""
+description = "Download conda metadata from packages without transferring entire file."
+install_requires = [
+  "conda-package-handling", # must use conda package, not pypi
+  "requests"
+]
+classifiers = [
+]
+keywords = ["packaging"]
+license = "BSD-3-Clause"
+url = "https://github.com/anaconda-distribution/conda-package-streaming"
+
+[build-system]
+requires = ["tomli; python<'3.11'", "enscons"]
+build-backend = "enscons.api"
