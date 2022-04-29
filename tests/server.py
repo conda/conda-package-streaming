@@ -7,8 +7,11 @@ import os.path
 import json
 import threading
 import wsgiref.simple_server
+import logging
 
 import bottle
+
+log = logging.getLogger(__name__)
 
 
 def find_packages_dirs():
@@ -26,7 +29,7 @@ def find_packages_dirs():
     # XXX can run individual environment's conda
     pkgs_dirs = conda_info["pkgs_dirs"] + [os.path.expanduser("~/miniconda3/pkgs")]
 
-    print(f"search {pkgs_dirs}")
+    log.debug("search %s", pkgs_dirs)
 
     first_pkg_dir = next(path for path in pkgs_dirs if os.path.exists(path))
 
@@ -36,6 +39,8 @@ def find_packages_dirs():
 def get_app():
     """
     Bottle conveniently supports Range requests.
+
+    Server may block if browser etc. keeps connection open.
     """
     app = bottle.Bottle()
     pkgs_dir = find_packages_dirs()
@@ -58,14 +63,36 @@ def selftest():
     """
     Run server in a thread that will die when the application exits.
     """
-    app = get_app()
-    server = wsgiref.simple_server.make_server("127.0.0.1", 0, app)
-    print(f"serving {app.pkgs_dir} on {server.server_address}/pkgs")
-    threading.Thread(daemon=True, target=server.serve_forever).start()
+    t = get_server_thread()
+    t.start()
+
     import time
 
     time.sleep(300)
 
 
+def get_server_thread():
+    """
+    Return test server thread with additional .server, .app properties.
+
+    Call .start() to serve in the background.
+    """
+    app = get_app()
+    server = wsgiref.simple_server.make_server("127.0.0.1", 0, app)
+    log.info(f"serving {app.pkgs_dir} on {server.server_address}/pkgs")
+    t = threading.Thread(daemon=True, target=server.serve_forever)
+    t.app = app
+    t.server = server
+    return t
+
+
 if __name__ == "__main__":
+    import logging
+
+    logging.basicConfig(
+        level=logging.INFO,
+        format="%(asctime)s %(message)s",
+        datefmt="%Y-%m-%dT%H:%M:%S",
+    )
+    log.setLevel(logging.DEBUG)
     selftest()
