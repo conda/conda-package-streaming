@@ -16,5 +16,5 @@ license = "BSD-3-Clause"
 url = "https://github.com/anaconda-distribution/conda-package-streaming"
 
 [build-system]
-requires = ["tomli; python<'3.11'", "enscons"]
+requires = ["tomli; python_version<'3.11'", "enscons>=0.28"]
 build-backend = "enscons.api"

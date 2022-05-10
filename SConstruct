@@ -8,7 +8,7 @@ try:
 except ImportError:
     import tomli as tomllib
 
-metadata = dict(tomllib.load(open("pyproject.toml")))["tool"]["enscons"]
+metadata = dict(tomllib.load(open("pyproject.toml", "rb")))["tool"]["enscons"]
 
 full_tag = "py3-none-any"
 
