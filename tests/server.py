@@ -1,13 +1,13 @@
 """
 Test web server.
 """
-import subprocess
+import json
+import logging
 import os
 import os.path
-import json
+import subprocess
 import threading
 import wsgiref.simple_server
-import logging
 
 import bottle
 

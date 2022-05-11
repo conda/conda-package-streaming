@@ -30,7 +30,8 @@ is finished early. However if we only want certain files from info/ we can stop
 after we've seen them all. Fetching repodata and calling response.raw.tell()
 after each tar member:
 
-$ python -m metayaml.fetch_metadata https://repo.anaconda.com/pkgs/main/linux-64/absl-py-0.1.10-py27_0.tar.bz2
+$ python -m metayaml.fetch_metadata \
+    https://repo.anaconda.com/pkgs/main/linux-64/absl-py-0.1.10-py27_0.tar.bz2
 128948 info/hash_input.json
 128948 info/index.json
 128948 info/files
@@ -46,7 +47,9 @@ $ python -m metayaml.fetch_metadata https://repo.anaconda.com/pkgs/main/linux-64
 128948 info/test/run_test.py
 ...
 
-A larger package: python -m metayaml.fetch_metadata https://repo.anaconda.com/pkgs/main/linux-64/airflow-1.10.10-py36_0.tar.bz2
+A larger package:
+$ python -m metayaml.fetch_metadata \
+    https://repo.anaconda.com/pkgs/main/linux-64/airflow-1.10.10-py36_0.tar.bz2
 286720 info/hash_input.json
 286720 info/has_prefix
 286720 info/index.json
@@ -63,21 +66,19 @@ A larger package: python -m metayaml.fetch_metadata https://repo.anaconda.com/pk
 634880 bin/airflow
 """
 
-from pathlib import Path
-import requests
-import tarfile
 import logging
-import zipfile
 import sys
+import tarfile
+import zipfile
+from pathlib import Path
 
+import requests
 from conda_package_handling import conda_fmt
-
-
-log = logging.getLogger(__name__)
 
 # Excellent HTTP Range request file-like object
 from . import lazy_wheel
 
+log = logging.getLogger(__name__)
 
 session = requests.Session()
 session.headers["User-Agent"] = "conda-package-streaming/0.1.0"

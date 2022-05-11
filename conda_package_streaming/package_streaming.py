@@ -3,12 +3,13 @@ Unpack conda packages without using a temporary file.
 """
 
 import bz2
-import zipfile
-import tarfile
-import zstandard  # or another zstandard binding that supports streams
-import os.path
 import json
+import os.path
+import tarfile
+import zipfile
 from contextlib import closing
+
+import zstandard  # or another zstandard binding that supports streams
 
 
 def tar_generator(fileobj):
