@@ -19,7 +19,7 @@ Could be used to get metadata from local `.tar.bz2` without reading entire file?
 * Do the least amount of I/O possible (no temporary files, transfer partial packages)
 * Open files from the network CDN / standard HTTP / s3
 
-* Continue using conda-package-handling to create .conda packages 
+* Continue using conda-package-handling to create .conda packages
 * Possibly merge into conda-package-handling when this package is mature
 
 # API

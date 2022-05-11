@@ -2,6 +2,7 @@
 
 # from pip 22.0.3 with fixes & remove imports from pip
 
+import logging
 from bisect import bisect_left, bisect_right
 from contextlib import contextmanager
 from tempfile import NamedTemporaryFile
@@ -10,8 +11,6 @@ from zipfile import BadZipfile, ZipFile
 
 from requests import Session
 from requests.models import CONTENT_CHUNK_SIZE, Response
-
-import logging
 
 log = logging.getLogger(__name__)
 
@@ -219,9 +218,9 @@ class LazyZipOverHTTP:
 
 
 if __name__ == "__main__":
-    import requests
-
     import logging
+
+    import requests
 
     logging.basicConfig(level=logging.DEBUG)
 

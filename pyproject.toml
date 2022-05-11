@@ -18,3 +18,11 @@ url = "https://github.com/anaconda-distribution/conda-package-streaming"
 [build-system]
 requires = ["tomli; python_version<'3.11'", "enscons>=0.28"]
 build-backend = "enscons.api"
+
+[tool.black]
+line-length = 100
+target-version = ['py37', 'py38', 'py39']
+
+[tool.isort]
+profile = "black"
+line_length = 100
