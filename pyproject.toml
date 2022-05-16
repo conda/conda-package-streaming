@@ -8,6 +8,7 @@ description = "Download conda metadata from packages without transferring entire
 install_requires = [
   "conda-package-handling", # must use conda package, not pypi
   "requests",
+  "zstandard",
 ]
 classifiers = []
 keywords = ["packaging"]
