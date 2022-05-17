@@ -14,9 +14,8 @@ import contextlib
 # streams everything in .tar.bz2 mode
 from .package_streaming import stream_conda_component
 
-
-# increase to reduce speed and increase compression (21 = normal max & conda's default)
-ZSTD_COMPRESS_LEVEL = 21
+# increase to reduce speed and increase compression (22 = conda's default)
+ZSTD_COMPRESS_LEVEL = 22
 # increase to reduce compression and increase speed
 ZSTD_COMPRESS_THREADS = 1
 
@@ -33,7 +32,9 @@ def test():
     import glob
 
     conda_packages = []
-    tarbz_packages = glob.glob(os.path.expanduser("~/miniconda3/pkgs/*.tar.bz2"))
+    tarbz_packages = glob.glob(
+        os.path.expanduser("~/miniconda3/pkgs/python-3.8.10-h0e5c897_0_cpython.tar.bz2")
+    )
 
     for packages in (conda_packages, tarbz_packages):
         for package in packages:
@@ -47,9 +48,7 @@ def transmute(package):
     file_id = os.path.basename(package)[: -len(".tar.bz2")]
 
     # x to not append to existing
-    conda_file = zipfile.ZipFile(
-        f"/tmp/{file_id}.conda", "x", compresslevel=zipfile.ZIP_STORED
-    )
+    conda_file = zipfile.ZipFile(f"/tmp/{file_id}.conda", "x", compresslevel=zipfile.ZIP_STORED)
 
     info_compress = zstandard.ZstdCompressor(
         level=ZSTD_COMPRESS_LEVEL, threads=ZSTD_COMPRESS_THREADS
