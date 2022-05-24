@@ -68,15 +68,14 @@ $ python -m metayaml.fetch_metadata \
 
 import logging
 import sys
-import tarfile
+import urllib.parse
 import zipfile
 from pathlib import Path
 
 import requests
-from conda_package_handling import conda_fmt
 
 # Excellent HTTP Range request file-like object
-from . import lazy_wheel
+from . import lazy_wheel, package_streaming
 
 log = logging.getLogger(__name__)
 
@@ -117,18 +116,21 @@ class LazyConda(lazy_wheel.LazyZipOverHTTP):
                 log.debug("no zip prefetch")
 
 
-def fetch_tarbz(url, destdir, checklist=set()):
+def fetch_tarbz(url: str, destdir: str | Path, checklist=set()):
     """
     Stream url, stop when all files in set checklist (file names like
     info/recipe/meta.yaml) have been found.
     """
     response = requests.get(url, stream=True)
-    tar = tarfile.open(fileobj=response.raw, mode="r|bz2")
-    for member in tar:
+    parsed_url = urllib.parse.urlparse(url)
+    _, filename = parsed_url.path.rsplit("/", 1)
+    stream = package_streaming.stream_conda_info(filename, response.raw)
+    for (tar, member) in stream:
         if member.name in checklist:
             tar.extract(member, destdir)
             checklist.remove(member.name)
         if not checklist:
+            stream.close()
             break
     log.debug(
         f"tell {response.raw.tell():,} content-length {int(response.headers['Content-Length']):,}",
@@ -143,10 +145,16 @@ def fetch_conda(url, destdir):
     Fetch only bytes ranges of url.
     """
     # filename without path or .conda extension
-    file_id = url.split("/")[-1].rsplit(".", 1)[0]
+    parsed_url = urllib.parse.urlparse(url)
+    _, filename = parsed_url.path.rsplit("/", 1)
+    file_id, _ = filename.rsplit(".", 1)
     conda = LazyConda(url, session)
     conda.prefetch(file_id)
-    conda_fmt._extract_component(conda, file_id, "info", str(destdir))
+
+    stream = package_streaming.stream_conda_info(filename, conda)
+    for (tar, member) in stream:
+        tar.extract(member, destdir)
+
     if conda._request_count > 3:
         log.warn("Should take 3 or fewer requests but took %d", conda._request_count)
 

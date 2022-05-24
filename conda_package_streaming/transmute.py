@@ -2,14 +2,15 @@
 Convert .tar.bz2 to .conda without writing temporary tarfiles to disk.
 """
 
-from asyncore import close_all
-import tarfile
-import zstandard
-import zipfile
-import os
-import io
-import time
 import contextlib
+import io
+import json
+import os
+import tarfile
+import time
+import zipfile
+
+import zstandard
 
 # streams everything in .tar.bz2 mode
 from .package_streaming import stream_conda_component
@@ -48,7 +49,9 @@ def transmute(package):
     file_id = os.path.basename(package)[: -len(".tar.bz2")]
 
     # x to not append to existing
-    conda_file = zipfile.ZipFile(f"/tmp/{file_id}.conda", "x", compresslevel=zipfile.ZIP_STORED)
+    conda_file = zipfile.ZipFile(
+        f"/tmp/{file_id}.conda", "x", compresslevel=zipfile.ZIP_STORED
+    )
 
     info_compress = zstandard.ZstdCompressor(
         level=ZSTD_COMPRESS_LEVEL, threads=ZSTD_COMPRESS_THREADS
@@ -63,7 +66,7 @@ def transmute(package):
     info_stream = info_compress.stream_writer(info_io, closefd=False)
     info_tar = tarfile.TarFile(fileobj=info_stream, mode="w")
 
-    conda_file.writestr("metadata.json", """{"conda_pkg_format_version": 2}""")
+    conda_file.writestr("metadata.json", json.dumps({"conda_pkg_format_version": 2}))
 
     with conda_file.open(f"pkg-{file_id}.tar.zst", "w") as pkg_file:
         pkg_stream = data_compress.stream_writer(pkg_file, closefd=False)

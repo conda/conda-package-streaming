@@ -1,15 +1,11 @@
 [tool.enscons]
 name = "conda-package-streaming"
-version = "0.0.1"
+version = "0.0.2"
 author = "Anaconda, Inc."
 author_email = "conda@anaconda.com"
 src_root = ""
 description = "Download conda metadata from packages without transferring entire file."
-install_requires = [
-  "conda-package-handling", # must use conda package, not pypi
-  "requests",
-  "zstandard",
-]
+install_requires = ["requests", "zstandard"]
 classifiers = []
 keywords = ["packaging"]
 license = "BSD-3-Clause"
@@ -20,9 +16,7 @@ requires = ["tomli; python_version<'3.11'", "enscons>=0.28"]
 build-backend = "enscons.api"
 
 [tool.black]
-line-length = 100
-target-version = ['py37', 'py38', 'py39']
+target-version = ["py38", "py39", "py310"]
 
 [tool.isort]
 profile = "black"
-line_length = 100

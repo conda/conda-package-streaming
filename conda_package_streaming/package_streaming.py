@@ -8,11 +8,12 @@ import os.path
 import tarfile
 import zipfile
 from contextlib import closing
+from typing import Iterator
 
 import zstandard  # or another zstandard binding that supports streams
 
 
-def tar_generator(fileobj):
+def tar_generator(fileobj) -> Iterator[tuple[tarfile.TarFile, tarfile.TarInfo]]:
     """
     Yield (tar, member) from fileobj.
     """
@@ -21,7 +22,9 @@ def tar_generator(fileobj):
             yield tar, member
 
 
-def stream_conda_info(filename, fileobj=None):
+def stream_conda_info(
+    filename, fileobj=None
+) -> Iterator[tuple[tarfile.TarFile, tarfile.TarInfo]]:
     """
     Yield members from conda's embedded info/ tarball.
 
@@ -39,7 +42,9 @@ def stream_conda_info(filename, fileobj=None):
     return stream_conda_component(filename, fileobj, component)
 
 
-def stream_conda_component(filename, fileobj=None, component="info"):
+def stream_conda_component(
+    filename, fileobj=None, component="info"
+) -> Iterator[tuple[tarfile.TarFile, tarfile.TarInfo]]:
     """
     Yield members from .conda's embedded {component}- tarball. "info" or "pkg".
 
