@@ -116,15 +116,34 @@ class LazyConda(lazy_wheel.LazyZipOverHTTP):
                 log.debug("no zip prefetch")
 
 
-def fetch_tarbz(url: str, destdir: str | Path, checklist=set()):
+def stream_meta(url):
     """
-    Stream url, stop when all files in set checklist (file names like
-    info/recipe/meta.yaml) have been found.
+    Yield (tar, member) for conda package at url
+
+    Just "info/" for .conda, all members for tar.
     """
-    response = requests.get(url, stream=True)
     parsed_url = urllib.parse.urlparse(url)
     _, filename = parsed_url.path.rsplit("/", 1)
-    stream = package_streaming.stream_conda_info(filename, response.raw)
+    if filename.endswith(".conda"):
+        file_id, _ = filename.rsplit(".", 1)
+        conda = LazyConda(url, session)
+        conda.prefetch(file_id)
+    elif filename.endswith(".tar.bz2"):
+        response = requests.get(url, stream=True)
+        conda = response.raw
+    else:
+        raise ValueError("Unsupported extension %s", url)
+
+    return package_streaming.stream_conda_info(filename, conda)
+
+
+def fetch_meta(url, destdir):
+    """
+    Extract info/index.json and info/recipe.meta.yaml from url to destdir; close
+    url as soon as those files are found.
+    """
+    checklist = {"info/index.json", "info/recipe/meta.yaml"}
+    stream = stream_meta(url)
     for (tar, member) in stream:
         if member.name in checklist:
             tar.extract(member, destdir)
@@ -132,42 +151,6 @@ def fetch_tarbz(url: str, destdir: str | Path, checklist=set()):
         if not checklist:
             stream.close()
             break
-    log.debug(
-        f"tell {response.raw.tell():,} content-length {int(response.headers['Content-Length']):,}",
-    )
-    response.close()
-
-
-def fetch_conda(url, destdir):
-    """
-    Extract whole .conda info/ into destdir/info.
-
-    Fetch only bytes ranges of url.
-    """
-    # filename without path or .conda extension
-    parsed_url = urllib.parse.urlparse(url)
-    _, filename = parsed_url.path.rsplit("/", 1)
-    file_id, _ = filename.rsplit(".", 1)
-    conda = LazyConda(url, session)
-    conda.prefetch(file_id)
-
-    stream = package_streaming.stream_conda_info(filename, conda)
-    for (tar, member) in stream:
-        tar.extract(member, destdir)
-
-    if conda._request_count > 3:
-        log.warn("Should take 3 or fewer requests but took %d", conda._request_count)
-
-
-def fetch_meta(url, destdir):
-    if url.endswith(".tar.bz2"):
-        fetch_tarbz(
-            url, destdir, checklist={"info/index.json", "info/recipe/meta.yaml"}
-        )
-    elif url.endswith(".conda"):
-        fetch_conda(url, destdir)
-    else:
-        raise ValueError("Unsupported extension %s", url)
 
 
 if __name__ == "__main__":
