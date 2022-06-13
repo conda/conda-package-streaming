@@ -19,7 +19,7 @@ repos:
         exclude: conda-recipe/meta.yaml
       - id: check-merge-conflict
   - repo: https://github.com/asottile/pyupgrade
-    rev: v2.32.1
+    rev: v2.34.0
     hooks:
       - id: pyupgrade
         args: ["--py37-plus"]
