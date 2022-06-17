@@ -37,3 +37,11 @@ fetch_meta(url, destdir)
 * s3 support via https://github.com/DavidMuller/aws-requests-auth/blob/master/aws_requests_auth ?
 * Or an adapter to issue the necessary s3 get / range requests with either boto3 or requests
 * Probably the best Python zstd binding https://github.com/indygreg/python-zstandard
+
+# Generating documentation
+
+Uses markdown, furo theme. Requires newer mdit-py-plugins.
+
+`pip install mdit-py-plugins\>=0.3.0`
+
+`sphinx-apidoc -o docs .`
