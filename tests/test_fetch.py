@@ -2,9 +2,10 @@ from contextlib import closing
 from pathlib import Path
 
 import pytest
-import requests
 
-from conda_package_streaming import fetch_metadata, package_streaming
+from conda_package_streaming import fetch_metadata
+
+LIMIT = 16
 
 
 @pytest.fixture
@@ -20,7 +21,9 @@ def package_url(package_server):
 def package_urls(package_server, package_url):
     pkgs_dir = Path(package_server.app.pkgs_dir)
     urls = []
-    for path in pkgs_dir.iterdir():
+    for i, path in enumerate(pkgs_dir.iterdir()):
+        if i > LIMIT:
+            break
         if path.name.endswith((".tar.bz2", ".conda")):
             urls.append(f"{package_url}/{path.name}")
     return urls

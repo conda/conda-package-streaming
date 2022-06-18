@@ -1,5 +1,14 @@
 """
-Convert .tar.bz2 to .conda without writing temporary tarfiles to disk.
+Convert .tar.bz2 to .conda without temporary files.
+
+Streams main `pkg-*` `.tar.zst` into open `ZipFile`, while buffering `info-*`
+`.tar.zst` in memory, writing it out at the end.
+
+Works well for a typical ~10k `info-*`, but the conda format does not guarantee
+a small `info-*`.
+
+Conda packages created this way will also have `info-*` as the last element in
+the `ZipFile`, instead of the first for normal conda packages.
 """
 
 import io

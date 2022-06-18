@@ -1,22 +1,33 @@
-[tool.enscons]
-name = "conda-package-streaming"
-version = "0.0.2"
-author = "Anaconda, Inc."
-author_email = "conda@anaconda.com"
-src_root = ""
-description = "Download conda metadata from packages without transferring entire file."
-install_requires = ["requests", "zstandard"]
-classifiers = []
-keywords = ["packaging"]
-license = "BSD-3-Clause"
-url = "https://github.com/anaconda-distribution/conda-package-streaming"
-
-[build-system]
-requires = ["tomli; python_version<'3.11'", "enscons>=0.28"]
-build-backend = "enscons.api"
-
 [tool.black]
 target-version = ["py38", "py39", "py310"]
 
 [tool.isort]
 profile = "black"
+
+[build-system]
+requires = ["flit_core >=3.2,<4"]
+build-backend = "flit_core.buildapi"
+
+[project]
+name = "conda_package_streaming"
+authors = [
+  { name = "Anaconda, Inc. & Contributors", email = "conda@continuum.io" },
+]
+description = "Download conda metadata from packages without transferring entire file."
+license = { "file" = "LICENSE" }
+readme = "README.md"
+dynamic = ["version"]
+requires-python = ">=3.9"
+dependencies = ["requests", "zstandard >=0.15"]
+
+[project.optional-dependencies]
+test = [
+  "pytest >=7",
+  "pytest-cov",
+  "pytest-mock",
+  "boto3",
+  "boto3-stubs[essential]",
+  "bottle",
+]
+[project.urls]
+Home = "https://github.com/conda-incubator/conda-package-streaming"

@@ -4,6 +4,8 @@ from pathlib import Path
 import boto3
 import pytest
 
+from conda_package_streaming import fetch_s3
+
 
 @pytest.fixture
 def s3_client(package_server):
@@ -19,35 +21,28 @@ def s3_client(package_server):
     return client
 
 
-def test_head_objects(package_server, s3_client):
+@pytest.fixture(scope="module")
+def conda_paths(package_server):
     pkgs_dir = Path(package_server.app.pkgs_dir)
-    bucket = "pkgs"  # independent of filesystem path
+    conda_paths = []
     for path in pkgs_dir.iterdir():
         if path.name.endswith((".tar.bz2", ".conda")):
-            print(s3_client.head_object(Bucket=bucket, Key=path.name))
+            conda_paths.append(path)
+    return conda_paths
 
 
-# response body shows a lot, implements read but not seek
-#
-# 'close',
-# 'closed',
-# 'fileno',
-# 'flush',
-# 'isatty',
-# 'iter_chunks',
-# 'iter_lines',
-# 'next',
-# 'read',
-# 'readable',
-# 'readline',
-# 'readlines',
-# 'seek',
-# 'seekable',
-# 'set_socket_timeout',
-# 'tell',
-# 'truncate',
-# 'writable',
-# 'writelines'
+def test_head_objects(s3_client, conda_paths):
+    bucket = "pkgs"  # independent of filesystem path
+    for path in conda_paths:
+        s3_client.head_object(Bucket=bucket, Key=path.name)
 
-# boto3 range request:
-# body = obj.get(Range='bytes=32-64')['Body']
+
+def test_stream_s3(s3_client, conda_paths):
+    for path in conda_paths:
+        members = fetch_s3.stream_meta(s3_client, "pkgs", path.name)
+        print("stream s3", path.name)
+        for tar, member in members:
+            if member.name == "info/index.json":
+                break
+        else:
+            pytest.fail("info/index.json not found")
