@@ -20,7 +20,7 @@ def tar_generator(
     Yield (tar, member) from fileobj.
     """
     # tarfile will not close fileobj because _extfileobj is True
-    # will be tricky to close files all the way back to the http request
+    # caller should take care to close files all the way back to the http request...
     with closing(tarfile.open(fileobj=fileobj, mode="r|")) as tar:
         for member in tar:
             yield tar, member

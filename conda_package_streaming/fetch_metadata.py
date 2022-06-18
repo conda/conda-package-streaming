@@ -70,6 +70,7 @@ import logging
 import sys
 import urllib.parse
 import zipfile
+from contextlib import closing
 from pathlib import Path
 
 import requests
@@ -134,7 +135,8 @@ def stream_meta(url):
     else:
         raise ValueError("Unsupported extension %s", url)
 
-    return package_streaming.stream_conda_info(filename, conda)
+    with closing(conda):
+        yield from package_streaming.stream_conda_info(filename, conda)
 
 
 def fetch_meta(url, destdir):
