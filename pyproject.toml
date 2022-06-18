@@ -31,3 +31,9 @@ test = [
 ]
 [project.urls]
 Home = "https://github.com/conda-incubator/conda-package-streaming"
+
+# pyproject.toml
+[tool.pytest.ini_options]
+minversion = "7.0"
+addopts = "--cov=conda_package_streaming/"
+testpaths = ["tests"]
