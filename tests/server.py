@@ -27,7 +27,8 @@ def find_packages_dirs():
         ).stdout
     )
 
-    # XXX can run individual environment's conda
+    # XXX can run individual environment's conda (base conda is more likely to
+    # have useful cached packages)
     pkgs_dirs = conda_info["pkgs_dirs"] + [os.path.expanduser("~/miniconda3/pkgs")]
 
     log.debug("search %s", pkgs_dirs)

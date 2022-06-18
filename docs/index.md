@@ -6,12 +6,17 @@
 # Welcome to conda-package-streaming's documentation!
 
 `conda-package-streaming` strives to be the most efficient way to read from new
-and old format `.conda` and `.tar.bz2` [conda packages](https://docs.conda.io/projects/conda/en/latest/user-guide/concepts/packages.html). `conda-package-streaming`
-can read from conda packages without ever writing to disk, unlike
-[conda-package-handling](https://github.com/conda/conda-package-handling)'s temporary directories. It can read a package from a
-URL or a stream without transferring the entire archive.
+and old format `.conda` and `.tar.bz2` [conda
+packages](https://docs.conda.io/projects/conda/en/latest/user-guide/concepts/packages.html).
+`conda-package-streaming` can read from conda packages without ever writing to
+disk, unlike
+[conda-package-handling](https://github.com/conda/conda-package-handling)'s
+temporary directories. It can read a package from a URL or a stream without
+transferring the entire archive.
 
-`conda-package-streaming` uses the standard library `zipfile` and `tarfile`, and
+`conda-package-streaming` uses the standard library
+[`zipfile`](https://docs.python.org/3/library/zipfile.html) and
+[`tarfile`](https://docs.python.org/3/library/tarfile.html), and
 [`zstandard`](https://github.com/indygreg/python-zstandard) to handle
 zstd-compressed streams.
 
