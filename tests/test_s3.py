@@ -6,6 +6,8 @@ import pytest
 
 from conda_package_streaming import fetch_s3
 
+LIMIT = 16
+
 
 @pytest.fixture
 def s3_client(package_server):
@@ -21,24 +23,17 @@ def s3_client(package_server):
     return client
 
 
-@pytest.fixture(scope="module")
-def conda_paths(package_server):
-    pkgs_dir = Path(package_server.app.pkgs_dir)
-    conda_paths = []
-    for path in pkgs_dir.iterdir():
-        if path.name.endswith((".tar.bz2", ".conda")):
-            conda_paths.append(path)
-    return conda_paths
-
-
 def test_head_objects(s3_client, conda_paths):
     bucket = "pkgs"  # independent of filesystem path
-    for path in conda_paths:
+    for path in conda_paths[:LIMIT]:
         s3_client.head_object(Bucket=bucket, Key=path.name)
 
 
 def test_stream_s3(s3_client, conda_paths):
-    for path in conda_paths:
+    with pytest.raises(ValueError):
+        next(fetch_s3.stream_meta(s3_client, "pkgs", "notaconda.rar"))
+
+    for path in conda_paths[:LIMIT]:
         members = fetch_s3.stream_meta(s3_client, "pkgs", path.name)
         print("stream s3", path.name)
         for tar, member in members:

@@ -1,4 +1,6 @@
+import tempfile
 from contextlib import closing
+from multiprocessing.sharedctypes import Value
 from pathlib import Path
 
 import pytest
@@ -30,6 +32,9 @@ def package_urls(package_server, package_url):
 
 
 def test_stream_url(package_urls):
+    with pytest.raises(ValueError):
+        next(fetch_metadata.stream_meta("https://localhost/notaconda.rar"))
+
     for url in package_urls:
         with closing(fetch_metadata.stream_meta(url)) as members:
             print("stream_url", url)
@@ -38,3 +43,9 @@ def test_stream_url(package_urls):
                     break
             else:
                 pytest.fail("info/index.json not found")
+
+
+def test_fetch_meta(package_urls):
+    for url in package_urls:
+        with tempfile.TemporaryDirectory() as destdir:
+            fetch_metadata.fetch_meta(url, destdir)

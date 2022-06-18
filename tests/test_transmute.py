@@ -13,14 +13,18 @@ def timeme(message: str = ""):
     print(f"{message}{end-begin:0.2f}s")
 
 
-def test_transmute():
+def test_transmute(conda_paths):
     import glob
     import tempfile
 
-    conda_packages = []
-    tarbz_packages = glob.glob(
-        os.path.expanduser("~/miniconda3/pkgs/python-3.8.10-h0e5c897_0_cpython.tar.bz2")
-    )
+    tarbz_packages = []
+    for path in conda_paths:
+        path = str(path)
+        if path.endswith(".tar.bz2") and (1 << 20 < os.stat(path).st_size < 1 << 22):
+            tarbz_packages = [path]
+    conda_packages = []  # not supported
+
+    assert tarbz_packages, "no medium-sized package found"
 
     with tempfile.TemporaryDirectory() as outdir:
         for packages in (conda_packages, tarbz_packages):

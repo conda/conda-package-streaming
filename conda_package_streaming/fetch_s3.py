@@ -8,7 +8,7 @@ from typing import Any
 
 from . import package_streaming
 
-if typing.TYPE_CHECKING:
+if typing.TYPE_CHECKING:  # pragma: no cover
     from mypy_boto3_s3 import Client
     from mypy_boto3_s3.type_defs import GetObjectOutputTypeDef
 else:

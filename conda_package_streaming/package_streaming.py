@@ -8,9 +8,12 @@ import os.path
 import tarfile
 import zipfile
 from contextlib import closing
-from typing import Generator  # not Iterator; exposes .close() method to typechecker
+from typing import Generator
 
 import zstandard
+from importlib_metadata import (  # not Iterator; exposes .close() method to typechecker
+    Lookup,
+)
 
 
 def tar_generator(
@@ -62,7 +65,7 @@ def stream_conda_component(
     care of some directory permissions/mtime issues, compared to `extract` or
     writing out the file objects yourself.
     """
-    if filename.endswith(".conda"):
+    if str(filename).endswith(".conda"):
         zf = zipfile.ZipFile(fileobj or filename)
         file_id, _, _ = os.path.basename(filename).rpartition(".")
         component_name = f"{component}-{file_id}"
@@ -70,39 +73,13 @@ def stream_conda_component(
             info for info in zf.infolist() if info.filename.startswith(component_name)
         ]
         if not component_filename:
-            raise RuntimeError(f"didn't find {component_name} component in {filename}")
+            raise LookupError(f"didn't find {component_name} component in {filename}")
         assert len(component_filename) == 1
         reader = zstandard.ZstdDecompressor().stream_reader(
             zf.open(component_filename[0])
         )
-    elif filename.endswith(".tar.bz2"):
+    elif str(filename).endswith(".tar.bz2"):
         reader = bz2.open(fileobj or filename, mode="rb")
     else:
         raise ValueError("unsupported file extension")
     return tar_generator(reader)
-
-
-def test():
-    import glob
-
-    conda_packages = glob.glob(os.path.expanduser("~/miniconda3/pkgs/*.conda"))
-    tarbz_packages = glob.glob(os.path.expanduser("~/miniconda3/pkgs/*.tar.bz2"))
-
-    for packages in (conda_packages, tarbz_packages):
-        for package in packages:
-            print(package)
-            stream = iter(stream_conda_info(package))
-            found = False
-            for tar, member in stream:
-                assert not found, "early exit did not work"
-                if member.name == "info/index.json":
-                    reader = tar.extractfile(member)
-                    if reader:
-                        json.load(reader)
-                        found = True
-                    stream.close()  # PEP 342 close()
-            assert found, f"index.json not found in {package}"
-
-
-if __name__ == "__main__":
-    test()
