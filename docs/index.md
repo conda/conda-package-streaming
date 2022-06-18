@@ -20,6 +20,10 @@ transferring the entire archive.
 [`zstandard`](https://github.com/indygreg/python-zstandard) to handle
 zstd-compressed streams.
 
+
+```{include} ../README.md
+```
+
 ```{toctree}
 :caption: 'Contents:'
 :maxdepth: 2

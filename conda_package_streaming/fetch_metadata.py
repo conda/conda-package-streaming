@@ -25,7 +25,7 @@ session.headers["User-Agent"] = "conda-package-streaming/0.1.0"
 
 def fetch_meta(url, destdir):
     """
-    Extract info/index.json and info/recipe.meta.yaml from url to destdir; close
+    Extract info/index.json and info/recipe/meta.yaml from url to destdir; close
     url as soon as those files are found.
     """
     checklist = {"info/index.json", "info/recipe/meta.yaml"}

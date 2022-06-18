@@ -68,7 +68,7 @@ def transmute(
         pkg_stream = data_compress.stream_writer(pkg_file, closefd=False)
         pkg_tar = tarfile.TarFile(fileobj=pkg_stream, mode="w")
 
-        stream = iter(stream_conda_component(package, None, "pkg"))
+        stream = iter(stream_conda_component(package))
         for tar, member in stream:
             tar_get = info_tar if member.name.startswith("info/") else pkg_tar
             if member.isfile():
