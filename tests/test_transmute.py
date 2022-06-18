@@ -1,5 +1,6 @@
 import contextlib
 import os
+import tempfile
 import time
 
 from conda_package_streaming.transmute import transmute
@@ -14,8 +15,6 @@ def timeme(message: str = ""):
 
 
 def test_transmute(conda_paths):
-    import glob
-    import tempfile
 
     tarbz_packages = []
     for path in conda_paths:

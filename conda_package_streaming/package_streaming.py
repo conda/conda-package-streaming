@@ -3,7 +3,6 @@ Unpack conda packages without using a temporary file.
 """
 
 import bz2
-import json
 import os.path
 import tarfile
 import zipfile
@@ -11,9 +10,6 @@ from contextlib import closing
 from typing import Generator
 
 import zstandard
-from importlib_metadata import (  # not Iterator; exposes .close() method to typechecker
-    Lookup,
-)
 
 
 def tar_generator(
