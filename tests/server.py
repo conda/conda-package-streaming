@@ -8,6 +8,7 @@ import os.path
 import subprocess
 import threading
 import wsgiref.simple_server
+from typing import Any
 
 import bottle
 
@@ -55,7 +56,7 @@ def get_app():
             mimetype = "binary/octet-stream"
         return bottle.static_file(filename, root=pkgs_dir, mimetype=mimetype)
 
-    app.route("/pkgs/<filename>", ["GET"], serve_file)
+    app.route("/pkgs/<filename>", "GET", serve_file)
     return app
 
 
@@ -71,6 +72,11 @@ def selftest():
     time.sleep(300)
 
 
+class ServerThread(threading.Thread):
+    server: wsgiref.simple_server.WSGIServer
+    app: Any
+
+
 def get_server_thread():
     """
     Return test server thread with additional .server, .app properties.
@@ -80,9 +86,9 @@ def get_server_thread():
     app = get_app()
     server = wsgiref.simple_server.make_server("127.0.0.1", 0, app)
     log.info(f"serving {app.pkgs_dir} on {server.server_address}/pkgs")
-    t = threading.Thread(daemon=True, target=server.serve_forever)
+    t = ServerThread(daemon=True, target=server.serve_forever)
     t.app = app
-    t.server = server
+    t.server = server  # server.application == app
     return t
 
 

@@ -44,8 +44,7 @@ def test():
 
 
 def transmute(package):
-    print(package)
-    assert package.endswith(".tar.bz2"), "can't convert .conda to .conda"
+    assert package.endswith(".tar.bz2"), "can only convert .tar.bz2 to .conda"
     file_id = os.path.basename(package)[: -len(".tar.bz2")]
 
     # x to not append to existing

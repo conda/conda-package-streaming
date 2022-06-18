@@ -96,7 +96,6 @@ class LazyZipOverHTTP:
         size bytes may be returned if EOF is reached.
         """
         # BUG does not download correctly if size is unspecified
-        # TODO why can't this be min(size, self._chunk_size)
         download_size = max(size, self._chunk_size)
         start, length = self.tell(), self._length
         stop = length if size < 0 else min(start + download_size, length)

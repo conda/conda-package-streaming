@@ -8,15 +8,19 @@ import os.path
 import tarfile
 import zipfile
 from contextlib import closing
-from typing import Iterator
+from typing import Generator  # not Iterator; exposes .close() method to typechecker
 
-import zstandard  # or another zstandard binding that supports streams
+import zstandard
 
 
-def tar_generator(fileobj) -> Iterator[tuple[tarfile.TarFile, tarfile.TarInfo]]:
+def tar_generator(
+    fileobj,
+) -> Generator[tuple[tarfile.TarFile, tarfile.TarInfo], None, None]:
     """
     Yield (tar, member) from fileobj.
     """
+    # tarfile will not close fileobj because _extfileobj is True
+    # will be tricky to close files all the way back to the http request
     with closing(tarfile.open(fileobj=fileobj, mode="r|")) as tar:
         for member in tar:
             yield tar, member
@@ -24,7 +28,7 @@ def tar_generator(fileobj) -> Iterator[tuple[tarfile.TarFile, tarfile.TarInfo]]:
 
 def stream_conda_info(
     filename, fileobj=None
-) -> Iterator[tuple[tarfile.TarFile, tarfile.TarInfo]]:
+) -> Generator[tuple[tarfile.TarFile, tarfile.TarInfo], None, None]:
     """
     Yield members from conda's embedded info/ tarball.
 
@@ -44,7 +48,7 @@ def stream_conda_info(
 
 def stream_conda_component(
     filename, fileobj=None, component="info"
-) -> Iterator[tuple[tarfile.TarFile, tarfile.TarInfo]]:
+) -> Generator[tuple[tarfile.TarFile, tarfile.TarInfo], None, None]:
     """
     Yield members from .conda's embedded {component}- tarball. "info" or "pkg".
 
@@ -73,6 +77,8 @@ def stream_conda_component(
         )
     elif filename.endswith(".tar.bz2"):
         reader = bz2.open(fileobj or filename, mode="rb")
+    else:
+        raise ValueError("unsupported file extension")
     return tar_generator(reader)
 
 
@@ -90,8 +96,10 @@ def test():
             for tar, member in stream:
                 assert not found, "early exit did not work"
                 if member.name == "info/index.json":
-                    json.load(tar.extractfile(member))
-                    found = True
+                    reader = tar.extractfile(member)
+                    if reader:
+                        json.load(reader)
+                        found = True
                     stream.close()  # PEP 342 close()
             assert found, f"index.json not found in {package}"
 
