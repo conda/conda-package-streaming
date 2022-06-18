@@ -1,6 +1,3 @@
-# TODO support s3 as well
-from pathlib import Path
-
 import boto3
 import pytest
 

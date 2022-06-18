@@ -226,35 +226,6 @@ class LazyZipOverHTTP:
                     self._file.write(chunk)
 
 
-if __name__ == "__main__":
-    import logging
-
-    import requests
-
-    logging.basicConfig(level=logging.DEBUG)
-
-    session = requests.Session()
-
-    lzoh = LazyZipOverHTTP(
-        "https://repodata.fly.dev/repo.anaconda.com/pkgs/main/win-32/current_repodata.jlap",
-        session,
-    )
-
-    lzoh.seek(1024)
-    lzoh.read(768)
-    lzoh.seek(0)
-
-    # compare against regular fetch
-    with open("outfile.txt", "wb+") as out:
-        buf = b" "
-        while buf:
-            buf = lzoh.read(CONTENT_CHUNK_SIZE)
-            print(list(zip(lzoh._left, lzoh._right)), lzoh._length)
-            if not buf:
-                break
-            out.write(buf)
-
-
 class LazyConda(LazyZipOverHTTP):
     def prefetch(self, conda_file_id):
         """

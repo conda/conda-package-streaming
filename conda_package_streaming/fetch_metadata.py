@@ -69,8 +69,8 @@ def reader_for_conda_url(url):
     return filename, conda
 
 
-if __name__ == "__main__":
+if __name__ == "__main__":  # pragma nocover
     import logging
 
     logging.basicConfig(level=logging.DEBUG)
-    fetch_meta(sys.argv[1], Path("/tmp/info").absolute())
+    fetch_meta(sys.argv[1], Path(sys.argv[2]).absolute())
