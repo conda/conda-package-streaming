@@ -7,7 +7,7 @@ import zipfile
 from bisect import bisect_left, bisect_right
 from contextlib import contextmanager
 from tempfile import NamedTemporaryFile
-from typing import Any, Dict, Iterator, List, Optional, Tuple
+from typing import Any, Iterator
 from zipfile import BadZipfile, ZipFile
 
 from requests import Session
@@ -69,8 +69,8 @@ class LazyZipOverHTTP:
             self.seek(self._length - content_length)
             for chunk in tail.iter_content(self._chunk_size):
                 self._file.write(chunk)
-        self._left: List[int] = [self._length - content_length]
-        self._right: List[int] = [self._length - 1]
+        self._left: list[int] = [self._length - content_length]
+        self._right: list[int] = [self._length - 1]
 
     @property
     def mode(self) -> str:
@@ -128,7 +128,7 @@ class LazyZipOverHTTP:
         """Return the current position."""
         return self._file.tell()
 
-    def truncate(self, size: Optional[int] = None) -> int:
+    def truncate(self, size: int | None = None) -> int:
         """Resize the stream to the given size in bytes.
 
         If size is unspecified resize to the current position.
@@ -142,11 +142,11 @@ class LazyZipOverHTTP:
         """Return False."""
         return False
 
-    def __enter__(self) -> "LazyZipOverHTTP":
+    def __enter__(self) -> LazyZipOverHTTP:
         self._file.__enter__()
         return self
 
-    def __exit__(self, *exc: Any) -> Optional[bool]:
+    def __exit__(self, *exc: Any) -> bool | None:
         return self._file.__exit__(*exc)
 
     @contextmanager
@@ -177,7 +177,7 @@ class LazyZipOverHTTP:
                     break
 
     def _stream_response(
-        self, start: int | str, end: int, base_headers: Dict[str, str] = HEADERS
+        self, start: int | str, end: int, base_headers: dict[str, str] = HEADERS
     ) -> Response:
         """Return HTTP response to a range request from start to end.
 
@@ -194,7 +194,7 @@ class LazyZipOverHTTP:
 
     def _merge(
         self, start: int, end: int, left: int, right: int
-    ) -> Iterator[Tuple[int, int]]:
+    ) -> Iterator[tuple[int, int]]:
         """Return an iterator of intervals to be fetched.
 
         Args:
