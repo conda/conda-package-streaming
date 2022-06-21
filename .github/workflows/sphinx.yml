@@ -11,6 +11,7 @@ jobs:
         with:
           python-version: "3.x"
           architecture: "x64"
+          cache: "pip"
       - name: Build Documentation
         run: |
           pip install -e .[docs]
