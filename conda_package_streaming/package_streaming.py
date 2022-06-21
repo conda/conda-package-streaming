@@ -6,7 +6,6 @@ import bz2
 import os.path
 import tarfile
 import zipfile
-from contextlib import closing
 from typing import Generator
 
 import zstandard
@@ -20,7 +19,7 @@ def tar_generator(
     """
     # tarfile will not close fileobj because _extfileobj is True
     # caller should take care to close files all the way back to the http request...
-    with closing(tarfile.open(fileobj=fileobj, mode="r|")) as tar:
+    with tarfile.open(fileobj=fileobj, mode="r|") as tar:
         for member in tar:
             yield tar, member
 
@@ -36,9 +35,9 @@ def stream_conda_info(
     Yields (tar, member) tuples. You must only use the current member to
     prevent tar seeks and scans.
 
-    To extract to disk, it's possible to call `tar.extractall(path)` on the
-    first result and then ignore the rest of this generator. `extractall` takes
-    care of some directory permissions/mtime issues, compared to `extract` or
+    To extract to disk, it's possible to call ``tar.extractall(path)`` on the
+    first result and then ignore the rest of this generator. ``extractall`` takes
+    care of some directory permissions/mtime issues, compared to ``extract`` or
     writing out the file objects yourself.
     """
     component = "info"
@@ -56,9 +55,9 @@ def stream_conda_component(
     Yields (tar, member) tuples. You must only use the current member to
     prevent tar seeks and scans.
 
-    To extract to disk, it's possible to call `tar.extractall(path)` on the
-    first result and then ignore the rest of this generator. `extractall` takes
-    care of some directory permissions/mtime issues, compared to `extract` or
+    To extract to disk, it's possible to call ``tar.extractall(path)`` on the
+    first result and then ignore the rest of this generator. ``extractall`` takes
+    care of some directory permissions/mtime issues, compared to ``extract`` or
     writing out the file objects yourself.
     """
     if str(filename).endswith(".conda"):

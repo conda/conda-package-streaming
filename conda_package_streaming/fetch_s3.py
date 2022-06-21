@@ -14,7 +14,7 @@ if typing.TYPE_CHECKING:  # pragma: no cover
 else:
     Client = GetObjectOutputTypeDef = None
 
-from .fetch_metadata import LazyConda
+from .fetch_metadata import reader_for_conda_url
 
 __all__ = ["stream_meta", "reader_for_s3"]
 
@@ -22,7 +22,7 @@ __all__ = ["stream_meta", "reader_for_s3"]
 class ResponseFacade:
     def __init__(self, response: GetObjectOutputTypeDef):
         self.response = response
-        self.body: Any = response["Body"]
+        self.raw: Any = response["Body"]
 
     def raise_for_status(self):
         # s3 get_object raises automatically?
@@ -38,7 +38,7 @@ class ResponseFacade:
         return self.response["ResponseMetadata"]["HTTPHeaders"]
 
     def iter_content(self, n: int):
-        while data := self.body.read(n):
+        while data := self.raw.read(n):
             yield data
 
 
@@ -52,10 +52,13 @@ class SessionFacade:
         self.bucket = bucket
         self.key = key
 
-    def get(self, url, *, headers: dict, stream=True):
-        response = self.client.get_object(
-            Bucket=self.bucket, Key=self.key, Range=headers["Range"]
-        )
+    def get(self, url, *, headers: dict | None = None, stream=True):
+        if headers and "Range" in headers:
+            response = self.client.get_object(
+                Bucket=self.bucket, Key=self.key, Range=headers["Range"]
+            )
+        else:
+            response = self.client.get_object(Bucket=self.bucket, Key=self.key)
         return ResponseFacade(response)
 
 
@@ -75,15 +78,5 @@ def reader_for_s3(client: Client, bucket: str, key: str):
     """
     Return (name, file_like) suitable for package_streaming APIs
     """
-    *_, filename = key.rsplit("/", 1)
-    if filename.endswith(".conda"):
-        session: Any = SessionFacade(client, bucket, key)
-        file_id, _ = filename.rsplit(".", 1)
-        conda = LazyConda(key, session)
-        conda.prefetch(file_id)
-    elif filename.endswith(".tar.bz2"):
-        response = client.get_object(Bucket=bucket, Key=key)
-        conda = response["Body"]
-    else:
-        raise ValueError("Unsupported extension %s", key)
-    return filename, conda
+    session: Any = SessionFacade(client, bucket, key)
+    return reader_for_conda_url(key, session)
