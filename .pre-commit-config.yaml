@@ -1,4 +1,4 @@
-exclude: ^(versioneer.py|conda_pack/_version.py)
+exclude: ^(versioneer.py|conda_pack/_version.py|build)
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v4.2.0
