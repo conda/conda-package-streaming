@@ -18,6 +18,8 @@ jobs:
           make html
       - name: Push Documentation
         run: |
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git config user.name "Github Actions Bot"
           git add -f build/html
           git commit -m "Build Documentation"
           git subtree push --prefix build/html origin gh-pages
