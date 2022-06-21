@@ -1,11 +1,11 @@
 <!doctype html>
-<html class="no-js">
+<html class="no-js" lang="en">
   <head><meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width,initial-scale=1"/>
-    <meta name="color-scheme" content="light dark"><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+    <meta name="color-scheme" content="light dark"><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 <link rel="index" title="Index" href="genindex.html" /><link rel="search" title="Search" href="search.html" /><link rel="next" title="fetch_metadata module" href="fetch_metadata.html" /><link rel="prev" title="Welcome to conda-package-streaming’s documentation!" href="index.html" />
 
-    <meta name="generator" content="sphinx-4.5.0, furo 2022.06.04.1"/>
+    <meta name="generator" content="sphinx-5.0.2, furo 2022.06.04.1"/>
         <title>conda_package_streaming - conda-package-streaming documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="_static/styles/furo.css?digest=40978830699223671f4072448e654b5958f38b89" />
@@ -198,7 +198,7 @@
         </div>
         <article role="main">
           <section id="conda-package-streaming">
-<h1>conda_package_streaming<a class="headerlink" href="#conda-package-streaming" title="Permalink to this headline">#</a></h1>
+<h1>conda_package_streaming<a class="headerlink" href="#conda-package-streaming" title="Permalink to this heading">#</a></h1>
 <p>Fetch metadata from remote .conda or .tar.bz2 package.</p>
 <p>Try to fetch less than the whole file if possible.</p>
 <p>Zip (.conda) is made for this:
@@ -217,7 +217,7 @@ optimization.</p>
 <p>Once you have the index, it would be possible to fetch everything else you want
 in a single (compound?) Range request.</p>
 <section id="older-format">
-<h2>Older format<a class="headerlink" href="#older-format" title="Permalink to this headline">#</a></h2>
+<h2>Older format<a class="headerlink" href="#older-format" title="Permalink to this heading">#</a></h2>
 <p>bzip2 has a very large block size, and we don’t know if the info/ directory
 is finished early. However if we only want certain files from info/ we can stop
 after we’ve seen them all. Fetching repodata and calling response.raw.tell()
@@ -344,6 +344,7 @@ after each tar member:</p>
 </div><script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
     <script src="_static/jquery.js"></script>
     <script src="_static/underscore.js"></script>
+    <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
     <script src="_static/doctools.js"></script>
     <script src="_static/scripts/furo.js"></script>
     </body>

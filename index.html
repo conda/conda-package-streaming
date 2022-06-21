@@ -1,11 +1,11 @@
 <!doctype html>
-<html class="no-js">
+<html class="no-js" lang="en">
   <head><meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width,initial-scale=1"/>
-    <meta name="color-scheme" content="light dark"><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+    <meta name="color-scheme" content="light dark"><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 <link rel="index" title="Index" href="genindex.html" /><link rel="search" title="Search" href="search.html" /><link rel="next" title="conda_package_streaming" href="modules.html" />
 
-    <meta name="generator" content="sphinx-4.5.0, furo 2022.06.04.1"/>
+    <meta name="generator" content="sphinx-5.0.2, furo 2022.06.04.1"/>
         <title>conda-package-streaming documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="_static/styles/furo.css?digest=40978830699223671f4072448e654b5958f38b89" />
@@ -198,7 +198,7 @@
         </div>
         <article role="main">
           <section id="welcome-to-conda-package-streaming-s-documentation">
-<h1>Welcome to conda-package-streaming’s documentation!<a class="headerlink" href="#welcome-to-conda-package-streaming-s-documentation" title="Permalink to this headline">#</a></h1>
+<h1>Welcome to conda-package-streaming’s documentation!<a class="headerlink" href="#welcome-to-conda-package-streaming-s-documentation" title="Permalink to this heading">#</a></h1>
 <p><code class="docutils literal notranslate"><span class="pre">conda-package-streaming</span></code> strives to be the most efficient way to read from new
 and old format <code class="docutils literal notranslate"><span class="pre">.conda</span></code> and <code class="docutils literal notranslate"><span class="pre">.tar.bz2</span></code> <a class="reference external" href="https://docs.conda.io/projects/conda/en/latest/user-guide/concepts/packages.html">conda
 packages</a>.
@@ -214,7 +214,7 @@ transferring the entire archive.</p>
 zstd-compressed streams.</p>
 </section>
 <section id="conda-package-streaming">
-<h1>conda-package-streaming<a class="headerlink" href="#conda-package-streaming" title="Permalink to this headline">#</a></h1>
+<h1>conda-package-streaming<a class="headerlink" href="#conda-package-streaming" title="Permalink to this heading">#</a></h1>
 <p>Download conda metadata from packages without transferring entire file. Get
 metadata from local <code class="docutils literal notranslate"><span class="pre">.tar.bz2</span></code> without reading entire file.</p>
 <p>Uses enhanced pip <code class="docutils literal notranslate"><span class="pre">lazy_wheel</span></code> to fetch a file out of <code class="docutils literal notranslate"><span class="pre">.conda</span></code> with no more than
@@ -223,7 +223,7 @@ metadata from local <code class="docutils literal notranslate"><span class="pre"
 HTTP request once desired files have been seen.</p>
 </section>
 <section id="quickstart">
-<h1>Quickstart<a class="headerlink" href="#quickstart" title="Permalink to this headline">#</a></h1>
+<h1>Quickstart<a class="headerlink" href="#quickstart" title="Permalink to this heading">#</a></h1>
 <p>The basic API yields (tarfile, member) tuples from conda files as tarfile is
 needed to extract member. Note the <code class="docutils literal notranslate"><span class="pre">.tar.bz2</span></code> format yields all members, not
 just <code class="docutils literal notranslate"><span class="pre">info/</span></code>, from <code class="docutils literal notranslate"><span class="pre">stream_conda_info</span></code> / <code class="docutils literal notranslate"><span class="pre">stream_conda_component</span></code>, while the
@@ -274,7 +274,7 @@ caller to decide when to stop reading.</p>
 </div>
 </section>
 <section id="package-goals">
-<h1>Package goals<a class="headerlink" href="#package-goals" title="Permalink to this headline">#</a></h1>
+<h1>Package goals<a class="headerlink" href="#package-goals" title="Permalink to this heading">#</a></h1>
 <ul class="simple">
 <li><p>Extract conda packages (both formats)</p></li>
 <li><p>Easy to install from pypi or conda</p></li>
@@ -284,7 +284,7 @@ caller to decide when to stop reading.</p>
 </ul>
 </section>
 <section id="generating-documentation">
-<h1>Generating documentation<a class="headerlink" href="#generating-documentation" title="Permalink to this headline">#</a></h1>
+<h1>Generating documentation<a class="headerlink" href="#generating-documentation" title="Permalink to this heading">#</a></h1>
 <p>Uses markdown, furo theme. Requires newer mdit-py-plugins.</p>
 <p><code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">conda-package-streaming[docs]</span></code></p>
 <p>One time:
@@ -300,7 +300,7 @@ caller to decide when to stop reading.</p>
 </div>
 </section>
 <section id="indices-and-tables">
-<h1>Indices and tables<a class="headerlink" href="#indices-and-tables" title="Permalink to this headline">#</a></h1>
+<h1>Indices and tables<a class="headerlink" href="#indices-and-tables" title="Permalink to this heading">#</a></h1>
 <ul class="simple">
 <li><p><a class="reference internal" href="genindex.html"><span class="std std-ref">Index</span></a></p></li>
 <li><p><a class="reference internal" href="py-modindex.html"><span class="std std-ref">Module Index</span></a></p></li>
@@ -352,6 +352,7 @@ caller to decide when to stop reading.</p>
 </div><script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
     <script src="_static/jquery.js"></script>
     <script src="_static/underscore.js"></script>
+    <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
     <script src="_static/doctools.js"></script>
     <script src="_static/scripts/furo.js"></script>
     </body>

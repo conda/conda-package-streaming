@@ -1,11 +1,11 @@
 <!doctype html>
-<html class="no-js">
+<html class="no-js" lang="en">
   <head><meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width,initial-scale=1"/>
-    <meta name="color-scheme" content="light dark"><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+    <meta name="color-scheme" content="light dark"><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 <link rel="index" title="Index" href="genindex.html" /><link rel="search" title="Search" href="search.html" /><link rel="next" title="package_streaming module" href="package_streaming.html" /><link rel="prev" title="fetch_s3 module" href="fetch_s3.html" />
 
-    <meta name="generator" content="sphinx-4.5.0, furo 2022.06.04.1"/>
+    <meta name="generator" content="sphinx-5.0.2, furo 2022.06.04.1"/>
         <title>lazy_wheel module - conda-package-streaming documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="_static/styles/furo.css?digest=40978830699223671f4072448e654b5958f38b89" />
@@ -198,7 +198,7 @@
         </div>
         <article role="main">
           <section id="lazy-wheel-module">
-<h1>lazy_wheel module<a class="headerlink" href="#lazy-wheel-module" title="Permalink to this headline">#</a></h1>
+<h1>lazy_wheel module<a class="headerlink" href="#lazy-wheel-module" title="Permalink to this heading">#</a></h1>
 <p><code class="docutils literal notranslate"><span class="pre">lazy_wheel</span></code> is derived from pip’s wheel download code. It is really a seekable
 file-like based on HTTP range requests, backed by a sparse temporary file. Each
 <code class="docutils literal notranslate"><span class="pre">read()</span></code> issues one or more HTTP range requests to the URL depending on how much
@@ -217,8 +217,8 @@ retrieve any individual file in the archive.</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="conda_package_streaming.lazy_wheel.LazyConda">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">conda_package_streaming.lazy_wheel.</span></span><span class="sig-name descname"><span class="pre">LazyConda</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">url</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">session</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">requests.sessions.Session</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">chunk_size</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">10240</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#conda_package_streaming.lazy_wheel.LazyConda" title="Permalink to this definition">#</a></dt>
-<dd><p>Bases: <a class="reference internal" href="#conda_package_streaming.lazy_wheel.LazyZipOverHTTP" title="conda_package_streaming.lazy_wheel.LazyZipOverHTTP"><code class="xref py py-class docutils literal notranslate"><span class="pre">conda_package_streaming.lazy_wheel.LazyZipOverHTTP</span></code></a></p>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">conda_package_streaming.lazy_wheel.</span></span><span class="sig-name descname"><span class="pre">LazyConda</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">url</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">session</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Session</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">chunk_size</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">10240</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#conda_package_streaming.lazy_wheel.LazyConda" title="Permalink to this definition">#</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#conda_package_streaming.lazy_wheel.LazyZipOverHTTP" title="conda_package_streaming.lazy_wheel.LazyZipOverHTTP"><code class="xref py py-class docutils literal notranslate"><span class="pre">LazyZipOverHTTP</span></code></a></p>
 <dl class="py method">
 <dt class="sig sig-object py" id="conda_package_streaming.lazy_wheel.LazyConda.prefetch">
 <span class="sig-name descname"><span class="pre">prefetch</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">conda_file_id</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#conda_package_streaming.lazy_wheel.LazyConda.prefetch" title="Permalink to this definition">#</a></dt>
@@ -232,7 +232,7 @@ for the file).</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="conda_package_streaming.lazy_wheel.LazyZipOverHTTP">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">conda_package_streaming.lazy_wheel.</span></span><span class="sig-name descname"><span class="pre">LazyZipOverHTTP</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">url</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">session</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">requests.sessions.Session</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">chunk_size</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">10240</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#conda_package_streaming.lazy_wheel.LazyZipOverHTTP" title="Permalink to this definition">#</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">conda_package_streaming.lazy_wheel.</span></span><span class="sig-name descname"><span class="pre">LazyZipOverHTTP</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">url</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">session</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Session</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">chunk_size</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">10240</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#conda_package_streaming.lazy_wheel.LazyZipOverHTTP" title="Permalink to this definition">#</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>File-like object mapped to a ZIP file over HTTP.</p>
 <p>This uses HTTP range requests to lazily fetch the file’s content,
@@ -373,6 +373,7 @@ The current stream position isn’t changed.</p>
 </div><script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
     <script src="_static/jquery.js"></script>
     <script src="_static/underscore.js"></script>
+    <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
     <script src="_static/doctools.js"></script>
     <script src="_static/scripts/furo.js"></script>
     </body>
