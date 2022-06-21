@@ -19,4 +19,5 @@ jobs:
       - name: Push Documentation
         run: |
           git add -f build/html
+          git commit -m "Build Documentation"
           git subtree push --prefix build/html origin gh-pages
