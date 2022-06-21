@@ -16,3 +16,7 @@ jobs:
         run: |
           pip install -e .[docs]
           make html
+      - name: Push Documentation
+        run: |
+          git add -f build/html
+          git subtree push --prefix build/html origin gh-pages
