@@ -25,6 +25,7 @@ jobs:
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git config user.name "Github Actions Bot"
           touch build/html/.nojekyll # keep _* folders
-          git add -f build/html
+          cd build/html
+          git add .
           git commit -m "Build Documentation"
-          git subtree push --prefix build/html origin gh-pages
+          git push origin gh-pages || true
