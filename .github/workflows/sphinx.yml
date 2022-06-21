@@ -22,10 +22,10 @@ jobs:
           make html
       - name: Push Documentation
         run: |
+          cd build/html
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git config user.name "Github Actions Bot"
-          touch build/html/.nojekyll # keep _* folders
-          cd build/html
+          touch .nojekyll # keep _* folders
           git add .
           git commit -m "Build Documentation"
           git push origin gh-pages || true
