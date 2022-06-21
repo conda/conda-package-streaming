@@ -15,7 +15,7 @@ jobs:
       - name: Build Documentation
         run: |
           rm -rf build/html
-          git clone . --branch gh-pages --single-branch build/html
+          git clone $(git remote get-url origin) --branch gh-pages --single-branch build/html
           pip install -e .[docs]
           make html
       - name: Push Documentation
