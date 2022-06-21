@@ -14,6 +14,7 @@ jobs:
           cache: "pip"
       - name: Build Documentation
         run: |
+          git clone . --branch gh-pages --single-branch build/html
           pip install -e .[docs]
           make html
       - name: Push Documentation
@@ -23,4 +24,4 @@ jobs:
           touch build/html/.nojekyll # keep _* folders
           git add -f build/html
           git commit -m "Build Documentation"
-          git subtree push --force --prefix build/html origin gh-pages
+          git subtree push --prefix build/html origin gh-pages
