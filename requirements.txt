@@ -1,0 +1,14 @@
+requests
+zstandard >=0.15
+# test
+pytest >=7
+pytest-cov
+pytest-mock
+boto3
+boto3-stubs[essential]
+bottle
+# docs
+furo
+sphinx
+myst-parser
+mdit-py-plugins>=0.3.0
