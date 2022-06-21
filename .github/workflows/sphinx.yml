@@ -20,6 +20,7 @@ jobs:
         run: |
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git config user.name "Github Actions Bot"
+          touch build/html/.nojekyll
           git add -f build/html
           git commit -m "Build Documentation"
           git subtree push --force --prefix build/html origin gh-pages
