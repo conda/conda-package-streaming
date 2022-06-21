@@ -22,4 +22,4 @@ jobs:
           git config user.name "Github Actions Bot"
           git add -f build/html
           git commit -m "Build Documentation"
-          git subtree push --prefix build/html origin gh-pages
+          git subtree push --force --prefix build/html origin gh-pages
