@@ -12,10 +12,12 @@ jobs:
           python-version: "3.x"
           architecture: "x64"
           cache: "pip"
+      - uses: actions/checkout@v3
+        with:
+          ref: gh-pages
+          path: build/html
       - name: Build Documentation
         run: |
-          rm -rf build/html
-          git clone $(git remote get-url origin) --branch gh-pages --single-branch build/html
           pip install -e .[docs]
           make html
       - name: Push Documentation
