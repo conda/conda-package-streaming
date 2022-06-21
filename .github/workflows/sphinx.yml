@@ -1,0 +1,17 @@
+name: Sphinx
+on:
+  pull_request:
+
+jobs:
+  sphinx:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-python@v4
+        with:
+          python-version: "3.x"
+          architecture: "x64"
+      - name: Build Documentation
+        run: |
+          pip install -e .[docs]
+          make html
