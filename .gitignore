@@ -1,0 +1,7 @@
+.coverage
+.vscode
+__pycache__
+PKG-INFO
+build
+dist
+deploy/metadata.json

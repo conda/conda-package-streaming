@@ -1,16 +1,20 @@
 """Lazy ZIP over HTTP"""
 
-# from pip 22.0.3 with fixes & remove imports from pip
+from __future__ import annotations
 
 import logging
+import zipfile
 from bisect import bisect_left, bisect_right
 from contextlib import contextmanager
 from tempfile import NamedTemporaryFile
-from typing import Any, Dict, Iterator, List, Optional, Tuple
+from typing import Any, Iterator
 from zipfile import BadZipfile, ZipFile
 
 from requests import Session
 from requests.models import CONTENT_CHUNK_SIZE, Response
+
+# from pip 22.0.3 with fixes & remove imports from pip
+
 
 log = logging.getLogger(__name__)
 
@@ -34,15 +38,17 @@ class LazyZipOverHTTP:
     def __init__(
         self, url: str, session: Session, chunk_size: int = CONTENT_CHUNK_SIZE
     ) -> None:
-        # initial range request for the end of the file
-        headers = HEADERS.copy()
-        headers["Range"] = f"bytes=-{CONTENT_CHUNK_SIZE}"
 
         # if CONTENT_CHUNK_SIZE is bigger than the file:
         # In [8]: response.headers["Content-Range"]
         # Out[8]: 'bytes 0-3133374/3133375'
 
-        tail = session.get(url, headers=headers, stream=True)
+        self._request_count = 0
+
+        self._session, self._url, self._chunk_size = session, url, chunk_size
+
+        # initial range request for the end of the file
+        tail = self._stream_response(start="", end=CONTENT_CHUNK_SIZE)
         # e.g. {'accept-ranges': 'bytes', 'content-length': '10240',
         # 'content-range': 'bytes 12824-23063/23064', 'last-modified': 'Sat, 16
         # Apr 2022 13:03:02 GMT', 'date': 'Thu, 21 Apr 2022 11:34:04 GMT'}
@@ -50,20 +56,21 @@ class LazyZipOverHTTP:
         if tail.status_code != 206:
             raise HTTPRangeRequestUnsupported("range request is not supported")
 
-        self._session, self._url, self._chunk_size = session, url, chunk_size
-        self._length = int(tail.headers["Content-Range"].partition("/")[-1])
+        # lowercase content-range to support s3
+        self._length = int(tail.headers["content-range"].partition("/")[-1])
         self._file = NamedTemporaryFile()
         self.truncate(self._length)
 
         # length is also in Content-Length and Content-Range header
         with self._stay():
-            self.seek(self._length - len(tail.content))
-            self._file.write(tail.content)
-        self._left: List[int] = [self._length - len(tail.content)]
-        self._right: List[int] = [self._length - 1]
-
-        self._request_count = 0
-        # self._check_zip()
+            content_length = int(tail.headers["content-length"])
+            if hasattr(tail, "content"):
+                assert content_length == len(tail.content)
+            self.seek(self._length - content_length)
+            for chunk in tail.iter_content(self._chunk_size):
+                self._file.write(chunk)
+        self._left: list[int] = [self._length - content_length]
+        self._right: list[int] = [self._length - 1]
 
     @property
     def mode(self) -> str:
@@ -96,7 +103,6 @@ class LazyZipOverHTTP:
         size bytes may be returned if EOF is reached.
         """
         # BUG does not download correctly if size is unspecified
-        # TODO why can't this be min(size, self._chunk_size)
         download_size = max(size, self._chunk_size)
         start, length = self.tell(), self._length
         stop = length if size < 0 else min(start + download_size, length)
@@ -122,7 +128,7 @@ class LazyZipOverHTTP:
         """Return the current position."""
         return self._file.tell()
 
-    def truncate(self, size: Optional[int] = None) -> int:
+    def truncate(self, size: int | None = None) -> int:
         """Resize the stream to the given size in bytes.
 
         If size is unspecified resize to the current position.
@@ -136,11 +142,11 @@ class LazyZipOverHTTP:
         """Return False."""
         return False
 
-    def __enter__(self) -> "LazyZipOverHTTP":
+    def __enter__(self) -> LazyZipOverHTTP:
         self._file.__enter__()
         return self
 
-    def __exit__(self, *exc: Any) -> Optional[bool]:
+    def __exit__(self, *exc: Any) -> bool | None:
         return self._file.__exit__(*exc)
 
     @contextmanager
@@ -171,20 +177,24 @@ class LazyZipOverHTTP:
                     break
 
     def _stream_response(
-        self, start: int, end: int, base_headers: Dict[str, str] = HEADERS
+        self, start: int | str, end: int, base_headers: dict[str, str] = HEADERS
     ) -> Response:
-        """Return HTTP response to a range request from start to end."""
+        """Return HTTP response to a range request from start to end.
+
+        :param start: if "", request ``end` bytes from end of file."""
         headers = base_headers.copy()
         headers["Range"] = f"bytes={start}-{end}"
         log.debug("%s", headers["Range"])
         # TODO: Get range requests to be correctly cached
         headers["Cache-Control"] = "no-cache"
         self._request_count += 1
-        return self._session.get(self._url, headers=headers, stream=True)
+        response = self._session.get(self._url, headers=headers, stream=True)
+        response.raise_for_status()
+        return response
 
     def _merge(
         self, start: int, end: int, left: int, right: int
-    ) -> Iterator[Tuple[int, int]]:
+    ) -> Iterator[tuple[int, int]]:
         """Return an iterator of intervals to be fetched.
 
         Args:
@@ -211,36 +221,39 @@ class LazyZipOverHTTP:
             right = bisect_right(self._left, end)
             for start, end in self._merge(start, end, left, right):
                 response = self._stream_response(start, end)
-                response.raise_for_status()
                 self.seek(start)
                 for chunk in response.iter_content(self._chunk_size):
                     self._file.write(chunk)
 
 
-if __name__ == "__main__":
-    import logging
+class LazyConda(LazyZipOverHTTP):
+    def prefetch(self, conda_file_id):
+        """
+        Conda fork specific. Prefetch the `.info` range from the remote archive.
+        Reduces number of Range requests to 2 or 3 (1 or 2 for the directory, 1
+        for the file).
 
-    import requests
-
-    logging.basicConfig(level=logging.DEBUG)
-
-    session = requests.Session()
-
-    lzoh = LazyZipOverHTTP(
-        "https://repodata.fly.dev/repo.anaconda.com/pkgs/main/win-32/current_repodata.jlap",
-        session,
-    )
-
-    lzoh.seek(1024)
-    lzoh.read(768)
-    lzoh.seek(0)
-
-    # compare against regular fetch
-    with open("outfile.txt", "wb+") as out:
-        buf = b" "
-        while buf:
-            buf = lzoh.read(CONTENT_CHUNK_SIZE)
-            print(list(zip(lzoh._left, lzoh._right)), lzoh._length)
-            if not buf:
-                break
-            out.write(buf)
+        conda_file_id: name of .conda without path or `.conda` extension
+        """
+        target_file = f"info-{conda_file_id}.tar.zst"
+        with self._stay():  # not strictly necessary
+            # try to read entire conda info in one request
+            zf = zipfile.ZipFile(self)
+            infolist = zf.infolist()
+            for i, info in enumerate(infolist):
+                if info.filename == target_file:
+                    start = info.header_offset
+                    try:
+                        end = infolist[i + 1].header_offset
+                    except IndexError:
+                        end = zf.start_dir
+                    self.seek(start)
+                    self.read(end - start)
+                    log.debug(
+                        "prefetch %s-%s",
+                        info.header_offset,
+                        end,
+                    )
+                    break
+            else:
+                log.debug("no zip prefetch")

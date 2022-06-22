@@ -1,13 +1,20 @@
 """
-Convert .tar.bz2 to .conda without writing temporary tarfiles to disk.
+Convert .tar.bz2 to .conda without temporary files.
+
+Streams main `pkg-*` `.tar.zst` into open `ZipFile`, while buffering `info-*`
+`.tar.zst` in memory, writing it out at the end.
+
+Works well for a typical ~10k `info-*`, but the conda format does not guarantee
+a small `info-*`.
+
+Conda packages created this way will also have `info-*` as the last element in
+the `ZipFile`, instead of the first for normal conda packages.
 """
 
-import contextlib
 import io
 import json
 import os
 import tarfile
-import time
 import zipfile
 
 import zstandard
@@ -21,44 +28,33 @@ ZSTD_COMPRESS_LEVEL = 22
 ZSTD_COMPRESS_THREADS = 1
 
 
-@contextlib.contextmanager
-def timeme(message: str = ""):
-    begin = time.time()
-    yield
-    end = time.time()
-    print(f"{message}{end-begin:0.2f}s")
+def transmute(
+    package,
+    path,
+    *,
+    compressor=lambda: zstandard.ZstdCompressor(
+        level=ZSTD_COMPRESS_LEVEL, threads=ZSTD_COMPRESS_THREADS
+    ),
+):
+    """
+    Convert .tar.bz2 conda :package to .conda-format under path.
 
-
-def test():
-    import glob
-
-    conda_packages = []
-    tarbz_packages = glob.glob(
-        os.path.expanduser("~/miniconda3/pkgs/python-3.8.10-h0e5c897_0_cpython.tar.bz2")
-    )
-
-    for packages in (conda_packages, tarbz_packages):
-        for package in packages:
-            with timeme(f"{package} took "):
-                transmute(package)
-
-
-def transmute(package):
-    print(package)
-    assert package.endswith(".tar.bz2"), "can't convert .conda to .conda"
+    :param package: path to .tar.bz2 conda package
+    :param path: destination path for transmuted .conda package
+    :param compressor: A function that creates instances of
+        ``zstandard.ZstdCompressor()`` to override defaults.
+    """
+    assert package.endswith(".tar.bz2"), "can only convert .tar.bz2 to .conda"
+    assert os.path.isdir(path)
     file_id = os.path.basename(package)[: -len(".tar.bz2")]
 
     # x to not append to existing
     conda_file = zipfile.ZipFile(
-        f"/tmp/{file_id}.conda", "x", compresslevel=zipfile.ZIP_STORED
+        os.path.join(path, f"{file_id}.conda"), "x", compresslevel=zipfile.ZIP_STORED
     )
 
-    info_compress = zstandard.ZstdCompressor(
-        level=ZSTD_COMPRESS_LEVEL, threads=ZSTD_COMPRESS_THREADS
-    )
-    data_compress = zstandard.ZstdCompressor(
-        level=ZSTD_COMPRESS_LEVEL, threads=ZSTD_COMPRESS_THREADS
-    )
+    info_compress = compressor()
+    data_compress = compressor()
 
     # in theory, info_tar could grow uncomfortably big, in which case we would
     # rather swap it to disk
@@ -72,7 +68,7 @@ def transmute(package):
         pkg_stream = data_compress.stream_writer(pkg_file, closefd=False)
         pkg_tar = tarfile.TarFile(fileobj=pkg_stream, mode="w")
 
-        stream = iter(stream_conda_component(package, None, "pkg"))
+        stream = iter(stream_conda_component(package))
         for tar, member in stream:
             tar_get = info_tar if member.name.startswith("info/") else pkg_tar
             if member.isfile():
@@ -88,7 +84,3 @@ def transmute(package):
 
     with conda_file.open(f"info-{file_id}.tar.zst", "w") as info_file:
         info_file.write(info_io.getvalue())
-
-
-if __name__ == "__main__":
-    test()

@@ -1,0 +1,38 @@
+name: Sphinx
+on:
+    push:
+        branches:
+        -   main
+
+    pull_request:
+        branches:
+        -   main
+
+
+jobs:
+  sphinx:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-python@v4
+        with:
+          python-version: "3.x"
+          architecture: "x64"
+          cache: "pip"
+      - uses: actions/checkout@v3
+        with:
+          ref: gh-pages
+          path: build/html
+      - name: Build Documentation
+        run: |
+          pip install -e .[docs]
+          make html
+      - name: Push Documentation
+        if: github.ref == 'refs/heads/main' # Only deploy on merge into main
+        run: |
+          cd build/html
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git config user.name "Github Actions Bot"
+          touch .nojekyll # keep _* folders
+          git commit -am "Build Documentation" || true
+          git push origin gh-pages || true
