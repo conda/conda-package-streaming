@@ -1,13 +1,12 @@
 name: Sphinx
 on:
-    push:
-        branches:
-        -   main
+  push:
+    branches:
+      - main
 
-    pull_request:
-        branches:
-        -   main
-
+  pull_request:
+    branches:
+      - main
 
 jobs:
   sphinx:
@@ -27,13 +26,9 @@ jobs:
         run: |
           pip install -e .[docs]
           make html
-      - name: Push Documentation
-        if: github.ref == 'refs/heads/main' # Only deploy on merge into main
-        run: |
-          cd build/html
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-          git config user.name "Github Actions Bot"
-          touch .nojekyll # keep _* folders
-          git add .
-          git commit -am "Build Documentation" || true
-          git push origin gh-pages || true
+      - name: Deploy
+        uses: peaceiris/actions-gh-pages@068dc23d9710f1ba62e86896f84735d869951305 # tag=v3
+        if: ${{ github.ref == 'refs/heads/main' }}
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./build/html
