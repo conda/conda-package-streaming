@@ -14,7 +14,14 @@ DEBUG:urllib3.connectionpool:https://repo.anaconda.com:443 "GET /pkgs/main/osx-6
 DEBUG:conda_package_streaming.lazy_wheel:bytes=43-38176
 DEBUG:urllib3.connectionpool:https://repo.anaconda.com:443 "GET /pkgs/main/osx-64/sqlalchemy-1.4.32-py310hca72f7f_0.conda HTTP/1.1" 206 38134
 DEBUG:conda_package_streaming.lazy_wheel:prefetch 43-38177
+
+$ curl -s -I https://repo.anaconda.com/pkgs/main/osx-64/sqlalchemy-1.4.32-py310hca72f7f_0.conda | grep content-length
+content-length: 1984926
 ```
+
+We fetch 10240 + 38134 = 48374 bytes in two requests of this 1984926-byte
+package.
+
 
 ## Older format
 
