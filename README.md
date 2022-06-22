@@ -1,7 +1,7 @@
 # conda-package-streaming
 
 Download conda metadata from packages without transferring entire file. Get
-metadata from local `.tar.bz2` without reading entire file.
+metadata from local `.tar.bz2` packages without reading entire files.
 
 Uses enhanced pip `lazy_wheel` to fetch a file out of `.conda` with no more than
 3 range requests, but usually 2.
@@ -19,9 +19,9 @@ caller to decide when to stop reading.
 
 From a url,
 ```python
-from conda_package_streaming import fetch_metadata
+from conda_package_streaming.url import stream_conda_info
 # url = (ends with .conda or .tar.bz2)
-for tar, member in fetch_metadata.stream_meta(url):
+for tar, member in stream_conda_info(url):
     if member.name == "info/index.json":
         index_json = json.load(tar.extractfile(member))
         break
@@ -30,9 +30,9 @@ for tar, member in fetch_metadata.stream_meta(url):
 From s3,
 ```python
 client = boto3.client("s3")
-from conda_package_streaming import fetch_s3
+from conda_package_streaming.s3 import stream_conda_info
 # key = (ends with .conda or .tar.bz2)
-for tar, member in fetch_s3.stream_meta(client, bucket, key):
+for tar, member in stream_conda_info(client, bucket, key):
     if member.name == "info/index.json":
         index_json = json.load(tar.extractfile(member))
         break
@@ -52,7 +52,7 @@ From a file-like object,
 ```python
 from contextlib import closing
 
-from conda_package_streaming.fetch_metadata import reader_for_conda_url
+from conda_package_streaming.url import reader_for_conda_url
 from conda_package_streaming.package_streaming import stream_conda_component
 filename, conda = reader_for_conda_url(url)
 

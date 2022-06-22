@@ -26,13 +26,13 @@ session.headers["User-Agent"] = "conda-package-streaming/0.1.0"
 METADATA_CHECKLIST = frozenset({"info/index.json", "info/recipe/meta.yaml"})
 
 
-def fetch_meta(url, destdir, checklist=METADATA_CHECKLIST, session=session):
+def extract_conda_info(url, destdir, checklist=METADATA_CHECKLIST, session=session):
     """
     Extract info/index.json and info/recipe/meta.yaml from url to destdir; close
     url as soon as those files are found.
     """
     checklist = set(checklist)
-    stream = stream_meta(url, session=session)
+    stream = stream_conda_info(url, session=session)
     for (tar, member) in stream:
         if member.name in checklist:
             tar.extract(member, destdir)
@@ -42,19 +42,19 @@ def fetch_meta(url, destdir, checklist=METADATA_CHECKLIST, session=session):
             break
 
 
-def stream_meta(url, session=session):
+def stream_conda_info(url, session=session):
     """
     Yield (tar, member) for conda package at url
 
     Just "info/" for .conda, all members for tar.
     """
-    filename, conda = reader_for_conda_url(url, session=session)
+    filename, conda = conda_reader_for_url(url, session=session)
 
     with closing(conda):
         yield from package_streaming.stream_conda_info(filename, conda)
 
 
-def reader_for_conda_url(url, session=session):
+def conda_reader_for_url(url, session=session):
     """
     Return (name, file_like) suitable for package_streaming APIs
     """
@@ -76,4 +76,4 @@ if __name__ == "__main__":  # pragma nocover
     import logging
 
     logging.basicConfig(level=logging.DEBUG)
-    fetch_meta(sys.argv[1], Path(sys.argv[2]).absolute())
+    extract_conda_info(sys.argv[1], Path(sys.argv[2]).absolute())

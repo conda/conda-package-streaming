@@ -14,9 +14,9 @@ if typing.TYPE_CHECKING:  # pragma: no cover
 else:
     Client = GetObjectOutputTypeDef = None
 
-from .fetch_metadata import reader_for_conda_url
+from .url import conda_reader_for_url
 
-__all__ = ["stream_meta", "reader_for_s3"]
+__all__ = ["stream_conda_info", "conda_reader_for_s3"]
 
 
 class ResponseFacade:
@@ -62,21 +62,21 @@ class SessionFacade:
         return ResponseFacade(response)
 
 
-def stream_meta(client, bucket, key):
+def stream_conda_info(client, bucket, key):
     """
     Yield (tar, member) for conda package.
 
     Just "info/" for .conda, all members for tar.
     """
-    filename, conda = reader_for_s3(client, bucket, key)
+    filename, conda = conda_reader_for_s3(client, bucket, key)
 
     with closing(conda):
         yield from package_streaming.stream_conda_info(filename, conda)
 
 
-def reader_for_s3(client: Client, bucket: str, key: str):
+def conda_reader_for_s3(client: Client, bucket: str, key: str):
     """
     Return (name, file_like) suitable for package_streaming APIs
     """
     session: Any = SessionFacade(client, bucket, key)
-    return reader_for_conda_url(key, session)
+    return conda_reader_for_url(key, session)
