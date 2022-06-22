@@ -7,7 +7,6 @@ Try to fetch less than the whole file if possible.
 import logging
 import sys
 import urllib.parse
-from contextlib import closing
 from pathlib import Path
 
 import requests
@@ -50,8 +49,15 @@ def stream_conda_info(url, session=session):
     """
     filename, conda = conda_reader_for_url(url, session=session)
 
-    with closing(conda):
+    try:
         yield from package_streaming.stream_conda_info(filename, conda)
+    finally:
+        if hasattr(conda, "release_conn"):
+            # For .tar.bz2. avoids hangs on exhausted connection pool, but
+            # causes connection errors. May be preferable to use new session /
+            # no connection pool for .tar.bz2
+            conda.release_conn()
+        conda.close()
 
 
 def conda_reader_for_url(url, session=session):
