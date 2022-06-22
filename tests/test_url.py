@@ -7,8 +7,8 @@ from zipfile import ZipFile
 import pytest
 from requests import HTTPError, Session
 
-from conda_package_streaming import fetch_metadata, lazy_wheel
-from conda_package_streaming.fetch_metadata import reader_for_conda_url
+from conda_package_streaming import lazy_wheel
+from conda_package_streaming.url import conda_reader_for_url, extract_conda_info, stream_conda_info
 from conda_package_streaming.lazy_wheel import LazyConda
 
 LIMIT = 16
@@ -37,10 +37,10 @@ def package_urls(package_server, package_url):
 
 def test_stream_url(package_urls):
     with pytest.raises(ValueError):
-        next(fetch_metadata.stream_meta("https://localhost/notaconda.rar"))
+        next(stream_conda_info("https://localhost/notaconda.rar"))
 
     for url in package_urls:
-        with closing(fetch_metadata.stream_meta(url)) as members:
+        with closing(stream_conda_info(url)) as members:
             print("stream_url", url)
             for tar, member in members:
                 if member.name == "info/index.json":
@@ -52,14 +52,14 @@ def test_stream_url(package_urls):
 def test_fetch_meta(package_urls):
     for url in package_urls:
         with tempfile.TemporaryDirectory() as destdir:
-            fetch_metadata.fetch_meta(url, destdir)
+            extract_conda_info(url, destdir)
 
 
 def test_lazy_wheel(package_urls):
     for url in package_urls:
         if url.endswith(".conda"):
             # API works with `.tar.bz2` but only returns LazyConda for `.conda`
-            file_id, conda = reader_for_conda_url(url)
+            file_id, conda = conda_reader_for_url(url)
             assert file_id == url.rsplit("/")[-1]
             with conda:
                 assert isinstance(conda, LazyConda)
@@ -75,7 +75,7 @@ def test_lazy_wheel(package_urls):
         raise LookupError("no .tar.bz2 packages found")
 
     with pytest.raises(HTTPError):
-        reader_for_conda_url(package_urls[0] + ".404.conda")
+        conda_reader_for_url(package_urls[0] + ".404.conda")
 
     class Session200(Session):
         def get(self, *args, **kwargs):

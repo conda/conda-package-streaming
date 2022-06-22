@@ -1,7 +1,7 @@
-fetch\_metadata module
+url module
 ======================
 
-.. automodule:: conda_package_streaming.fetch_metadata
+.. automodule:: conda_package_streaming.url
    :members:
    :undoc-members:
    :show-inheritance:
