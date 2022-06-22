@@ -1,7 +1,7 @@
 # conda-package-streaming
 
 Download conda metadata from packages without transferring entire file. Get
-metadata from local `.tar.bz2` without reading entire file.
+metadata from local `.tar.bz2` packages without reading entire files.
 
 Uses enhanced pip `lazy_wheel` to fetch a file out of `.conda` with no more than
 3 range requests, but usually 2.
