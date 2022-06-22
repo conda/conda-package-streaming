@@ -37,8 +37,8 @@ def extract_conda_info(url, destdir, checklist=METADATA_CHECKLIST, session=sessi
             tar.extract(member, destdir)
             checklist.remove(member.name)
         if not checklist:
-            stream.close()
             break
+    stream.close() # ?
 
 
 def stream_conda_info(url, session=session):
