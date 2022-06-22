@@ -216,7 +216,7 @@ zstd-compressed streams.</p>
 <section id="conda-package-streaming">
 <h1>conda-package-streaming<a class="headerlink" href="#conda-package-streaming" title="Permalink to this heading">#</a></h1>
 <p>Download conda metadata from packages without transferring entire file. Get
-metadata from local <code class="docutils literal notranslate"><span class="pre">.tar.bz2</span></code> without reading entire file.</p>
+metadata from local <code class="docutils literal notranslate"><span class="pre">.tar.bz2</span></code> packages without reading entire files.</p>
 <p>Uses enhanced pip <code class="docutils literal notranslate"><span class="pre">lazy_wheel</span></code> to fetch a file out of <code class="docutils literal notranslate"><span class="pre">.conda</span></code> with no more than
 3 range requests, but usually 2.</p>
 <p>Uses <code class="docutils literal notranslate"><span class="pre">tar</span> <span class="pre">=</span> <span class="pre">tarfile.open(fileobj=...)</span></code> to stream remote <code class="docutils literal notranslate"><span class="pre">.tar.bz2</span></code>. Closes the
