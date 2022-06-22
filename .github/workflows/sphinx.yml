@@ -1,6 +1,13 @@
 name: Sphinx
 on:
-  pull_request:
+    push:
+        branches:
+        -   main
+
+    pull_request:
+        branches:
+        -   main
+
 
 jobs:
   sphinx:
@@ -21,6 +28,7 @@ jobs:
           pip install -e .[docs]
           make html
       - name: Push Documentation
+        if: github.ref == 'refs/heads/main' # Only deploy on merge into main
         run: |
           cd build/html
           git config user.email "github-actions[bot]@users.noreply.github.com"
