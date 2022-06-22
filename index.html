@@ -157,8 +157,8 @@
   <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
 <ul>
 <li class="toctree-l1 has-children"><a class="reference internal" href="modules.html">conda_package_streaming</a><input class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
-<li class="toctree-l2"><a class="reference internal" href="fetch_metadata.html">fetch_metadata module</a></li>
-<li class="toctree-l2"><a class="reference internal" href="fetch_s3.html">fetch_s3 module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="url.html">url module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="s3.html">s3 module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="lazy_wheel.html">lazy_wheel module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="package_streaming.html">package_streaming module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="transmute.html">transmute module</a></li>
@@ -230,9 +230,9 @@ just <code class="docutils literal notranslate"><span class="pre">info/</span></
 <code class="docutils literal notranslate"><span class="pre">.conda</span></code> format yields members from the requested inner archive — allowing the
 caller to decide when to stop reading.</p>
 <p>From a url,</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">conda_package_streaming</span> <span class="kn">import</span> <span class="n">fetch_metadata</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">conda_package_streaming.url</span> <span class="kn">import</span> <span class="n">stream_conda_info</span>
 <span class="c1"># url = (ends with .conda or .tar.bz2)</span>
-<span class="k">for</span> <span class="n">tar</span><span class="p">,</span> <span class="n">member</span> <span class="ow">in</span> <span class="n">fetch_metadata</span><span class="o">.</span><span class="n">stream_meta</span><span class="p">(</span><span class="n">url</span><span class="p">):</span>
+<span class="k">for</span> <span class="n">tar</span><span class="p">,</span> <span class="n">member</span> <span class="ow">in</span> <span class="n">stream_conda_info</span><span class="p">(</span><span class="n">url</span><span class="p">):</span>
     <span class="k">if</span> <span class="n">member</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="s2">&quot;info/index.json&quot;</span><span class="p">:</span>
         <span class="n">index_json</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">tar</span><span class="o">.</span><span class="n">extractfile</span><span class="p">(</span><span class="n">member</span><span class="p">))</span>
         <span class="k">break</span>
@@ -240,9 +240,9 @@ caller to decide when to stop reading.</p>
 </div>
 <p>From s3,</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">client</span> <span class="o">=</span> <span class="n">boto3</span><span class="o">.</span><span class="n">client</span><span class="p">(</span><span class="s2">&quot;s3&quot;</span><span class="p">)</span>
-<span class="kn">from</span> <span class="nn">conda_package_streaming</span> <span class="kn">import</span> <span class="n">fetch_s3</span>
+<span class="kn">from</span> <span class="nn">conda_package_streaming.s3</span> <span class="kn">import</span> <span class="n">stream_conda_info</span>
 <span class="c1"># key = (ends with .conda or .tar.bz2)</span>
-<span class="k">for</span> <span class="n">tar</span><span class="p">,</span> <span class="n">member</span> <span class="ow">in</span> <span class="n">fetch_s3</span><span class="o">.</span><span class="n">stream_meta</span><span class="p">(</span><span class="n">client</span><span class="p">,</span> <span class="n">bucket</span><span class="p">,</span> <span class="n">key</span><span class="p">):</span>
+<span class="k">for</span> <span class="n">tar</span><span class="p">,</span> <span class="n">member</span> <span class="ow">in</span> <span class="n">stream_conda_info</span><span class="p">(</span><span class="n">client</span><span class="p">,</span> <span class="n">bucket</span><span class="p">,</span> <span class="n">key</span><span class="p">):</span>
     <span class="k">if</span> <span class="n">member</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="s2">&quot;info/index.json&quot;</span><span class="p">:</span>
         <span class="n">index_json</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">tar</span><span class="o">.</span><span class="n">extractfile</span><span class="p">(</span><span class="n">member</span><span class="p">))</span>
         <span class="k">break</span>
@@ -260,7 +260,7 @@ caller to decide when to stop reading.</p>
 <p>From a file-like object,</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">contextlib</span> <span class="kn">import</span> <span class="n">closing</span>
 
-<span class="kn">from</span> <span class="nn">conda_package_streaming.fetch_metadata</span> <span class="kn">import</span> <span class="n">reader_for_conda_url</span>
+<span class="kn">from</span> <span class="nn">conda_package_streaming.url</span> <span class="kn">import</span> <span class="n">reader_for_conda_url</span>
 <span class="kn">from</span> <span class="nn">conda_package_streaming.package_streaming</span> <span class="kn">import</span> <span class="n">stream_conda_component</span>
 <span class="n">filename</span><span class="p">,</span> <span class="n">conda</span> <span class="o">=</span> <span class="n">reader_for_conda_url</span><span class="p">(</span><span class="n">url</span><span class="p">)</span>
 

@@ -5,31 +5,23 @@ Fetch metadata from remote .conda or .tar.bz2 package.
 Try to fetch less than the whole file if possible.
 
 Zip (.conda) is made for this:
-When pip's lazy http implementation is modified to print request headers:
 
 ```
-$ python -m metayaml.fetch_metadata
-https://repo.anaconda.com/pkgs/main/linux-64/absl-py-0.1.10-py27_0.conda fetch
-range {'Accept-Encoding': 'identity', 'Range': 'bytes=122880-128735'}, fetch
-range {'Accept-Encoding': 'identity', 'Range': 'bytes=118496-122879'}, fetch
-range {'Accept-Encoding': 'identity', 'Range': 'bytes=0-10239'}, fetch range
-{'Accept-Encoding': 'identity', 'Range': 'bytes=10240-10269'}, fetch range
-{'Accept-Encoding': 'identity', 'Range': 'bytes=10270-10303'}
+$ python -m conda_package_streaming.url https://repo.anaconda.com/pkgs/main/osx-64/sqlalchemy-1.4.32-py310hca72f7f_0.conda /tmp/
+DEBUG:conda_package_streaming.lazy_wheel:bytes=-10240
+DEBUG:urllib3.connectionpool:Starting new HTTPS connection (1): repo.anaconda.com:443
+DEBUG:urllib3.connectionpool:https://repo.anaconda.com:443 "GET /pkgs/main/osx-64/sqlalchemy-1.4.32-py310hca72f7f_0.conda HTTP/1.1" 206 10240
+DEBUG:conda_package_streaming.lazy_wheel:bytes=43-38176
+DEBUG:urllib3.connectionpool:https://repo.anaconda.com:443 "GET /pkgs/main/osx-64/sqlalchemy-1.4.32-py310hca72f7f_0.conda HTTP/1.1" 206 38134
+DEBUG:conda_package_streaming.lazy_wheel:prefetch 43-38177
 ```
-
-Extracts entire info folder. Appears not to do the bytes-from-end
-optimization.
-
-Once you have the index, it would be possible to fetch everything else you want
-in a single (compound?) Range request.
-
 
 ## Older format
 
-bzip2 has a very large block size, and we don't know if the info/ directory
-is finished early. However if we only want certain files from info/ we can stop
-after we've seen them all. Fetching repodata and calling response.raw.tell()
-after each tar member:
+bzip2 has a very large block size, and we don't know if the info/ directory is
+finished before reading the entire archive. However if we only want certain
+files from info/ we can stop after we've seen them all. Fetching repodata and
+calling response.raw.tell() after each tar member:
 
 ```
 $ python -m metayaml.fetch_metadata \
@@ -52,8 +44,8 @@ $ python -m metayaml.fetch_metadata \
 
 A larger package:
 ```
-$ python -m metayaml.fetch_metadata \
-    https://repo.anaconda.com/pkgs/main/linux-64/airflow-1.10.10-py36_0.tar.bz2
+# Fetch https://repo.anaconda.com/pkgs/main/linux-64/airflow-1.10.10-py36_0.tar.bz2
+# Printing bytes transferred after each archive member,
 286720 info/hash_input.json
 286720 info/has_prefix
 286720 info/index.json
@@ -73,8 +65,8 @@ $ python -m metayaml.fetch_metadata \
 ```{toctree}
 :maxdepth: 4
 
-fetch_metadata
-fetch_s3
+url
+s3
 lazy_wheel
 package_streaming
 transmute
