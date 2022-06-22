@@ -8,8 +8,12 @@ import pytest
 from requests import HTTPError, Session
 
 from conda_package_streaming import lazy_wheel
-from conda_package_streaming.url import conda_reader_for_url, extract_conda_info, stream_conda_info
 from conda_package_streaming.lazy_wheel import LazyConda
+from conda_package_streaming.url import (
+    conda_reader_for_url,
+    extract_conda_info,
+    stream_conda_info,
+)
 
 LIMIT = 16
 
