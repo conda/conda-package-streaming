@@ -7,7 +7,6 @@ Try to fetch less than the whole file if possible.
 import logging
 import sys
 import urllib.parse
-from contextlib import closing
 from pathlib import Path
 
 import requests
@@ -39,7 +38,7 @@ def extract_conda_info(url, destdir, checklist=METADATA_CHECKLIST, session=sessi
             checklist.remove(member.name)
         if not checklist:
             stream.close()
-            break
+            # next iteraton of for loop raises GeneratorExit in stream
 
 
 def stream_conda_info(url, session=session):
@@ -50,8 +49,14 @@ def stream_conda_info(url, session=session):
     """
     filename, conda = conda_reader_for_url(url, session=session)
 
-    with closing(conda):
+    try:
         yield from package_streaming.stream_conda_info(filename, conda)
+    finally:
+        if hasattr(conda, "release_conn"):
+            # For .tar.bz2. Take extra care to drop connections after we are
+            # done reading a partial response.
+            conda.release_conn()
+        conda.close()
 
 
 def conda_reader_for_url(url, session=session):
@@ -65,7 +70,7 @@ def conda_reader_for_url(url, session=session):
         conda = LazyConda(url, session)
         conda.prefetch(file_id)
     elif filename.endswith(".tar.bz2"):
-        response = session.get(url, stream=True)
+        response = session.get(url, stream=True, headers={"Connection": "close"})
         conda = response.raw
     else:
         raise ValueError("Unsupported extension %s", url)
