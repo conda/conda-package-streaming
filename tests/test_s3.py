@@ -33,9 +33,10 @@ def test_stream_s3(s3_client, conda_paths):
     for path in conda_paths[:LIMIT]:
         members = s3.stream_conda_info(s3_client, "pkgs", path.name)
         print("stream s3", path.name)
+        found = False
         for tar, member in members:
             if member.name == "info/index.json":
+                found = True
                 members.close()  # faster than waiting for gc?
-                break
-        else:
+        if not found:
             pytest.fail("info/index.json not found")

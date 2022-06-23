@@ -39,7 +39,7 @@ def extract_conda_info(url, destdir, checklist=METADATA_CHECKLIST, session=sessi
             checklist.remove(member.name)
         if not checklist:
             stream.close()
-            break
+            # next iteration of for loop raises GeneratorExit in stream
 
 
 def stream_conda_info(url, session=session):
