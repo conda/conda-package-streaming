@@ -30,12 +30,20 @@ def package_url(package_server):
 @pytest.fixture
 def package_urls(package_server, package_url):
     pkgs_dir = Path(package_server.app.pkgs_dir)
-    urls = []
-    for i, path in enumerate(pkgs_dir.iterdir()):
-        if i > LIMIT:
+    conda = []
+    tar_bz2 = []
+    for path in pkgs_dir.iterdir():
+        if len(conda) > LIMIT and len(tar_bz2) > LIMIT:
             break
-        if path.name.endswith((".tar.bz2", ".conda")):
-            urls.append(f"{package_url}/{path.name}")
+        url = f"{package_url}/{path.name}"
+        if path.name.endswith(".tar.bz2") and len(tar_bz2) < LIMIT:
+            tar_bz2.append(url)
+        elif path.name.endswith(".conda") and len(conda) < LIMIT:
+            conda.append(url)
+    # interleave
+    urls = []
+    for pair in zip(conda, tar_bz2):
+        urls.extend(pair)
     return urls
 
 
@@ -60,23 +68,41 @@ def test_fetch_meta(package_urls):
 
 
 def test_lazy_wheel(package_urls):
+    lazy_tests = 7
     for url in package_urls:
         if url.endswith(".conda"):
             # API works with `.tar.bz2` but only returns LazyConda for `.conda`
-            file_id, conda = conda_reader_for_url(url)
-            assert file_id == url.rsplit("/")[-1]
+            filename, conda = conda_reader_for_url(url)
+            assert filename == url.rsplit("/")[-1]
             with conda:
                 assert isinstance(conda, LazyConda)
                 assert conda.mode == "rb"
                 assert conda.readable()
                 assert not conda.writable()
                 assert not conda.closed
+
+                request_count = conda._request_count
+
+                # did we really prefetch the info?
+                zf = ZipFile(conda)  # type: ignore
+                filename = filename[: -len(".conda")]
+                zf.open(f"info-{filename}.tar.zst").read()
+
+                assert (
+                    conda._request_count == request_count
+                ), "info required extra GET request"
+                assert conda._request_count <= 3
+
                 conda.prefetch("not-appearing-in-archive.txt")
 
-                conda._check_zip()  # zip will figurue this out naturally; delete method?
-            break
+                # zip will figure this out naturally; delete method?
+                conda._check_zip()
+
+            lazy_tests -= 1
+            if lazy_tests <= 0:
+                break
     else:
-        raise LookupError("no .tar.bz2 packages found")
+        raise LookupError("not enough .conda packages found")
 
     with pytest.raises(HTTPError):
         conda_reader_for_url(package_urls[0] + ".404.conda")

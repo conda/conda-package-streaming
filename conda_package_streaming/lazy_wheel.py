@@ -103,7 +103,7 @@ class LazyZipOverHTTP:
         size bytes may be returned if EOF is reached.
         """
         # BUG does not download correctly if size is unspecified
-        download_size = max(size, self._chunk_size)
+        download_size = size
         start, length = self.tell(), self._length
         stop = length if size < 0 else min(start + download_size, length)
         start = max(0, stop - download_size)
@@ -242,9 +242,16 @@ class LazyConda(LazyZipOverHTTP):
             infolist = zf.infolist()
             for i, info in enumerate(infolist):
                 if info.filename == target_file:
+                    # could be incorrect if zipfile was concatenated to another
+                    # file (not likely for .conda)
                     start = info.header_offset
                     try:
                         end = infolist[i + 1].header_offset
+                        # or info.header_offset
+                        # + len(info.filename)
+                        # + len(info.extra)
+                        # + info.compress_size
+                        # (unless Zip64)
                     except IndexError:
                         end = zf.start_dir
                     self.seek(start)
