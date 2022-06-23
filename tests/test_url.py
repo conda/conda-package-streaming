@@ -63,8 +63,8 @@ def test_lazy_wheel(package_urls):
     for url in package_urls:
         if url.endswith(".conda"):
             # API works with `.tar.bz2` but only returns LazyConda for `.conda`
-            file_id, conda = conda_reader_for_url(url)
-            assert file_id == url.rsplit("/")[-1]
+            filename, conda = conda_reader_for_url(url)
+            assert filename == url.rsplit("/")[-1]
             with conda:
                 assert isinstance(conda, LazyConda)
                 assert conda.mode == "rb"
@@ -73,7 +73,14 @@ def test_lazy_wheel(package_urls):
                 assert not conda.closed
                 conda.prefetch("not-appearing-in-archive.txt")
 
-                conda._check_zip()  # zip will figurue this out naturally; delete method?
+                conda._check_zip()  # zip will figure this out naturally; delete method?
+
+                # did we really prefetch the info?
+                zf = ZipFile(conda)  # type: ignore
+                file_id = filename[: -len(".conda")]
+                zf.open(f"info-{file_id}.tar.zst").read()
+
+                assert conda._request_count <= 3
             break
     else:
         raise LookupError("no .tar.bz2 packages found")
