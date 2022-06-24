@@ -1,0 +1,41 @@
+{% set name = "conda-package-streaming" %}
+{% set version = "0.3.0" %}
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+build:
+  skip: true  # [py<39]
+  script: {{ PYTHON }} -m pip install . -vv
+  number: 0
+
+source:
+  git_url: ../
+
+requirements:
+  build:
+    - flit
+    - python
+  run:
+    - zstandard >=0.15
+    - requests
+    - python
+
+test:
+  imports:
+    - conda_package_streaming.url
+  commands:
+    - pip check
+  requires:
+    - pip
+
+about:
+  home: https://github.com/conda-incubator/conda-package-streaming
+  summary: Download metadata from conda packages without transferring entire file.
+  license: BSD-3-Clause
+  license_file: LICENSE
+
+extra:
+  recipe-maintainers:
+    - dholth
