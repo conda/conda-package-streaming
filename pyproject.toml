@@ -13,7 +13,7 @@ name = "conda_package_streaming"
 authors = [
   { name = "Anaconda, Inc. & Contributors", email = "conda@continuum.io" },
 ]
-description = "Download conda metadata from packages without transferring entire file."
+description = "Download metadata from conda packages without transferring entire file."
 license = { "file" = "LICENSE" }
 readme = "README.md"
 dynamic = ["version"]

@@ -16,7 +16,7 @@ repos:
       - id: end-of-file-fixer
       - id: trailing-whitespace
       - id: check-yaml
-        exclude: conda-recipe/meta.yaml
+        exclude: conda.recipe/meta.yaml
       - id: check-merge-conflict
   - repo: https://github.com/asottile/pyupgrade
     rev: v2.34.0
