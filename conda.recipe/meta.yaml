@@ -15,7 +15,7 @@ source:
 
 requirements:
   build:
-    - flit
+    - flit-core
     - python
   run:
     - zstandard >=0.15
