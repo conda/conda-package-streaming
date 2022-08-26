@@ -6,14 +6,14 @@ import bz2
 import os.path
 import tarfile
 import zipfile
-from typing import Generator
+from typing import Generator, Tuple
 
 import zstandard
 
 
 def tar_generator(
     fileobj,
-) -> Generator[tuple[tarfile.TarFile, tarfile.TarInfo], None, None]:
+) -> Generator[Tuple[tarfile.TarFile, tarfile.TarInfo], None, None]:
     """
     Yield (tar, member) from fileobj.
     """
@@ -26,7 +26,7 @@ def tar_generator(
 
 def stream_conda_info(
     filename, fileobj=None
-) -> Generator[tuple[tarfile.TarFile, tarfile.TarInfo], None, None]:
+) -> Generator[Tuple[tarfile.TarFile, tarfile.TarInfo], None, None]:
     """
     Yield members from conda's embedded info/ tarball.
 
@@ -46,7 +46,7 @@ def stream_conda_info(
 
 def stream_conda_component(
     filename, fileobj=None, component="info"
-) -> Generator[tuple[tarfile.TarFile, tarfile.TarInfo], None, None]:
+) -> Generator[Tuple[tarfile.TarFile, tarfile.TarInfo], None, None]:
     """
     Yield members from .conda's embedded {component}- tarball. "info" or "pkg".
 

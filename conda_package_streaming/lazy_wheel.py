@@ -7,7 +7,7 @@ import zipfile
 from bisect import bisect_left, bisect_right
 from contextlib import contextmanager
 from tempfile import NamedTemporaryFile
-from typing import Any, Iterator
+from typing import Any, Iterator, Tuple
 from zipfile import BadZipfile, ZipFile
 
 from requests import Session
@@ -194,7 +194,7 @@ class LazyZipOverHTTP:
 
     def _merge(
         self, start: int, end: int, left: int, right: int
-    ) -> Iterator[tuple[int, int]]:
+    ) -> Iterator[Tuple[int, int]]:
         """Return an iterator of intervals to be fetched.
 
         Args:
