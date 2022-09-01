@@ -6,7 +6,7 @@ class InvalidArchiveError(Exception):
             "Error with archive. You probably need to delete and re-download "
             "or re-create this file. Message was:\n\n%s" % (msg,)
         )
-        super(InvalidArchiveError, self).__init__(msg)
+        super().__init__(msg)
 
 
 class CaseInsensitiveFileSystemError(Exception):
@@ -18,4 +18,4 @@ this breaks things. Try installing to a location that is case-sensitive. Windows
 drives are usually the culprit here - can you install to a native Unix drive, or
 turn on case sensitivity for this (Windows) location?
         """
-        super(CaseInsensitiveFileSystemError, self).__init__(message)
+        super().__init__(message)

@@ -1,9 +1,7 @@
 import io
-import os
 import sys
 import tarfile
 from errno import ELOOP
-from unittest.mock import patch
 
 import pytest
 

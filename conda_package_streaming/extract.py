@@ -55,7 +55,7 @@ def extract_stream(
             else:
                 # tarfile ExtractError instead / OSError subclass?
                 raise exceptions.InvalidArchiveError(
-                    "failed with error: {}".format(str(e))
+                    f"failed with error: {str(e)}"
                 ) from e
 
         # next iteraton of for loop raises GeneratorExit in stream

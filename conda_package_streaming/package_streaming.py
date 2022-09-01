@@ -11,8 +11,6 @@ from typing import Generator, Tuple
 
 import zstandard
 
-from . import extract
-
 
 class CondaComponent(Enum):
     pkg = "pkg"
