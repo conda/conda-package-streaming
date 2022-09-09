@@ -3,10 +3,10 @@
   <head><meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width,initial-scale=1"/>
     <meta name="color-scheme" content="light dark"><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
-<link rel="index" title="Index" href="genindex.html" /><link rel="search" title="Search" href="search.html" /><link rel="prev" title="extract module" href="extract.html" />
+<link rel="index" title="Index" href="genindex.html" /><link rel="search" title="Search" href="search.html" /><link rel="next" title="transmute module" href="transmute.html" /><link rel="prev" title="package_streaming module" href="package_streaming.html" />
 
     <meta name="generator" content="sphinx-5.1.1, furo 2022.06.21"/>
-        <title>transmute module - conda-package-streaming documentation</title>
+        <title>extract module - conda-package-streaming documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="_static/styles/furo.css?digest=40978830699223671f4072448e654b5958f38b89" />
     <link rel="stylesheet" type="text/css" href="_static/styles/furo-extensions.css?digest=30d1aed668e5c3a91c3e3bf6a60b675221979f0e" />
@@ -161,8 +161,8 @@
 <li class="toctree-l2"><a class="reference internal" href="s3.html">s3 module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="lazy_wheel.html">lazy_wheel module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="package_streaming.html">package_streaming module</a></li>
-<li class="toctree-l2"><a class="reference internal" href="extract.html">extract module</a></li>
-<li class="toctree-l2 current current-page"><a class="current reference internal" href="#">transmute module</a></li>
+<li class="toctree-l2 current current-page"><a class="current reference internal" href="#">extract module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="transmute.html">transmute module</a></li>
 </ul>
 </li>
 </ul>
@@ -198,29 +198,25 @@
           </label>
         </div>
         <article role="main">
-          <section id="module-conda_package_streaming.transmute">
-<span id="transmute-module"></span><h1>transmute module<a class="headerlink" href="#module-conda_package_streaming.transmute" title="Permalink to this heading">#</a></h1>
-<p>Convert .tar.bz2 to .conda without temporary files.</p>
-<p>Streams main <cite>pkg-*</cite> <cite>.tar.zst</cite> into open <cite>ZipFile</cite>, while buffering <cite>info-*</cite>
-<cite>.tar.zst</cite> in memory, writing it out at the end.</p>
-<p>Works well for a typical ~10k <cite>info-*</cite>, but the conda format does not guarantee
-a small <cite>info-*</cite>.</p>
-<p>Conda packages created this way will also have <cite>info-*</cite> as the last element in
-the <cite>ZipFile</cite>, instead of the first for normal conda packages.</p>
+          <section id="extract-module">
+<h1>extract module<a class="headerlink" href="#extract-module" title="Permalink to this heading">#</a></h1>
+<p>Extract conda packages to the filesystem.</p>
+<span class="target" id="module-conda_package_streaming.extract"></span><p>Extract package to directory, with checks against tar members extracting outside
+the target directory.</p>
 <dl class="py function">
-<dt class="sig sig-object py" id="conda_package_streaming.transmute.transmute">
-<span class="sig-prename descclassname"><span class="pre">conda_package_streaming.transmute.</span></span><span class="sig-name descname"><span class="pre">transmute</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">package</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">compressor=&lt;function</span> <span class="pre">&lt;lambda&gt;&gt;</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#conda_package_streaming.transmute.transmute" title="Permalink to this definition">#</a></dt>
-<dd><p>Convert .tar.bz2 conda :package to .conda-format under path.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>package</strong> – path to .tar.bz2 conda package</p></li>
-<li><p><strong>path</strong> – destination path for transmuted .conda package</p></li>
-<li><p><strong>compressor</strong> – A function that creates instances of
-<code class="docutils literal notranslate"><span class="pre">zstandard.ZstdCompressor()</span></code> to override defaults.</p></li>
-</ul>
-</dd>
-</dl>
+<dt class="sig sig-object py" id="conda_package_streaming.extract.extract">
+<span class="sig-prename descclassname"><span class="pre">conda_package_streaming.extract.</span></span><span class="sig-name descname"><span class="pre">extract</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dest_dir</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fileobj</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#conda_package_streaming.extract.extract" title="Permalink to this definition">#</a></dt>
+<dd><p>Extract all components of conda package to dest_dir.</p>
+<p>fileobj: must be seekable if provided, if a <code class="docutils literal notranslate"><span class="pre">.conda</span></code> package.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="conda_package_streaming.extract.extract_stream">
+<span class="sig-prename descclassname"><span class="pre">conda_package_streaming.extract.</span></span><span class="sig-name descname"><span class="pre">extract_stream</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">stream</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Generator</span><span class="p"><span class="pre">[</span></span><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">TarFile</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">TarInfo</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">None</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">None</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dest_dir</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">pathlib.Path</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#conda_package_streaming.extract.extract_stream" title="Permalink to this definition">#</a></dt>
+<dd><p>Pipe <code class="docutils literal notranslate"><span class="pre">stream_conda_component</span></code> output here to extract every member into
+dest_dir.</p>
+<p>For <code class="docutils literal notranslate"><span class="pre">.conda</span></code> will need to be called twice (for info and pkg components);
+for <code class="docutils literal notranslate"><span class="pre">.tar.bz2</span></code> every member is extracted.</p>
 </dd></dl>
 
 </section>
@@ -230,15 +226,23 @@ the <cite>ZipFile</cite>, instead of the first for normal conda packages.</p>
       <footer>
         
         <div class="related-pages">
-          
-          <a class="prev-page" href="extract.html">
+          <a class="next-page" href="transmute.html">
+              <div class="page-info">
+                <div class="context">
+                  <span>Next</span>
+                </div>
+                <div class="title">transmute module</div>
+              </div>
+              <svg><use href="#svg-arrow-right"></use></svg>
+            </a>
+          <a class="prev-page" href="package_streaming.html">
               <svg><use href="#svg-arrow-right"></use></svg>
               <div class="page-info">
                 <div class="context">
                   <span>Previous</span>
                 </div>
                 
-                <div class="title">extract module</div>
+                <div class="title">package_streaming module</div>
                 
               </div>
             </a>

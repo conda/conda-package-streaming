@@ -76,5 +76,6 @@ url
 s3
 lazy_wheel
 package_streaming
+extract
 transmute
 ```
