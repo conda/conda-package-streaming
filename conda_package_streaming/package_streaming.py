@@ -6,9 +6,18 @@ import bz2
 import os.path
 import tarfile
 import zipfile
+from enum import Enum
 from typing import Generator, Tuple
 
 import zstandard
+
+
+class CondaComponent(Enum):
+    pkg = "pkg"
+    info = "info"
+
+    def __str__(self):
+        return self.value
 
 
 def tar_generator(
@@ -45,7 +54,7 @@ def stream_conda_info(
 
 
 def stream_conda_component(
-    filename, fileobj=None, component="info"
+    filename, fileobj=None, component: CondaComponent | str = CondaComponent.info
 ) -> Generator[Tuple[tarfile.TarFile, tarfile.TarInfo], None, None]:
     """
     Yield members from .conda's embedded {component}- tarball. "info" or "pkg".
