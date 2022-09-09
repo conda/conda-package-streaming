@@ -1,6 +1,4 @@
 class InvalidArchiveError(Exception):
-    """Raised on OSError"""
-
     def __init__(self, msg, *args, **kw):
         msg = (
             "Error with archive. You probably need to delete and re-download "
@@ -9,7 +7,7 @@ class InvalidArchiveError(Exception):
         super().__init__(msg)
 
 
-class CaseInsensitiveFileSystemError(Exception):
+class CaseInsensitiveFileSystemError(OSError):
     def __init__(self):
         message = """\
 Cannot extract package to a case-insensitive file system. Your install

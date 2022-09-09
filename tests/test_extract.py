@@ -66,7 +66,7 @@ def test_oserror(tmp_path):
     with pytest.raises(exceptions.CaseInsensitiveFileSystemError):
         extract.extract_stream(stream(TarELOOP), tmp_path)
 
-    with pytest.raises(exceptions.InvalidArchiveError):
+    with pytest.raises(OSError):
         extract.extract_stream(stream(TarOSError), tmp_path)
 
 

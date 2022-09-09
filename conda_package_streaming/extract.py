@@ -52,11 +52,7 @@ def extract_stream(
         except OSError as e:
             if e.errno == ELOOP:
                 raise exceptions.CaseInsensitiveFileSystemError() from e
-            else:
-                # tarfile ExtractError instead / OSError subclass?
-                raise exceptions.InvalidArchiveError(
-                    f"failed with error: {str(e)}"
-                ) from e
+            raise
 
         # next iteraton of for loop raises GeneratorExit in stream
         stream.close()
