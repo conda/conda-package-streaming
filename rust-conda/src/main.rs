@@ -3,6 +3,8 @@ use std::fs;
 use tar::Archive;
 use zstd;
 
+use crate::lib;
+
 fn main() {
     std::process::exit(real_main());
 }
@@ -10,7 +12,7 @@ fn main() {
 fn real_main() -> i32 {
     let args: Vec<_> = std::env::args().collect();
     if args.len() < 2 {
-        println!("Usage: {} <filename>", args[0]);
+        println!("Usagex: {} <filename>", args[0]);
         return 1;
     }
     let fname = std::path::Path::new(&*args[1]);
@@ -18,6 +20,8 @@ fn real_main() -> i32 {
     let dest = fname.file_stem().unwrap();
 
     println!("Unpack to {:?}", dest);
+
+    lib::_unpack_conda(&*args[1], dest);
 
     let mut archive = zip::ZipArchive::new(file).unwrap();
 
