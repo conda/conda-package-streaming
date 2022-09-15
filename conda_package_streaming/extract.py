@@ -4,7 +4,6 @@ the target directory.
 """
 
 import os
-import sys
 import tarfile
 from errno import ELOOP
 from pathlib import Path
@@ -56,17 +55,6 @@ def extract_stream(
 
         # next iteraton of for loop raises GeneratorExit in stream
         stream.close()
-
-    if sys.platform.startswith("linux") and os.getuid() == 0:
-        # When extracting as root, tarfile will by restore ownership
-        # of extracted files.  However, we want root to be the owner
-        # (our implementation of --no-same-owner).
-
-        # XXX we could only chown collected names from checked_members()
-        for root, _, files in os.walk(dest_dir):
-            for fn in files:
-                p = os.path.join(root, fn)
-                os.lchown(p, 0, 0)
 
 
 def extract(filename, dest_dir=None, fileobj=None):

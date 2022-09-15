@@ -1,5 +1,4 @@
 import io
-import sys
 import tarfile
 from errno import ELOOP
 
@@ -97,12 +96,6 @@ def test_chown(conda_paths, tmp_path, mocker):
                 package, fileobj, component=package_streaming.CondaComponent.pkg
             )
 
-            dest_dir = tmp_path / package.name
-
-            mocker.patch("sys.platform", "linux")
-            mocker.patch("os.getuid", lambda: 0)
-            mocker.patch("os.lchown", lambda p, u, g: True)
-
-            extract.extract_stream(stream, dest_dir)
-
-    assert sys.platform == "linux"
+            for tar, member in stream:
+                assert isinstance(tar, package_streaming.TarfileNoSameOwner), tar
+                break

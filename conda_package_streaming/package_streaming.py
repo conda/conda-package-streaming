@@ -20,15 +20,24 @@ class CondaComponent(Enum):
         return self.value
 
 
+class TarfileNoSameOwner(tarfile.TarFile):
+    def chown(self, tarinfo, targetpath, numeric_owner):
+        """
+        Override chown to be a no-op, since we don't want to preserve ownership
+        here. (tarfile.TarFile only lets us toggle all of (chown, chmod, mtime))
+        """
+        return
+
+
 def tar_generator(
-    fileobj,
+    fileobj, tarfile_open=TarfileNoSameOwner.open
 ) -> Generator[Tuple[tarfile.TarFile, tarfile.TarInfo], None, None]:
     """
     Yield (tar, member) from fileobj.
     """
     # tarfile will not close fileobj because _extfileobj is True
     # caller should take care to close files all the way back to the http request...
-    with tarfile.open(fileobj=fileobj, mode="r|") as tar:
+    with tarfile_open(fileobj=fileobj, mode="r|") as tar:
         for member in tar:
             yield tar, member
 
