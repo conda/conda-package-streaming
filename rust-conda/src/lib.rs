@@ -22,10 +22,11 @@ fn _unpack_conda(fname: &Path, dest: &Path) {
 }
 
 #[pyfunction]
-fn unpack_conda(fname: &str, dest: &str) -> PyResult<()> {
+fn unpack_conda(py: Python<'_>, fname: &str, dest: &str) -> PyResult<()> {
     let fname_path = Path::new(fname);
     let dest_path = Path::new(dest);
-    _unpack_conda(fname_path, dest_path);
+    py.allow_threads(|| _unpack_conda(fname_path, dest_path));
+
     Ok(())
 }
 
