@@ -3,7 +3,7 @@ import tarfile
 
 class SafetyError(tarfile.TarError):
     def __init__(self, msg, *args, **kw):
-        msg = "Error with archive. %s" % (msg,)
+        msg = f"Error with archive. {msg}"
         super().__init__(msg)
 
 

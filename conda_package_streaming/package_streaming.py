@@ -9,7 +9,7 @@ import os.path
 import tarfile
 import zipfile
 from enum import Enum
-from typing import Generator, Tuple
+from typing import Generator
 
 import zstandard
 
@@ -33,7 +33,7 @@ class TarfileNoSameOwner(tarfile.TarFile):
 
 def tar_generator(
     fileobj, tarfile_open=TarfileNoSameOwner.open
-) -> Generator[Tuple[tarfile.TarFile, tarfile.TarInfo], None, None]:
+) -> Generator[tuple[tarfile.TarFile, tarfile.TarInfo], None, None]:
     """
     Yield (tar, member) from fileobj.
     """
@@ -46,7 +46,7 @@ def tar_generator(
 
 def stream_conda_info(
     filename, fileobj=None
-) -> Generator[Tuple[tarfile.TarFile, tarfile.TarInfo], None, None]:
+) -> Generator[tuple[tarfile.TarFile, tarfile.TarInfo], None, None]:
     """
     Yield members from conda's embedded info/ tarball.
 
@@ -66,7 +66,7 @@ def stream_conda_info(
 
 def stream_conda_component(
     filename, fileobj=None, component: CondaComponent | str = CondaComponent.info
-) -> Generator[Tuple[tarfile.TarFile, tarfile.TarInfo], None, None]:
+) -> Generator[tuple[tarfile.TarFile, tarfile.TarInfo], None, None]:
     """
     Yield members from .conda's embedded {component}- tarball. "info" or "pkg".
 

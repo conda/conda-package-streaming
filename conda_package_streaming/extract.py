@@ -9,7 +9,7 @@ import os
 import tarfile
 from errno import ELOOP
 from pathlib import Path
-from typing import Generator, Tuple
+from typing import Generator
 
 from . import exceptions, package_streaming
 
@@ -17,7 +17,7 @@ __all__ = ["extract_stream", "extract"]
 
 
 def extract_stream(
-    stream: Generator[Tuple[tarfile.TarFile, tarfile.TarInfo], None, None],
+    stream: Generator[tuple[tarfile.TarFile, tarfile.TarInfo], None, None],
     dest_dir: Path | str,
 ):
     """
