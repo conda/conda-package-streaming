@@ -35,7 +35,9 @@ def extract_stream(
 
         # careful not to seek backwards
         def checked_members():
-            # from conda_package_handling
+            # from conda_package_handling. other libraries refuse to extract
+            # anything with / or ../ in the name, and skip realpath(). n.b.
+            # https://bugs.python.org/issue21109
             for member in tar_file:
                 if os.path.isabs(member.name) or not os.path.realpath(
                     member.name
