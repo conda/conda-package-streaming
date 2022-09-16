@@ -17,7 +17,7 @@ description = "Download metadata from conda packages without transferring entire
 license = { "file" = "LICENSE" }
 readme = "README.md"
 dynamic = ["version"]
-requires-python = ">=3.9"
+requires-python = ">=3.7"
 dependencies = ["requests", "zstandard >=0.15"]
 
 [project.optional-dependencies]
