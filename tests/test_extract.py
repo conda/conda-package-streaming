@@ -79,12 +79,12 @@ def test_slip(tmp_path):
 
     tar = empty_tarfile(name="../slip")
 
-    with pytest.raises(exceptions.InvalidArchiveError):
+    with pytest.raises(exceptions.SafetyError):
         extract.extract_stream(stream(tar), tmp_path)
 
     tar2 = empty_tarfile(name="/absolute")
 
-    with pytest.raises(exceptions.InvalidArchiveError):
+    with pytest.raises(exceptions.SafetyError):
         extract.extract_stream(stream(tar2), tmp_path)
 
 

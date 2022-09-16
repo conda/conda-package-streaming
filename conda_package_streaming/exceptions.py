@@ -1,9 +1,9 @@
-class InvalidArchiveError(Exception):
+import tarfile
+
+
+class SafetyError(tarfile.TarError):
     def __init__(self, msg, *args, **kw):
-        msg = (
-            "Error with archive. You probably need to delete and re-download "
-            "or re-create this file. Message was:\n\n%s" % (msg,)
-        )
+        msg = "Error with archive. %s" % (msg,)
         super().__init__(msg)
 
 

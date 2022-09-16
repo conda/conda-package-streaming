@@ -39,7 +39,7 @@ def extract_stream(
                 if os.path.isabs(member.name) or not os.path.realpath(
                     member.name
                 ).startswith(cwd):
-                    raise exceptions.InvalidArchiveError(
+                    raise exceptions.SafetyError(
                         "contains unsafe path: {} {}".format(
                             os.path.realpath(member.name), cwd
                         ),
