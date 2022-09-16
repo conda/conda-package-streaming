@@ -3,6 +3,8 @@ Extract package to directory, with checks against tar members extracting outside
 the target directory.
 """
 
+from __future__ import annotations
+
 import os
 import tarfile
 from errno import ELOOP

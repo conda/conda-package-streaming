@@ -1,5 +1,6 @@
 .coverage
 .vscode
+.nox
 __pycache__
 PKG-INFO
 build

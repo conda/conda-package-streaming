@@ -2,6 +2,8 @@
 Adapt s3 to package_streaming
 """
 
+from __future__ import annotations
+
 import typing
 from contextlib import closing
 from typing import Any
@@ -38,8 +40,7 @@ class ResponseFacade:
         return self.response["ResponseMetadata"]["HTTPHeaders"]
 
     def iter_content(self, n: int):
-        while data := self.raw.read(n):
-            yield data
+        return iter(lambda: self.raw.read(n), b"")
 
 
 class SessionFacade:

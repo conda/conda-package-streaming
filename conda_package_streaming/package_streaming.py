@@ -2,6 +2,8 @@
 Unpack conda packages without using a temporary file.
 """
 
+from __future__ import annotations
+
 import bz2
 import os.path
 import tarfile
