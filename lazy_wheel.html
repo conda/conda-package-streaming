@@ -5,7 +5,7 @@
     <meta name="color-scheme" content="light dark"><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 <link rel="index" title="Index" href="genindex.html" /><link rel="search" title="Search" href="search.html" /><link rel="next" title="package_streaming module" href="package_streaming.html" /><link rel="prev" title="s3 module" href="s3.html" />
 
-    <meta name="generator" content="sphinx-5.1.1, furo 2022.09.15"/>
+    <meta name="generator" content="sphinx-5.2.1, furo 2022.09.15"/>
         <title>lazy_wheel module - conda-package-streaming documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="_static/styles/furo.css?digest=9ec31e2665bf879c1d47d93a8ec4893870ee1e45" />
@@ -134,7 +134,7 @@
           <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
         </button>
       </div>
-      <label class="toc-overlay-icon toc-header-icon no-toc" for="__toc">
+      <label class="toc-overlay-icon toc-header-icon" for="__toc">
         <div class="visually-hidden">Toggle table of contents sidebar</div>
         <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
       </label>
@@ -192,7 +192,7 @@
               <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
             </button>
           </div>
-          <label class="toc-overlay-icon toc-content-icon no-toc" for="__toc">
+          <label class="toc-overlay-icon toc-content-icon" for="__toc">
             <div class="visually-hidden">Toggle table of contents sidebar</div>
             <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
           </label>
@@ -209,8 +209,8 @@ portions of the file are fulfilled by the backing file.</p>
 compressed member. We fetch the directory, and then the portion of the file
 containing the member or members of interest, for a maximum of 3 requests to
 retrieve any individual file in the archive.</p>
-<span class="target" id="module-conda_package_streaming.lazy_wheel"></span><p>Lazy ZIP over HTTP</p>
-<dl class="py exception">
+<p>Lazy ZIP over HTTP</p>
+<span class="target" id="module-conda_package_streaming.lazy_wheel"></span><dl class="py exception">
 <dt class="sig sig-object py" id="conda_package_streaming.lazy_wheel.HTTPRangeRequestUnsupported">
 <em class="property"><span class="pre">exception</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">conda_package_streaming.lazy_wheel.</span></span><span class="sig-name descname"><span class="pre">HTTPRangeRequestUnsupported</span></span><a class="headerlink" href="#conda_package_streaming.lazy_wheel.HTTPRangeRequestUnsupported" title="Permalink to this definition">#</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Exception</span></code></p>
@@ -365,8 +365,45 @@ The current stream position isn’t changed.</p>
         
       </footer>
     </div>
-    <aside class="toc-drawer no-toc">
+    <aside class="toc-drawer">
       
+      
+      <div class="toc-sticky toc-scroll">
+        <div class="toc-title-container">
+          <span class="toc-title">
+            On this page
+          </span>
+        </div>
+        <div class="toc-tree-container">
+          <div class="toc-tree">
+            <ul>
+<li><a class="reference internal" href="#">lazy_wheel module</a><ul>
+<li><a class="reference internal" href="#conda_package_streaming.lazy_wheel.HTTPRangeRequestUnsupported"><code class="docutils literal notranslate"><span class="pre">HTTPRangeRequestUnsupported</span></code></a></li>
+<li><a class="reference internal" href="#conda_package_streaming.lazy_wheel.LazyConda"><code class="docutils literal notranslate"><span class="pre">LazyConda</span></code></a><ul>
+<li><a class="reference internal" href="#conda_package_streaming.lazy_wheel.LazyConda.prefetch"><code class="docutils literal notranslate"><span class="pre">LazyConda.prefetch()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#conda_package_streaming.lazy_wheel.LazyZipOverHTTP"><code class="docutils literal notranslate"><span class="pre">LazyZipOverHTTP</span></code></a><ul>
+<li><a class="reference internal" href="#conda_package_streaming.lazy_wheel.LazyZipOverHTTP.close"><code class="docutils literal notranslate"><span class="pre">LazyZipOverHTTP.close()</span></code></a></li>
+<li><a class="reference internal" href="#conda_package_streaming.lazy_wheel.LazyZipOverHTTP.closed"><code class="docutils literal notranslate"><span class="pre">LazyZipOverHTTP.closed</span></code></a></li>
+<li><a class="reference internal" href="#conda_package_streaming.lazy_wheel.LazyZipOverHTTP.mode"><code class="docutils literal notranslate"><span class="pre">LazyZipOverHTTP.mode</span></code></a></li>
+<li><a class="reference internal" href="#conda_package_streaming.lazy_wheel.LazyZipOverHTTP.name"><code class="docutils literal notranslate"><span class="pre">LazyZipOverHTTP.name</span></code></a></li>
+<li><a class="reference internal" href="#conda_package_streaming.lazy_wheel.LazyZipOverHTTP.read"><code class="docutils literal notranslate"><span class="pre">LazyZipOverHTTP.read()</span></code></a></li>
+<li><a class="reference internal" href="#conda_package_streaming.lazy_wheel.LazyZipOverHTTP.readable"><code class="docutils literal notranslate"><span class="pre">LazyZipOverHTTP.readable()</span></code></a></li>
+<li><a class="reference internal" href="#conda_package_streaming.lazy_wheel.LazyZipOverHTTP.seek"><code class="docutils literal notranslate"><span class="pre">LazyZipOverHTTP.seek()</span></code></a></li>
+<li><a class="reference internal" href="#conda_package_streaming.lazy_wheel.LazyZipOverHTTP.seekable"><code class="docutils literal notranslate"><span class="pre">LazyZipOverHTTP.seekable()</span></code></a></li>
+<li><a class="reference internal" href="#conda_package_streaming.lazy_wheel.LazyZipOverHTTP.tell"><code class="docutils literal notranslate"><span class="pre">LazyZipOverHTTP.tell()</span></code></a></li>
+<li><a class="reference internal" href="#conda_package_streaming.lazy_wheel.LazyZipOverHTTP.truncate"><code class="docutils literal notranslate"><span class="pre">LazyZipOverHTTP.truncate()</span></code></a></li>
+<li><a class="reference internal" href="#conda_package_streaming.lazy_wheel.LazyZipOverHTTP.writable"><code class="docutils literal notranslate"><span class="pre">LazyZipOverHTTP.writable()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+          </div>
+        </div>
+      </div>
       
       
     </aside>
@@ -376,6 +413,7 @@ The current stream position isn’t changed.</p>
     <script src="_static/underscore.js"></script>
     <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
     <script src="_static/doctools.js"></script>
+    <script src="_static/sphinx_highlight.js"></script>
     <script src="_static/scripts/furo.js"></script>
     </body>
 </html>

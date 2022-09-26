@@ -5,7 +5,7 @@
     <meta name="color-scheme" content="light dark"><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 <link rel="index" title="Index" href="genindex.html" /><link rel="search" title="Search" href="search.html" /><link rel="next" title="s3 module" href="s3.html" /><link rel="prev" title="conda_package_streaming" href="modules.html" />
 
-    <meta name="generator" content="sphinx-5.1.1, furo 2022.09.15"/>
+    <meta name="generator" content="sphinx-5.2.1, furo 2022.09.15"/>
         <title>url module - conda-package-streaming documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="_static/styles/furo.css?digest=9ec31e2665bf879c1d47d93a8ec4893870ee1e45" />
@@ -134,7 +134,7 @@
           <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
         </button>
       </div>
-      <label class="toc-overlay-icon toc-header-icon no-toc" for="__toc">
+      <label class="toc-overlay-icon toc-header-icon" for="__toc">
         <div class="visually-hidden">Toggle table of contents sidebar</div>
         <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
       </label>
@@ -192,17 +192,17 @@
               <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
             </button>
           </div>
-          <label class="toc-overlay-icon toc-content-icon no-toc" for="__toc">
+          <label class="toc-overlay-icon toc-content-icon" for="__toc">
             <div class="visually-hidden">Toggle table of contents sidebar</div>
             <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
           </label>
         </div>
         <article role="main">
-          <section id="module-conda_package_streaming.url">
-<span id="url-module"></span><h1>url module<a class="headerlink" href="#module-conda_package_streaming.url" title="Permalink to this heading">#</a></h1>
+          <section id="url-module">
+<h1>url module<a class="headerlink" href="#url-module" title="Permalink to this heading">#</a></h1>
 <p>Fetch metadata from remote .conda or .tar.bz2 package.</p>
 <p>Try to fetch less than the whole file if possible.</p>
-<dl class="py function">
+<span class="target" id="module-conda_package_streaming.url"></span><dl class="py function">
 <dt class="sig sig-object py" id="conda_package_streaming.url.conda_reader_for_url">
 <span class="sig-prename descclassname"><span class="pre">conda_package_streaming.url.</span></span><span class="sig-name descname"><span class="pre">conda_reader_for_url</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">url</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">session=&lt;requests.sessions.Session</span> <span class="pre">object&gt;</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#conda_package_streaming.url.conda_reader_for_url" title="Permalink to this definition">#</a></dt>
 <dd><p>Return (name, file_like) suitable for package_streaming APIs</p>
@@ -269,8 +269,29 @@ url as soon as those files are found.</p>
         
       </footer>
     </div>
-    <aside class="toc-drawer no-toc">
+    <aside class="toc-drawer">
       
+      
+      <div class="toc-sticky toc-scroll">
+        <div class="toc-title-container">
+          <span class="toc-title">
+            On this page
+          </span>
+        </div>
+        <div class="toc-tree-container">
+          <div class="toc-tree">
+            <ul>
+<li><a class="reference internal" href="#">url module</a><ul>
+<li><a class="reference internal" href="#conda_package_streaming.url.conda_reader_for_url"><code class="docutils literal notranslate"><span class="pre">conda_reader_for_url()</span></code></a></li>
+<li><a class="reference internal" href="#conda_package_streaming.url.extract_conda_info"><code class="docutils literal notranslate"><span class="pre">extract_conda_info()</span></code></a></li>
+<li><a class="reference internal" href="#conda_package_streaming.url.stream_conda_info"><code class="docutils literal notranslate"><span class="pre">stream_conda_info()</span></code></a></li>
+</ul>
+</li>
+</ul>
+
+          </div>
+        </div>
+      </div>
       
       
     </aside>
@@ -280,6 +301,7 @@ url as soon as those files are found.</p>
     <script src="_static/underscore.js"></script>
     <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
     <script src="_static/doctools.js"></script>
+    <script src="_static/sphinx_highlight.js"></script>
     <script src="_static/scripts/furo.js"></script>
     </body>
 </html>

@@ -5,7 +5,7 @@
     <meta name="color-scheme" content="light dark"><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 <link rel="index" title="Index" href="genindex.html" /><link rel="search" title="Search" href="search.html" /><link rel="prev" title="extract module" href="extract.html" />
 
-    <meta name="generator" content="sphinx-5.1.1, furo 2022.09.15"/>
+    <meta name="generator" content="sphinx-5.2.1, furo 2022.09.15"/>
         <title>transmute module - conda-package-streaming documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="_static/styles/furo.css?digest=9ec31e2665bf879c1d47d93a8ec4893870ee1e45" />
@@ -134,7 +134,7 @@
           <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
         </button>
       </div>
-      <label class="toc-overlay-icon toc-header-icon no-toc" for="__toc">
+      <label class="toc-overlay-icon toc-header-icon" for="__toc">
         <div class="visually-hidden">Toggle table of contents sidebar</div>
         <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
       </label>
@@ -192,14 +192,14 @@
               <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
             </button>
           </div>
-          <label class="toc-overlay-icon toc-content-icon no-toc" for="__toc">
+          <label class="toc-overlay-icon toc-content-icon" for="__toc">
             <div class="visually-hidden">Toggle table of contents sidebar</div>
             <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
           </label>
         </div>
         <article role="main">
-          <section id="module-conda_package_streaming.transmute">
-<span id="transmute-module"></span><h1>transmute module<a class="headerlink" href="#module-conda_package_streaming.transmute" title="Permalink to this heading">#</a></h1>
+          <section id="transmute-module">
+<h1>transmute module<a class="headerlink" href="#transmute-module" title="Permalink to this heading">#</a></h1>
 <p>Convert .tar.bz2 to .conda without temporary files.</p>
 <p>Streams main <cite>pkg-*</cite> <cite>.tar.zst</cite> into open <cite>ZipFile</cite>, while buffering <cite>info-*</cite>
 <cite>.tar.zst</cite> in memory, writing it out at the end.</p>
@@ -207,7 +207,7 @@
 a small <cite>info-*</cite>.</p>
 <p>Conda packages created this way will also have <cite>info-*</cite> as the last element in
 the <cite>ZipFile</cite>, instead of the first for normal conda packages.</p>
-<dl class="py function">
+<span class="target" id="module-conda_package_streaming.transmute"></span><dl class="py function">
 <dt class="sig sig-object py" id="conda_package_streaming.transmute.transmute">
 <span class="sig-prename descclassname"><span class="pre">conda_package_streaming.transmute.</span></span><span class="sig-name descname"><span class="pre">transmute</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">package</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">compressor=&lt;function</span> <span class="pre">&lt;lambda&gt;&gt;</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#conda_package_streaming.transmute.transmute" title="Permalink to this definition">#</a></dt>
 <dd><p>Convert .tar.bz2 conda :package to .conda-format under path.</p>
@@ -262,8 +262,27 @@ the <cite>ZipFile</cite>, instead of the first for normal conda packages.</p>
         
       </footer>
     </div>
-    <aside class="toc-drawer no-toc">
+    <aside class="toc-drawer">
       
+      
+      <div class="toc-sticky toc-scroll">
+        <div class="toc-title-container">
+          <span class="toc-title">
+            On this page
+          </span>
+        </div>
+        <div class="toc-tree-container">
+          <div class="toc-tree">
+            <ul>
+<li><a class="reference internal" href="#">transmute module</a><ul>
+<li><a class="reference internal" href="#conda_package_streaming.transmute.transmute"><code class="docutils literal notranslate"><span class="pre">transmute()</span></code></a></li>
+</ul>
+</li>
+</ul>
+
+          </div>
+        </div>
+      </div>
       
       
     </aside>
@@ -273,6 +292,7 @@ the <cite>ZipFile</cite>, instead of the first for normal conda packages.</p>
     <script src="_static/underscore.js"></script>
     <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
     <script src="_static/doctools.js"></script>
+    <script src="_static/sphinx_highlight.js"></script>
     <script src="_static/scripts/furo.js"></script>
     </body>
 </html>

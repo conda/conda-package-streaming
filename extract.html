@@ -5,7 +5,7 @@
     <meta name="color-scheme" content="light dark"><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 <link rel="index" title="Index" href="genindex.html" /><link rel="search" title="Search" href="search.html" /><link rel="next" title="transmute module" href="transmute.html" /><link rel="prev" title="package_streaming module" href="package_streaming.html" />
 
-    <meta name="generator" content="sphinx-5.1.1, furo 2022.09.15"/>
+    <meta name="generator" content="sphinx-5.2.1, furo 2022.09.15"/>
         <title>extract module - conda-package-streaming documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="_static/styles/furo.css?digest=9ec31e2665bf879c1d47d93a8ec4893870ee1e45" />
@@ -134,7 +134,7 @@
           <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
         </button>
       </div>
-      <label class="toc-overlay-icon toc-header-icon no-toc" for="__toc">
+      <label class="toc-overlay-icon toc-header-icon" for="__toc">
         <div class="visually-hidden">Toggle table of contents sidebar</div>
         <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
       </label>
@@ -192,7 +192,7 @@
               <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
             </button>
           </div>
-          <label class="toc-overlay-icon toc-content-icon no-toc" for="__toc">
+          <label class="toc-overlay-icon toc-content-icon" for="__toc">
             <div class="visually-hidden">Toggle table of contents sidebar</div>
             <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
           </label>
@@ -201,9 +201,9 @@
           <section id="extract-module">
 <h1>extract module<a class="headerlink" href="#extract-module" title="Permalink to this heading">#</a></h1>
 <p>Extract conda packages to the filesystem.</p>
-<span class="target" id="module-conda_package_streaming.extract"></span><p>Extract package to directory, with checks against tar members extracting outside
+<p>Extract package to directory, with checks against tar members extracting outside
 the target directory.</p>
-<dl class="py function">
+<span class="target" id="module-conda_package_streaming.extract"></span><dl class="py function">
 <dt class="sig sig-object py" id="conda_package_streaming.extract.extract">
 <span class="sig-prename descclassname"><span class="pre">conda_package_streaming.extract.</span></span><span class="sig-name descname"><span class="pre">extract</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dest_dir</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fileobj</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#conda_package_streaming.extract.extract" title="Permalink to this definition">#</a></dt>
 <dd><p>Extract all components of conda package to dest_dir.</p>
@@ -266,8 +266,28 @@ for <code class="docutils literal notranslate"><span class="pre">.tar.bz2</span>
         
       </footer>
     </div>
-    <aside class="toc-drawer no-toc">
+    <aside class="toc-drawer">
       
+      
+      <div class="toc-sticky toc-scroll">
+        <div class="toc-title-container">
+          <span class="toc-title">
+            On this page
+          </span>
+        </div>
+        <div class="toc-tree-container">
+          <div class="toc-tree">
+            <ul>
+<li><a class="reference internal" href="#">extract module</a><ul>
+<li><a class="reference internal" href="#conda_package_streaming.extract.extract"><code class="docutils literal notranslate"><span class="pre">extract()</span></code></a></li>
+<li><a class="reference internal" href="#conda_package_streaming.extract.extract_stream"><code class="docutils literal notranslate"><span class="pre">extract_stream()</span></code></a></li>
+</ul>
+</li>
+</ul>
+
+          </div>
+        </div>
+      </div>
       
       
     </aside>
@@ -277,6 +297,7 @@ for <code class="docutils literal notranslate"><span class="pre">.tar.bz2</span>
     <script src="_static/underscore.js"></script>
     <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
     <script src="_static/doctools.js"></script>
+    <script src="_static/sphinx_highlight.js"></script>
     <script src="_static/scripts/furo.js"></script>
     </body>
 </html>

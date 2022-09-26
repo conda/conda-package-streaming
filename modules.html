@@ -5,7 +5,7 @@
     <meta name="color-scheme" content="light dark"><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 <link rel="index" title="Index" href="genindex.html" /><link rel="search" title="Search" href="search.html" /><link rel="next" title="url module" href="url.html" /><link rel="prev" title="Welcome to conda-package-streaming’s documentation!" href="index.html" />
 
-    <meta name="generator" content="sphinx-5.1.1, furo 2022.09.15"/>
+    <meta name="generator" content="sphinx-5.2.1, furo 2022.09.15"/>
         <title>conda_package_streaming - conda-package-streaming documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="_static/styles/furo.css?digest=9ec31e2665bf879c1d47d93a8ec4893870ee1e45" />
@@ -262,12 +262,63 @@ calling response.raw.tell() after each tar member:</p>
 </div>
 <div class="toctree-wrapper compound">
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="url.html">url module</a></li>
-<li class="toctree-l1"><a class="reference internal" href="s3.html">s3 module</a></li>
-<li class="toctree-l1"><a class="reference internal" href="lazy_wheel.html">lazy_wheel module</a></li>
-<li class="toctree-l1"><a class="reference internal" href="package_streaming.html">package_streaming module</a></li>
-<li class="toctree-l1"><a class="reference internal" href="extract.html">extract module</a></li>
-<li class="toctree-l1"><a class="reference internal" href="transmute.html">transmute module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="url.html">url module</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="url.html#conda_package_streaming.url.conda_reader_for_url"><code class="docutils literal notranslate"><span class="pre">conda_reader_for_url()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="url.html#conda_package_streaming.url.extract_conda_info"><code class="docutils literal notranslate"><span class="pre">extract_conda_info()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="url.html#conda_package_streaming.url.stream_conda_info"><code class="docutils literal notranslate"><span class="pre">stream_conda_info()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="s3.html">s3 module</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="s3.html#conda_package_streaming.s3.conda_reader_for_s3"><code class="docutils literal notranslate"><span class="pre">conda_reader_for_s3()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="s3.html#conda_package_streaming.s3.stream_conda_info"><code class="docutils literal notranslate"><span class="pre">stream_conda_info()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="lazy_wheel.html">lazy_wheel module</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="lazy_wheel.html#conda_package_streaming.lazy_wheel.HTTPRangeRequestUnsupported"><code class="docutils literal notranslate"><span class="pre">HTTPRangeRequestUnsupported</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="lazy_wheel.html#conda_package_streaming.lazy_wheel.LazyConda"><code class="docutils literal notranslate"><span class="pre">LazyConda</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="lazy_wheel.html#conda_package_streaming.lazy_wheel.LazyConda.prefetch"><code class="docutils literal notranslate"><span class="pre">LazyConda.prefetch()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="lazy_wheel.html#conda_package_streaming.lazy_wheel.LazyZipOverHTTP"><code class="docutils literal notranslate"><span class="pre">LazyZipOverHTTP</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="lazy_wheel.html#conda_package_streaming.lazy_wheel.LazyZipOverHTTP.close"><code class="docutils literal notranslate"><span class="pre">LazyZipOverHTTP.close()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="lazy_wheel.html#conda_package_streaming.lazy_wheel.LazyZipOverHTTP.closed"><code class="docutils literal notranslate"><span class="pre">LazyZipOverHTTP.closed</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="lazy_wheel.html#conda_package_streaming.lazy_wheel.LazyZipOverHTTP.mode"><code class="docutils literal notranslate"><span class="pre">LazyZipOverHTTP.mode</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="lazy_wheel.html#conda_package_streaming.lazy_wheel.LazyZipOverHTTP.name"><code class="docutils literal notranslate"><span class="pre">LazyZipOverHTTP.name</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="lazy_wheel.html#conda_package_streaming.lazy_wheel.LazyZipOverHTTP.read"><code class="docutils literal notranslate"><span class="pre">LazyZipOverHTTP.read()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="lazy_wheel.html#conda_package_streaming.lazy_wheel.LazyZipOverHTTP.readable"><code class="docutils literal notranslate"><span class="pre">LazyZipOverHTTP.readable()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="lazy_wheel.html#conda_package_streaming.lazy_wheel.LazyZipOverHTTP.seek"><code class="docutils literal notranslate"><span class="pre">LazyZipOverHTTP.seek()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="lazy_wheel.html#conda_package_streaming.lazy_wheel.LazyZipOverHTTP.seekable"><code class="docutils literal notranslate"><span class="pre">LazyZipOverHTTP.seekable()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="lazy_wheel.html#conda_package_streaming.lazy_wheel.LazyZipOverHTTP.tell"><code class="docutils literal notranslate"><span class="pre">LazyZipOverHTTP.tell()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="lazy_wheel.html#conda_package_streaming.lazy_wheel.LazyZipOverHTTP.truncate"><code class="docutils literal notranslate"><span class="pre">LazyZipOverHTTP.truncate()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="lazy_wheel.html#conda_package_streaming.lazy_wheel.LazyZipOverHTTP.writable"><code class="docutils literal notranslate"><span class="pre">LazyZipOverHTTP.writable()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="package_streaming.html">package_streaming module</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="package_streaming.html#conda_package_streaming.package_streaming.CondaComponent"><code class="docutils literal notranslate"><span class="pre">CondaComponent</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="package_streaming.html#conda_package_streaming.package_streaming.CondaComponent.info"><code class="docutils literal notranslate"><span class="pre">CondaComponent.info</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="package_streaming.html#conda_package_streaming.package_streaming.CondaComponent.pkg"><code class="docutils literal notranslate"><span class="pre">CondaComponent.pkg</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="package_streaming.html#conda_package_streaming.package_streaming.TarfileNoSameOwner"><code class="docutils literal notranslate"><span class="pre">TarfileNoSameOwner</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="package_streaming.html#conda_package_streaming.package_streaming.TarfileNoSameOwner.chown"><code class="docutils literal notranslate"><span class="pre">TarfileNoSameOwner.chown()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="package_streaming.html#conda_package_streaming.package_streaming.stream_conda_component"><code class="docutils literal notranslate"><span class="pre">stream_conda_component()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="package_streaming.html#conda_package_streaming.package_streaming.stream_conda_info"><code class="docutils literal notranslate"><span class="pre">stream_conda_info()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="package_streaming.html#conda_package_streaming.package_streaming.tar_generator"><code class="docutils literal notranslate"><span class="pre">tar_generator()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="extract.html">extract module</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="extract.html#conda_package_streaming.extract.extract"><code class="docutils literal notranslate"><span class="pre">extract()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="extract.html#conda_package_streaming.extract.extract_stream"><code class="docutils literal notranslate"><span class="pre">extract_stream()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="transmute.html">transmute module</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="transmute.html#conda_package_streaming.transmute.transmute"><code class="docutils literal notranslate"><span class="pre">transmute()</span></code></a></li>
+</ul>
+</li>
 </ul>
 </div>
 </section>
@@ -348,6 +399,7 @@ calling response.raw.tell() after each tar member:</p>
     <script src="_static/underscore.js"></script>
     <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
     <script src="_static/doctools.js"></script>
+    <script src="_static/sphinx_highlight.js"></script>
     <script src="_static/scripts/furo.js"></script>
     </body>
 </html>
