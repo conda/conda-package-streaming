@@ -1,6 +1,6 @@
 {% set name = "conda-package-streaming" %}
 {% set version_match = load_file_regex(
-  load_file="conda_package_streaming/__init__.py", 
+  load_file="conda_package_streaming/__init__.py",
   regex_pattern='^__version__ = "(.+)"') %}
 {% set version = version_match[1] %}
 
