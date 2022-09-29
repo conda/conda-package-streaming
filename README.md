@@ -52,9 +52,9 @@ From a file-like object,
 ```python
 from contextlib import closing
 
-from conda_package_streaming.url import reader_for_conda_url
+from conda_package_streaming.url import conda_reader_for_url
 from conda_package_streaming.package_streaming import stream_conda_component
-filename, conda = reader_for_conda_url(url)
+filename, conda = conda_reader_for_url(url)
 
 # file object must be seekable for `.conda` format, but merely readable for `.tar.bz2`
 with closing(conda):
