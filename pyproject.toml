@@ -32,8 +32,8 @@ test = [
 docs = ["furo", "sphinx", "myst-parser", "mdit-py-plugins>=0.3.0"]
 
 [project.urls]
-Home = "https://github.com/conda-incubator/conda-package-streaming"
-Documentation = "https://conda-incubator.github.io/conda-package-streaming/"
+Home = "https://github.com/conda/conda-package-streaming"
+Documentation = "https://conda.github.io/conda-package-streaming/"
 
 # pyproject.toml
 [tool.pytest.ini_options]

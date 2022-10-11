@@ -10,7 +10,7 @@ package:
 
 source:
   git_url: ../
-  # url: https://github.com/conda-incubator/conda-package-streaming/archive/refs/tags/v{{ version }}.tar.gz
+  # url: https://github.com/conda/conda-package-streaming/archive/refs/tags/v{{ version }}.tar.gz
   # sha256: 60a064dcb6adf775362339ffc8728320d89115c0f3870f2bb43fd368240a3205
 
 build:
@@ -38,12 +38,12 @@ test:
     - requests
 
 about:
-  home: https://github.com/conda-incubator/conda-package-streaming
+  home: https://github.com/conda/conda-package-streaming
   summary: Download metadata from conda packages without transferring entire file.
   license: BSD-3-Clause
   license_file: LICENSE
-  doc_url: https://conda-incubator.github.io/conda-package-streaming/
-  dev_url: https://github.com/conda-incubator/conda-package-streaming
+  doc_url: https://conda.github.io/conda-package-streaming/
+  dev_url: https://github.com/conda/conda-package-streaming
 
 extra:
   recipe-maintainers:
