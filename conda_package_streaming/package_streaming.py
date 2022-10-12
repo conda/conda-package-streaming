@@ -16,10 +16,7 @@ try:
 except ImportError:
     import warnings
 
-    warnings.warn(
-        "zstandard could not be imported. Running without .conda support.",
-        RuntimeWarning,
-    )
+    warnings.warn("zstandard could not be imported. Running without .conda support.")
 
     zstandard = None
 
