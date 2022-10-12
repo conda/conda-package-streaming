@@ -11,7 +11,17 @@ import zipfile
 from enum import Enum
 from typing import Generator
 
-import zstandard
+try:
+    import zstandard
+except ImportError:
+    import warnings
+
+    warnings.warn(
+        "zstandard could not be imported. Running without .conda support.",
+        RuntimeWarning,
+    )
+
+    zstandard = None
 
 
 class CondaComponent(Enum):
@@ -65,7 +75,7 @@ def stream_conda_info(
 
 
 def stream_conda_component(
-    filename, fileobj=None, component: CondaComponent | str = CondaComponent.info
+    filename, fileobj=None, component: CondaComponent | str = CondaComponent.pkg
 ) -> Generator[tuple[tarfile.TarFile, tarfile.TarInfo], None, None]:
     """
     Yield members from .conda's embedded {component}- tarball. "info" or "pkg".
@@ -81,6 +91,9 @@ def stream_conda_component(
     writing out the file objects yourself.
     """
     if str(filename).endswith(".conda"):
+        if zstandard is None:
+            raise RuntimeError("Cannot unpack `.conda` without zstandard")
+
         zf = zipfile.ZipFile(fileobj or filename)
         file_id, _, _ = os.path.basename(filename).rpartition(".")
         component_name = f"{component}-{file_id}"
