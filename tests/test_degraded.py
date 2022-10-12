@@ -26,7 +26,7 @@ def test_degraded(tmpdir):
             pass
 
         testtar = Path(tmpdir, "test.tar.bz2")
-        with tarfile.open(tmpdir / "test.tar.bz2", "w:bz2") as tar:
+        with tarfile.open(testtar, "w:bz2") as tar:
             pass
 
         for (
