@@ -1,4 +1,4 @@
-.coverage
+.coverage*
 .vscode
 .nox
 __pycache__
