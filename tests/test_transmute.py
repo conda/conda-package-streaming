@@ -1,7 +1,9 @@
 import contextlib
 import os
+import tarfile
 import tempfile
 import time
+from pathlib import Path
 
 from conda_package_streaming.transmute import transmute
 
@@ -30,3 +32,14 @@ def test_transmute(conda_paths):
             for package in packages:
                 with timeme(f"{package} took "):
                     transmute(package, outdir)
+
+
+def test_transmute_symlink(tmpdir):
+    testtar = Path(tmpdir, "test.tar.bz2")
+    with tarfile.open(testtar, "w:bz2") as tar:
+        symlink = tarfile.TarInfo(name="symlink")
+        symlink.type = tarfile.LNKTYPE
+        symlink.linkname = "target"
+        tar.addfile(symlink)
+
+    transmute(str(testtar), tmpdir)
