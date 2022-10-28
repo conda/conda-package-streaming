@@ -20,7 +20,7 @@ import zipfile
 import zstandard
 
 # streams everything in .tar.bz2 mode
-from .package_streaming import stream_conda_component
+from .package_streaming import CondaComponent, stream_conda_component
 
 # increase to reduce speed and increase compression (22 = conda's default)
 ZSTD_COMPRESS_LEVEL = 22
@@ -35,6 +35,7 @@ def transmute(
     compressor=lambda: zstandard.ZstdCompressor(
         level=ZSTD_COMPRESS_LEVEL, threads=ZSTD_COMPRESS_THREADS
     ),
+    is_info=lambda filename: filename.startswith("info/"),
 ):
     """
     Convert .tar.bz2 conda :package to .conda-format under path.
@@ -43,6 +44,11 @@ def transmute(
     :param path: destination path for transmuted .conda package
     :param compressor: A function that creates instances of
         ``zstandard.ZstdCompressor()`` to override defaults.
+    :param is_info: A function that returns True if a file belongs in the
+        ``info`` component of a `.conda` package.  ``conda-package-handling``
+        (not this package ``conda-package-streaming``) uses a set of regular
+        expressions to keep expected items in the info- component, while other
+        items starting with ``info/`` wind up in the pkg- component.
     """
     assert package.endswith(".tar.bz2"), "can only convert .tar.bz2 to .conda"
     assert os.path.isdir(path)
@@ -70,7 +76,7 @@ def transmute(
 
         stream = iter(stream_conda_component(package))
         for tar, member in stream:
-            tar_get = info_tar if member.name.startswith("info/") else pkg_tar
+            tar_get = info_tar if is_info(member.name) else pkg_tar
             if member.isfile():
                 tar_get.addfile(member, tar.extractfile(member))
             else:
@@ -84,3 +90,41 @@ def transmute(
 
     with conda_file.open(f"info-{file_id}.tar.zst", "w") as info_file:
         info_file.write(info_io.getvalue())
+
+
+def transmute_tar_bz2(
+    package,
+    path,
+):
+    """
+    Convert .conda :package to .tar.bz2 format under path.
+
+    Can recompress .tar.bz2 packages.
+
+    :param package: path to `.conda` or `.tar.bz2` package.
+    :param path: destination path for transmuted package.
+    """
+    assert package.endswith((".tar.bz2", ".conda")), "Unknown extension"
+    assert os.path.isdir(path)
+
+    incoming_format = ".conda" if package.endswith(".conda") else ".tar.bz2"
+
+    file_id = os.path.basename(package)[: -len(incoming_format)]
+
+    if incoming_format == ".conda":
+        # .tar.bz2 MUST place info/ first.
+        components = [CondaComponent.info, CondaComponent.pkg]
+    else:
+        # .tar.bz2 doesn't filter by component
+        components = [CondaComponent.pkg]
+
+    with open(package, "rb") as fileobj, tarfile.open(
+        os.path.join(path, f"{file_id}.tar.bz2"), "x:bz2"
+    ) as pkg_tar:
+        for component in components:
+            stream = iter(stream_conda_component(package, fileobj, component=component))
+            for tar, member in stream:
+                if member.isfile():
+                    pkg_tar.addfile(member, tar.extractfile(member))
+                else:
+                    pkg_tar.addfile(member)

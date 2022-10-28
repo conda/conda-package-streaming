@@ -67,7 +67,10 @@ def extract(filename, dest_dir=None, fileobj=None):
     """
     assert dest_dir, "dest_dir is required"
     if str(filename).endswith(".conda"):
-        components = list(package_streaming.CondaComponent)
+        components = [
+            package_streaming.CondaComponent.pkg,
+            package_streaming.CondaComponent.info,
+        ]
     else:  # .tar.bz2 doesn't filter by component
         components = [package_streaming.CondaComponent.pkg]
 
