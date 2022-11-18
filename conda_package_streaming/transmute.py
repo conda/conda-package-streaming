@@ -11,11 +11,14 @@ Conda packages created this way will also have `info-*` as the last element in
 the `ZipFile`, instead of the first for normal conda packages.
 """
 
+from __future__ import annotations
+
 import io
 import json
 import os
 import tarfile
 import zipfile
+from typing import Callable
 
 import zstandard
 
@@ -32,10 +35,12 @@ def transmute(
     package,
     path,
     *,
-    compressor=lambda: zstandard.ZstdCompressor(
+    compressor: Callable[
+        [], zstandard.ZstdCompressor
+    ] = lambda: zstandard.ZstdCompressor(
         level=ZSTD_COMPRESS_LEVEL, threads=ZSTD_COMPRESS_THREADS
     ),
-    is_info=lambda filename: filename.startswith("info/"),
+    is_info: Callable[[str], bool] = lambda filename: filename.startswith("info/"),
 ):
     """
     Convert .tar.bz2 conda :package to .conda-format under path.
