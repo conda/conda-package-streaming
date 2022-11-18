@@ -42,7 +42,7 @@ def extract_stream(
             for member in tar_file:
                 if not is_within_dest_dir(member.name):
                     raise exceptions.SafetyError(
-                        f"contains unsafe path: {os.path.realpath(member.name)}"
+                        f"contains unsafe path: {member.name}"
                     )
                 yield member
 
