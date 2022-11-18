@@ -79,7 +79,7 @@ def test_transmute_info_filter(tmpdir, testtar_bytes):
             },
         ):
             items = stream_conda_component("test.conda", fileobj, component)
-            assert set(member.name for tar, member in items) == expected, items
+            assert {member.name for tar, member in items} == expected, items
 
 
 def test_transmute_backwards(tmpdir, conda_paths):
