@@ -27,10 +27,12 @@ def extract_stream(
     For ``.conda`` will need to be called twice (for info and pkg components);
     for ``.tar.bz2`` every member is extracted.
     """
-    dest_dir = str(dest_dir)
-    # we don't extract to cwd; only used to check that tar member does not
-    # escape its target directory:
-    cwd = os.getcwd()
+    dest_dir = os.path.realpath(dest_dir)
+
+    def is_within_dest_dir(name):
+        abs_target = os.path.realpath(os.path.join(dest_dir, name))
+        prefix = os.path.commonpath((dest_dir, abs_target))
+        return prefix == dest_dir
 
     for tar_file, _ in stream:
 
@@ -38,13 +40,9 @@ def extract_stream(
         def checked_members():
             # from conda_package_handling
             for member in tar_file:
-                if os.path.isabs(member.name) or not os.path.realpath(
-                    member.name
-                ).startswith(cwd):
+                if not is_within_dest_dir(member.name):
                     raise exceptions.SafetyError(
-                        "contains unsafe path: {} {}".format(
-                            os.path.realpath(member.name), cwd
-                        ),
+                        f"contains unsafe path: {member.name}"
                     )
                 yield member
 
