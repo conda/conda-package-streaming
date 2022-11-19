@@ -18,8 +18,7 @@ def test_package_streaming(conda_paths):
 def test_early_exit(conda_paths):
     for package in conda_paths:
         print(package)
-        fileobj = open(package, "rb")
-        stream = iter(package_streaming.stream_conda_info(package, fileobj))
+        stream = iter(package_streaming.stream_conda_info(package))
         found = False
         for tar, member in stream:
             assert not found, "early exit did not work"
@@ -29,5 +28,6 @@ def test_early_exit(conda_paths):
                     json.load(reader)
                     found = True
                 stream.close()  # PEP 342 close()
-        # assert fileobj.closed # would be preferable
+        # stream_conda_info doesn't close a passed-in fileobj, but a
+        # filename should be closed.
         assert found, f"index.json not found in {package}"

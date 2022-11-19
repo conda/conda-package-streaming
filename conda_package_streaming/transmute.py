@@ -55,41 +55,43 @@ def transmute(
     file_id = os.path.basename(package)[: -len(".tar.bz2")]
 
     # x to not append to existing
-    conda_file = zipfile.ZipFile(
+    with zipfile.ZipFile(
         os.path.join(path, f"{file_id}.conda"), "x", compresslevel=zipfile.ZIP_STORED
-    )
+    ) as conda_file:
 
-    info_compress = compressor()
-    data_compress = compressor()
+        info_compress = compressor()
+        data_compress = compressor()
 
-    # in theory, info_tar could grow uncomfortably big, in which case we would
-    # rather swap it to disk
-    info_io = io.BytesIO()
-    info_stream = info_compress.stream_writer(info_io, closefd=False)
-    info_tar = tarfile.TarFile(fileobj=info_stream, mode="w")
+        # in theory, info_tar could grow uncomfortably big, in which case we would
+        # rather swap it to disk
+        info_io = io.BytesIO()
+        info_stream = info_compress.stream_writer(info_io, closefd=False)
+        info_tar = tarfile.TarFile(fileobj=info_stream, mode="w")
 
-    conda_file.writestr("metadata.json", json.dumps({"conda_pkg_format_version": 2}))
+        conda_file.writestr(
+            "metadata.json", json.dumps({"conda_pkg_format_version": 2})
+        )
 
-    with conda_file.open(f"pkg-{file_id}.tar.zst", "w") as pkg_file:
-        pkg_stream = data_compress.stream_writer(pkg_file, closefd=False)
-        pkg_tar = tarfile.TarFile(fileobj=pkg_stream, mode="w")
+        with conda_file.open(f"pkg-{file_id}.tar.zst", "w") as pkg_file:
+            pkg_stream = data_compress.stream_writer(pkg_file, closefd=False)
+            pkg_tar = tarfile.TarFile(fileobj=pkg_stream, mode="w")
 
-        stream = iter(stream_conda_component(package))
-        for tar, member in stream:
-            tar_get = info_tar if is_info(member.name) else pkg_tar
-            if member.isfile():
-                tar_get.addfile(member, tar.extractfile(member))
-            else:
-                tar_get.addfile(member)
+            stream = iter(stream_conda_component(package))
+            for tar, member in stream:
+                tar_get = info_tar if is_info(member.name) else pkg_tar
+                if member.isfile():
+                    tar_get.addfile(member, tar.extractfile(member))
+                else:
+                    tar_get.addfile(member)
 
-        pkg_tar.close()
-        pkg_stream.close()
+            pkg_tar.close()
+            pkg_stream.close()
 
-        info_tar.close()
-        info_stream.close()
+            info_tar.close()
+            info_stream.close()
 
-    with conda_file.open(f"info-{file_id}.tar.zst", "w") as info_file:
-        info_file.write(info_io.getvalue())
+        with conda_file.open(f"info-{file_id}.tar.zst", "w") as info_file:
+            info_file.write(info_io.getvalue())
 
 
 def transmute_tar_bz2(

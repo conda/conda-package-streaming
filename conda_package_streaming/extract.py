@@ -41,9 +41,7 @@ def extract_stream(
             # from conda_package_handling
             for member in tar_file:
                 if not is_within_dest_dir(member.name):
-                    raise exceptions.SafetyError(
-                        f"contains unsafe path: {member.name}"
-                    )
+                    raise exceptions.SafetyError(f"contains unsafe path: {member.name}")
                 yield member
 
         try:
@@ -72,11 +70,17 @@ def extract(filename, dest_dir=None, fileobj=None):
     else:  # .tar.bz2 doesn't filter by component
         components = [package_streaming.CondaComponent.pkg]
 
+    closefd = False
     if not fileobj:
         fileobj = open(filename, "rb")
+        closefd = True
 
-    for component in components:
-        stream = package_streaming.stream_conda_component(
-            filename, fileobj, component=component
-        )
-        extract_stream(stream, dest_dir)
+    try:
+        for component in components:
+            stream = package_streaming.stream_conda_component(
+                filename, fileobj, component=component
+            )
+            extract_stream(stream, dest_dir)
+    finally:
+        if closefd:
+            fileobj.close()

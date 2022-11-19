@@ -39,16 +39,20 @@ class TarfileNoSameOwner(tarfile.TarFile):
 
 
 def tar_generator(
-    fileobj, tarfile_open=TarfileNoSameOwner.open
+    fileobj, tarfile_open=TarfileNoSameOwner.open, closefd=False
 ) -> Generator[tuple[tarfile.TarFile, tarfile.TarInfo], None, None]:
     """
     Yield (tar, member) from fileobj.
     """
     # tarfile will not close fileobj because _extfileobj is True
     # caller should take care to close files all the way back to the http request...
-    with tarfile_open(fileobj=fileobj, mode="r|") as tar:
-        for member in tar:
-            yield tar, member
+    try:
+        with tarfile_open(fileobj=fileobj, mode="r|") as tar:
+            for member in tar:
+                yield tar, member
+    finally:
+        if closefd:
+            fileobj.close()
 
 
 def stream_conda_info(
@@ -107,4 +111,4 @@ def stream_conda_component(
         reader = bz2.open(fileobj or filename, mode="rb")
     else:
         raise ValueError("unsupported file extension")
-    return tar_generator(reader)
+    return tar_generator(reader, closefd=fileobj is None)
