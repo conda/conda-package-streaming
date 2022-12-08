@@ -39,8 +39,9 @@ test:
 
 about:
   home: https://github.com/conda/conda-package-streaming
-  summary: Download metadata from conda packages without transferring entire file.
+  summary: An efficient library to read from new and old format .conda and .tar.bz2 conda packages.
   license: BSD-3-Clause
+  license_family: BSD
   license_file: LICENSE
   doc_url: https://conda.github.io/conda-package-streaming/
   dev_url: https://github.com/conda/conda-package-streaming

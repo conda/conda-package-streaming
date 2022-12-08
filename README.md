@@ -1,5 +1,8 @@
 # conda-package-streaming
 
+An efficient library to read from new and old format .conda and .tar.bz2 conda
+packages.
+
 Download conda metadata from packages without transferring entire file. Get
 metadata from local `.tar.bz2` packages without reading entire files.
 
