@@ -13,7 +13,7 @@ name = "conda_package_streaming"
 authors = [
   { name = "Anaconda, Inc. & Contributors", email = "conda@continuum.io" },
 ]
-description = "Download metadata from conda packages without transferring entire file."
+description = "An efficient library to read from new and old format .conda and .tar.bz2 conda packages."
 license = { file = "LICENSE" }
 readme = "README.md"
 classifiers = [
