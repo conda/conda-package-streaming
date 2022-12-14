@@ -34,6 +34,7 @@ test = [
   "boto3",
   "boto3-stubs[essential]",
   "bottle",
+  "conda",
 ]
 docs = ["furo", "sphinx", "myst-parser", "mdit-py-plugins>=0.3.0"]
 
