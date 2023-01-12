@@ -1,5 +1,7 @@
 # conda-package-streaming
 
+[![pre-commit.ci status](https://results.pre-commit.ci/badge/github/conda/conda-package-streaming/main.svg)](https://results.pre-commit.ci/latest/github/conda/conda-package-streaming/main)
+
 An efficient library to read from new and old format .conda and .tar.bz2 conda
 packages.
 
