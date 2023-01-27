@@ -25,8 +25,9 @@ import zstandard
 # streams everything in .tar.bz2 mode
 from .package_streaming import CondaComponent, stream_conda_component
 
-# increase to reduce speed and increase compression (22 = conda's default)
-ZSTD_COMPRESS_LEVEL = 22
+# increase to reduce speed and increase compression (levels above 19 use much
+# more memory)
+ZSTD_COMPRESS_LEVEL = 19
 # increase to reduce compression and increase speed
 ZSTD_COMPRESS_THREADS = 1
 
