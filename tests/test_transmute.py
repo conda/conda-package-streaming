@@ -39,7 +39,6 @@ def timeme(message: str = ""):
 
 
 def test_transmute(conda_paths, tmpdir):
-
     tarbz_packages = []
     for path in conda_paths:
         path = str(path)
@@ -83,7 +82,6 @@ def test_transmute_info_filter(tmpdir, testtar_bytes):
 
 
 def test_transmute_backwards(tmpdir, conda_paths):
-
     tarbz_packages = []
     for path in conda_paths:
         path = str(path)

@@ -38,7 +38,6 @@ class LazyZipOverHTTP:
     def __init__(
         self, url: str, session: Session, chunk_size: int = CONTENT_CHUNK_SIZE
     ) -> None:
-
         # if CONTENT_CHUNK_SIZE is bigger than the file:
         # In [8]: response.headers["Content-Range"]
         # Out[8]: 'bytes 0-3133374/3133375'
