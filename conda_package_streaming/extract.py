@@ -35,7 +35,6 @@ def extract_stream(
         return prefix == dest_dir
 
     for tar_file, _ in stream:
-
         # careful not to seek backwards
         def checked_members():
             # from conda_package_handling

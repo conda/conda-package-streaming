@@ -64,7 +64,6 @@ def transmute(
     with zipfile.ZipFile(
         os.path.join(path, f"{file_id}.conda"), "x", compresslevel=zipfile.ZIP_STORED
     ) as conda_file:
-
         info_compress = compressor()
         data_compress = compressor()
 
