@@ -13,10 +13,10 @@ the `ZipFile`, instead of the first for normal conda packages.
 
 from __future__ import annotations
 
-import io
-import json
 import os
+import shutil
 import tarfile
+import tempfile
 import zipfile
 from typing import Callable
 
@@ -60,43 +60,50 @@ def transmute(
     assert os.path.isdir(path)
     file_id = os.path.basename(package)[: -len(".tar.bz2")]
 
-    # x to not append to existing
-    with zipfile.ZipFile(
-        os.path.join(path, f"{file_id}.conda"), "x", compresslevel=zipfile.ZIP_STORED
+    with tempfile.SpooledTemporaryFile() as info_file, tempfile.SpooledTemporaryFile() as pkg_file, tarfile.TarFile(
+        fileobj=info_file, mode="w"
+    ) as info_tar, tarfile.TarFile(
+        fileobj=pkg_file, mode="w"
+    ) as pkg_tar, zipfile.ZipFile(
+        os.path.join(path, f"{file_id}.conda"),
+        "x",  # x to not append to existing
+        compresslevel=zipfile.ZIP_STORED,
     ) as conda_file:
-        info_compress = compressor()
+
+        # If we wanted to compress these at a low setting to save temporary
+        # space, we could insert a file object that counts bytes written in
+        # front of a zstd (level between 1..3) compressor.
+        stream = iter(stream_conda_component(package))
+        for tar, member in stream:
+            tar_get = info_tar if is_info(member.name) else pkg_tar
+            if member.isfile():
+                tar_get.addfile(member, tar.extractfile(member))
+            else:
+                tar_get.addfile(member)
+
+        info_tar.close()
+        pkg_tar.close()
+
+        info_size = info_file.tell()
+        pkg_size = pkg_file.tell()
+
+        info_file.seek(0)
+        pkg_file.seek(0)
+
+        # Use a maximum of one Zstd compressor, stream_writer at a time to save memory.
         data_compress = compressor()
 
-        # in theory, info_tar could grow uncomfortably big, in which case we would
-        # rather swap it to disk
-        info_io = io.BytesIO()
-        info_stream = info_compress.stream_writer(info_io, closefd=False)
-        info_tar = tarfile.TarFile(fileobj=info_stream, mode="w")
+        with conda_file.open(f"pkg-{file_id}.tar.zst", "w") as pkg_file_zip:
+            pkg_stream = data_compress.stream_writer(
+                pkg_file_zip, size=pkg_size, closefd=False
+            )
+            shutil.copyfileobj(pkg_file, pkg_stream)
 
-        conda_file.writestr(
-            "metadata.json", json.dumps({"conda_pkg_format_version": 2})
-        )
-
-        with conda_file.open(f"pkg-{file_id}.tar.zst", "w") as pkg_file:
-            pkg_stream = data_compress.stream_writer(pkg_file, closefd=False)
-            pkg_tar = tarfile.TarFile(fileobj=pkg_stream, mode="w")
-
-            stream = iter(stream_conda_component(package))
-            for tar, member in stream:
-                tar_get = info_tar if is_info(member.name) else pkg_tar
-                if member.isfile():
-                    tar_get.addfile(member, tar.extractfile(member))
-                else:
-                    tar_get.addfile(member)
-
-            pkg_tar.close()
-            pkg_stream.close()
-
-            info_tar.close()
-            info_stream.close()
-
-        with conda_file.open(f"info-{file_id}.tar.zst", "w") as info_file:
-            info_file.write(info_io.getvalue())
+        with conda_file.open(f"info-{file_id}.tar.zst", "w") as info_file_zip:
+            info_stream = data_compress.stream_writer(
+                info_file_zip, size=info_size, closefd=False
+            )
+            shutil.copyfileobj(info_file, info_stream)
 
 
 def transmute_tar_bz2(
