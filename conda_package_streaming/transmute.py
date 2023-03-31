@@ -86,33 +86,33 @@ def transmute(
             info_file.seek(0)
             pkg_file.seek(0)
 
-    with zipfile.ZipFile(
-        os.path.join(path, f"{file_id}.conda"),
-        "x",  # x to not append to existing
-        compresslevel=zipfile.ZIP_STORED,
-    ) as conda_file:
+        with zipfile.ZipFile(
+            os.path.join(path, f"{file_id}.conda"),
+            "x",  # x to not append to existing
+            compresslevel=zipfile.ZIP_STORED,
+        ) as conda_file:
 
-        # Use a maximum of one Zstd compressor, stream_writer at a time to save memory.
-        data_compress = compressor()
+            # Use a maximum of one Zstd compressor, stream_writer at a time to save memory.
+            data_compress = compressor()
 
-        with conda_file.open(
-            f"pkg-{file_id}.tar.zst", "w"
-        ) as pkg_file_zip, data_compress.stream_writer(
-            pkg_file_zip, size=pkg_size, closefd=True
-        ) as pkg_stream:
-            pkg_dat = pkg_file.read()
-            pkg_stream.write(pkg_dat)
-            pkg_stream.flush()
+            with conda_file.open(
+                f"pkg-{file_id}.tar.zst", "w"
+            ) as pkg_file_zip, data_compress.stream_writer(
+                pkg_file_zip, size=pkg_size, closefd=False
+            ) as pkg_stream:
+                pkg_dat = pkg_file._file.read()
+                pkg_stream.write(pkg_dat)
+                pkg_stream.flush()
 
-        data_compress = compressor()
+            data_compress = compressor()
 
-        with conda_file.open(
-            f"info-{file_id}.tar.zst", "w"
-        ) as info_file_zip, data_compress.stream_writer(
-            info_file_zip, size=info_size, closefd=True
-        ) as info_stream:
-            info_dat = info_file.read()
-            info_stream.write(info_dat)
+            with conda_file.open(
+                f"info-{file_id}.tar.zst", "w"
+            ) as info_file_zip, data_compress.stream_writer(
+                info_file_zip, size=info_size, closefd=False
+            ) as info_stream:
+                info_dat = info_file._file.read()
+                info_stream.write(info_dat)
 
 
 def transmute_tar_bz2(
