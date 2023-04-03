@@ -60,6 +60,10 @@ jobs:
           conda install --quiet conda pip
           pip install -e .[test]
           conda info --json
+          cat ~/.condarc
+          ls /home/runner/conda_pkgs_dir
+          ls /usr/share/miniconda/pkgs
+          ls /usr/share/miniconda/envs/test_env/pkgs
           pytest
 
   analyze:
