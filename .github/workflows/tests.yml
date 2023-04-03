@@ -59,7 +59,7 @@ jobs:
           # conda is our test dependency but can't be pip installed
           conda install --quiet conda pip
           pip install -e .[test]
-          conda info -a
+          conda info --json
           pytest
 
   analyze:
