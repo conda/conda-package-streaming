@@ -56,6 +56,7 @@ jobs:
 
       - name: Source Scripts
         run: |
+          set -x
           # conda is our test dependency but can't be pip installed
           conda install --quiet conda pip
           pip install -e .[test]
