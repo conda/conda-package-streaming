@@ -30,6 +30,7 @@ zstd-compressed streams.
 :caption: 'Contents:'
 :maxdepth: 2
 modules
+changelog
 ```
 
 # Indices and tables

@@ -13,6 +13,9 @@ from conda_package_streaming.transmute import transmute_tar_bz2
 log = logging.getLogger(__name__)
 
 
+LIMIT_TEST_PACKAGES = 16
+
+
 def find_packages_dirs() -> Path:
     """
     Ask conda for package directories.
@@ -85,6 +88,7 @@ def add_tar_bz2s(paths: list[Path], pkgs_dir: Path):
     for path in conda_paths:
         if 1 << 20 < path.stat().st_size < 1 << 22:
             medium_conda_paths.append(path)
+    medium_conda_paths = medium_conda_paths[:LIMIT_TEST_PACKAGES]
 
     # this ignores existing .tar.bz2 for simplicity (.tar.bz2 is missing in CI)
     for conda in set(medium_conda_paths + conda_paths[:10]):

@@ -18,6 +18,7 @@ import shutil
 import tarfile
 import tempfile
 import zipfile
+from pathlib import Path
 from typing import Callable
 
 import zstandard
@@ -42,7 +43,7 @@ def transmute(
         level=ZSTD_COMPRESS_LEVEL, threads=ZSTD_COMPRESS_THREADS
     ),
     is_info: Callable[[str], bool] = lambda filename: filename.startswith("info/"),
-):
+) -> Path:
     """
     Convert .tar.bz2 conda :package to .conda-format under path.
 
@@ -55,10 +56,13 @@ def transmute(
         (not this package ``conda-package-streaming``) uses a set of regular
         expressions to keep expected items in the info- component, while other
         items starting with ``info/`` wind up in the pkg- component.
+
+    :return: Path to transmuted package.
     """
     assert package.endswith(".tar.bz2"), "can only convert .tar.bz2 to .conda"
     assert os.path.isdir(path)
     file_id = os.path.basename(package)[: -len(".tar.bz2")]
+    output_path = Path(path, f"{file_id}.conda")
 
     with tempfile.SpooledTemporaryFile() as info_file, tempfile.SpooledTemporaryFile() as pkg_file:
         with tarfile.TarFile(fileobj=info_file, mode="w") as info_tar, tarfile.TarFile(
@@ -85,7 +89,7 @@ def transmute(
             pkg_file.seek(0)
 
         with zipfile.ZipFile(
-            os.path.join(path, f"{file_id}.conda"),
+            output_path,
             "x",  # x to not append to existing
             compresslevel=zipfile.ZIP_STORED,
         ) as conda_file:
@@ -106,11 +110,13 @@ def transmute(
             ) as info_stream:
                 shutil.copyfileobj(info_file._file, info_stream)
 
+    return output_path
+
 
 def transmute_tar_bz2(
     package: str,
     path,
-):
+) -> Path:
     """
     Convert .conda :package to .tar.bz2 format under path.
 
@@ -118,6 +124,8 @@ def transmute_tar_bz2(
 
     :param package: path to `.conda` or `.tar.bz2` package.
     :param path: destination path for transmuted package.
+
+    :return: Path to transmuted package.
     """
     assert package.endswith((".tar.bz2", ".conda")), "Unknown extension"
     assert os.path.isdir(path)
@@ -133,9 +141,9 @@ def transmute_tar_bz2(
         # .tar.bz2 doesn't filter by component
         components = [CondaComponent.pkg]
 
-    with open(package, "rb") as fileobj, tarfile.open(
-        os.path.join(path, f"{file_id}.tar.bz2"), "x:bz2"
-    ) as pkg_tar:
+    output_path = Path(path, f"{file_id}.tar.bz2")
+
+    with open(package, "rb") as fileobj, tarfile.open(output_path, "x:bz2") as pkg_tar:
         for component in components:
             stream = iter(stream_conda_component(package, fileobj, component=component))
             for tar, member in stream:
@@ -143,3 +151,5 @@ def transmute_tar_bz2(
                     pkg_tar.addfile(member, tar.extractfile(member))
                 else:
                     pkg_tar.addfile(member)
+
+    return output_path

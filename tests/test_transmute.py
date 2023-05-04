@@ -6,6 +6,7 @@ import time
 from pathlib import Path
 
 import pytest
+from conda_package_handling.validate import validate_converted_files_match_streaming
 
 from conda_package_streaming.package_streaming import (
     CondaComponent,
@@ -51,14 +52,22 @@ def test_transmute(conda_paths, tmpdir):
     for packages in (conda_packages, tarbz_packages):
         for package in packages:
             with timeme(f"{package} took "):
-                transmute(package, tmpdir)
+                out = transmute(package, tmpdir)
+                _, missing, mismatched = validate_converted_files_match_streaming(
+                    out, package, strict=True
+                )
+                assert missing == mismatched == []
 
 
 def test_transmute_symlink(tmpdir, testtar_bytes):
     testtar = Path(tmpdir, "test.tar.bz2")
     testtar.write_bytes(testtar_bytes)
 
-    transmute(str(testtar), tmpdir)
+    out = transmute(str(testtar), tmpdir)
+    _, missing, mismatched = validate_converted_files_match_streaming(
+        out, testtar, strict=True
+    )
+    assert missing == mismatched == []
 
 
 def test_transmute_info_filter(tmpdir, testtar_bytes):
@@ -94,7 +103,11 @@ def test_transmute_backwards(tmpdir, conda_paths):
     for packages in (conda_packages, tarbz_packages):
         for package in packages:
             with timeme(f"{package} took "):
-                transmute_tar_bz2(package, tmpdir)
+                out = transmute_tar_bz2(package, tmpdir)
+                _, missing, mismatched = validate_converted_files_match_streaming(
+                    out, package, strict=True
+                )
+                assert missing == mismatched == []
 
 
 def test_transmute_tarbz2_to_tarbz2(tmpdir, testtar_bytes):
@@ -102,4 +115,8 @@ def test_transmute_tarbz2_to_tarbz2(tmpdir, testtar_bytes):
     testtar.write_bytes(testtar_bytes)
     outdir = Path(tmpdir, "output")
     outdir.mkdir()
-    transmute_tar_bz2(str(testtar), outdir)
+    out = transmute_tar_bz2(str(testtar), outdir)
+    _, missing, mismatched = validate_converted_files_match_streaming(
+        out, testtar, strict=True
+    )
+    assert missing == mismatched == []

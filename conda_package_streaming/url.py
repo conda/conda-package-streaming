@@ -2,6 +2,11 @@
 Fetch metadata from remote .conda or .tar.bz2 package.
 
 Try to fetch less than the whole file if possible.
+
+This module should only be used to make *partial* reads against a remote
+package, typically just the ``info`` portion. If a full ``.conda`` format
+package is needed, it is more efficient to download locally first and then use
+the file-based ``package_streaming`` API.
 """
 
 import logging
