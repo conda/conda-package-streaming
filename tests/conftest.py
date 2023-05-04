@@ -81,7 +81,13 @@ def add_tar_bz2s(paths: list[Path], pkgs_dir: Path):
 
     tarbz2_path: Path = pkgs_dir
 
-    for conda in conda_paths[:10]:
+    medium_conda_paths = []
+    for path in conda_paths:
+        if 1 << 20 < path.stat().st_size < 1 << 22:
+            medium_conda_paths.append(path)
+
+    # this ignores existing .tar.bz2 for simplicity (.tar.bz2 is missing in CI)
+    for conda in set(medium_conda_paths + conda_paths[:10]):
         shutil.copy(conda, tarbz2_path)
         transmute_tar_bz2(str(conda), tarbz2_path)
 
