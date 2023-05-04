@@ -26,21 +26,21 @@ def conda_paths(package_server, tmp_path_factory):
     return conda_paths
 
 
-def add_tar_bz2s(paths, tmp_path_factory):
+def add_tar_bz2s(paths: list[Path], tmp_path_factory):
     """
     If there aren't enough .tar.bz2's available, create some from available
     .conda's; append to paths list.
     """
-    conda_paths = []
-    tarbz2_paths = []
+    conda_paths: list[Path] = []
+    tarbz2_paths: list[Path] = []
     for path in paths:
-        if path.endswith(".tar.bz2"):
+        if path.name.endswith(".tar.bz2"):
             tarbz2_paths.append(path)
-        elif paths.endswith(".conda"):
+        elif path.name.endswith(".conda"):
             conda_paths.append(path)
 
     tarbz2_path = tmp_path_factory.mktemp("pkgs")
 
     if len(tarbz2_paths) < 10:
         for conda in conda_paths[:10]:
-            transmute_tar_bz2(conda, tarbz2_path)
+            transmute_tar_bz2(str(conda), tarbz2_path)

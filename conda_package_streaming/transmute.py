@@ -111,7 +111,7 @@ def transmute(
 
 
 def transmute_tar_bz2(
-    package,
+    package: str,
     path,
 ):
     """
