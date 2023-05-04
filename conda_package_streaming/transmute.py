@@ -100,19 +100,14 @@ def transmute(
             ) as pkg_file_zip, data_compress.stream_writer(
                 pkg_file_zip, size=pkg_size, closefd=False
             ) as pkg_stream:
-                pkg_dat = pkg_file._file.read()
-                pkg_stream.write(pkg_dat)
-                pkg_stream.flush()
-
-            data_compress = compressor()
+                shutil.copyfileobj(pkg_file._file, pkg_stream)
 
             with conda_file.open(
                 f"info-{file_id}.tar.zst", "w"
             ) as info_file_zip, data_compress.stream_writer(
                 info_file_zip, size=info_size, closefd=False
             ) as info_stream:
-                info_dat = info_file._file.read()
-                info_stream.write(info_dat)
+                shutil.copyfileobj(info_file._file, info_stream)
 
 
 def transmute_tar_bz2(
