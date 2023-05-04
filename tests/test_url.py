@@ -32,6 +32,7 @@ def package_urls(package_server, package_url):
     pkgs_dir = Path(package_server.app.pkgs_dir)
     conda = []
     tar_bz2 = []
+
     for path in pkgs_dir.iterdir():
         if len(conda) > LIMIT and len(tar_bz2) > LIMIT:
             break
@@ -102,7 +103,9 @@ def test_lazy_wheel(package_urls):
             if lazy_tests <= 0:
                 break
     else:
-        raise LookupError("not enough .conda packages found")
+        raise LookupError(
+            "not enough .conda packages found %d %s" % (lazy_tests, package_urls)
+        )
 
     with pytest.raises(HTTPError):
         conda_reader_for_url(package_urls[0] + ".404.conda")
