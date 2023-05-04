@@ -7,9 +7,8 @@ import wsgiref.simple_server
 from pathlib import Path
 from typing import Any
 
-import conftest
-
 import bottle
+import conftest
 
 log = logging.getLogger(__name__)
 

@@ -61,11 +61,9 @@ def transmute(
     file_id = os.path.basename(package)[: -len(".tar.bz2")]
 
     with tempfile.SpooledTemporaryFile() as info_file, tempfile.SpooledTemporaryFile() as pkg_file:
-
         with tarfile.TarFile(fileobj=info_file, mode="w") as info_tar, tarfile.TarFile(
             fileobj=pkg_file, mode="w"
         ) as pkg_tar:
-
             # If we wanted to compress these at a low setting to save temporary
             # space, we could insert a file object that counts bytes written in
             # front of a zstd (level between 1..3) compressor.
@@ -91,7 +89,6 @@ def transmute(
             "x",  # x to not append to existing
             compresslevel=zipfile.ZIP_STORED,
         ) as conda_file:
-
             # Use a maximum of one Zstd compressor, stream_writer at a time to save memory.
             data_compress = compressor()
 
