@@ -69,6 +69,10 @@ with closing(conda):
             break
 ```
 
+If you need the entire package, download it first and use the file-based APIs.
+The URL-based APIs are more efficient if you only need to access package
+metadata.
+
 # Package goals
 
 * Extract conda packages (both formats)
