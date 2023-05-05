@@ -13,6 +13,7 @@ the `ZipFile`, instead of the first for normal conda packages.
 
 from __future__ import annotations
 
+import json
 import os
 import shutil
 import tarfile
@@ -31,6 +32,8 @@ from .package_streaming import CondaComponent, stream_conda_component
 ZSTD_COMPRESS_LEVEL = 19
 # increase to reduce compression and increase speed
 ZSTD_COMPRESS_THREADS = 1
+
+CONDA_PACKAGE_FORMAT_VERSION = 2
 
 
 def transmute(
@@ -95,6 +98,9 @@ def transmute(
         ) as conda_file:
             # Use a maximum of one Zstd compressor, stream_writer at a time to save memory.
             data_compress = compressor()
+
+            pkg_metadata = {"conda_pkg_format_version": CONDA_PACKAGE_FORMAT_VERSION}
+            conda_file.writestr("metadata.json", json.dumps(pkg_metadata))
 
             with conda_file.open(
                 f"pkg-{file_id}.tar.zst", "w"

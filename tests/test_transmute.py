@@ -4,6 +4,7 @@ import os
 import tarfile
 import time
 from pathlib import Path
+from zipfile import ZipFile
 
 import pytest
 from conda_package_handling.validate import validate_converted_files_match_streaming
@@ -39,7 +40,7 @@ def timeme(message: str = ""):
     print(f"{message}{end-begin:0.2f}s")
 
 
-def test_transmute(conda_paths, tmpdir):
+def test_transmute(conda_paths: list[Path], tmpdir):
     tarbz_packages = []
     for path in conda_paths:
         path = str(path)
@@ -57,6 +58,9 @@ def test_transmute(conda_paths, tmpdir):
                     out, package, strict=True
                 )
                 assert missing == mismatched == []
+                if out.name.endswith(".conda"):
+                    with ZipFile(out) as zf:
+                        assert "metadata.json" in zf.namelist()
 
 
 def test_transmute_symlink(tmpdir, testtar_bytes):
