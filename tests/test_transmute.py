@@ -50,6 +50,8 @@ def test_transmute(conda_paths: list[Path], tmpdir):
 
     assert tarbz_packages, "no medium-sized .tar.bz2 packages found"
 
+    metadata_checks = 0
+
     for packages in (conda_packages, tarbz_packages):
         for package in packages:
             with timeme(f"{package} took "):
@@ -60,7 +62,10 @@ def test_transmute(conda_paths: list[Path], tmpdir):
                 assert missing == mismatched == []
                 if out.name.endswith(".conda"):
                     with ZipFile(out) as zf:
+                        metadata_checks += 1
                         assert "metadata.json" in zf.namelist()
+
+    assert metadata_checks > 0
 
 
 def test_transmute_symlink(tmpdir, testtar_bytes):
