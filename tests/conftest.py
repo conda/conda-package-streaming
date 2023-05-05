@@ -98,4 +98,4 @@ def add_tar_bz2s(paths: list[Path], pkgs_dir: Path):
     output_paths.extend(tarbz2_path.glob("*.tar.bz2"))
     output_paths.extend(tarbz2_path.glob("*.conda"))
 
-    return output_paths
+    return sorted(output_paths)  # sort interleaves .tar.bz2 and .conda
