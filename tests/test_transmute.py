@@ -4,8 +4,10 @@ import os
 import tarfile
 import time
 from pathlib import Path
+from zipfile import ZipFile
 
 import pytest
+from conda_package_handling.validate import validate_converted_files_match_streaming
 
 from conda_package_streaming.package_streaming import (
     CondaComponent,
@@ -38,7 +40,7 @@ def timeme(message: str = ""):
     print(f"{message}{end-begin:0.2f}s")
 
 
-def test_transmute(conda_paths, tmpdir):
+def test_transmute(conda_paths: list[Path], tmpdir):
     tarbz_packages = []
     for path in conda_paths:
         path = str(path)
@@ -48,17 +50,33 @@ def test_transmute(conda_paths, tmpdir):
 
     assert tarbz_packages, "no medium-sized .tar.bz2 packages found"
 
+    metadata_checks = 0
+
     for packages in (conda_packages, tarbz_packages):
         for package in packages:
             with timeme(f"{package} took "):
-                transmute(package, tmpdir)
+                out = transmute(package, tmpdir)
+                _, missing, mismatched = validate_converted_files_match_streaming(
+                    out, package, strict=True
+                )
+                assert missing == mismatched == []
+                if out.name.endswith(".conda"):
+                    with ZipFile(out) as zf:
+                        metadata_checks += 1
+                        assert "metadata.json" in zf.namelist()
+
+    assert metadata_checks > 0
 
 
 def test_transmute_symlink(tmpdir, testtar_bytes):
     testtar = Path(tmpdir, "test.tar.bz2")
     testtar.write_bytes(testtar_bytes)
 
-    transmute(str(testtar), tmpdir)
+    out = transmute(str(testtar), tmpdir)
+    _, missing, mismatched = validate_converted_files_match_streaming(
+        out, testtar, strict=True
+    )
+    assert missing == mismatched == []
 
 
 def test_transmute_info_filter(tmpdir, testtar_bytes):
@@ -94,7 +112,11 @@ def test_transmute_backwards(tmpdir, conda_paths):
     for packages in (conda_packages, tarbz_packages):
         for package in packages:
             with timeme(f"{package} took "):
-                transmute_tar_bz2(package, tmpdir)
+                out = transmute_tar_bz2(package, tmpdir)
+                _, missing, mismatched = validate_converted_files_match_streaming(
+                    out, package, strict=True
+                )
+                assert missing == mismatched == []
 
 
 def test_transmute_tarbz2_to_tarbz2(tmpdir, testtar_bytes):
@@ -102,4 +124,8 @@ def test_transmute_tarbz2_to_tarbz2(tmpdir, testtar_bytes):
     testtar.write_bytes(testtar_bytes)
     outdir = Path(tmpdir, "output")
     outdir.mkdir()
-    transmute_tar_bz2(str(testtar), outdir)
+    out = transmute_tar_bz2(str(testtar), outdir)
+    _, missing, mismatched = validate_converted_files_match_streaming(
+        out, testtar, strict=True
+    )
+    assert missing == mismatched == []
