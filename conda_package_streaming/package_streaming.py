@@ -5,11 +5,15 @@ Unpack conda packages without using a temporary file.
 from __future__ import annotations
 
 import bz2
+import os
 import os.path
 import tarfile
 import zipfile
 from enum import Enum
 from typing import Generator
+
+umask = os.umask(0)
+os.umask(umask)
 
 try:
     import zstandard
@@ -36,6 +40,16 @@ class TarfileNoSameOwner(tarfile.TarFile):
         here. (tarfile.TarFile only lets us toggle all of (chown, chmod, mtime))
         """
         return
+
+    def chmod(self, tarinfo, targetpath):
+        """
+        Set file permissions of targetpath according to tarinfo, respecting
+        umask.
+        """
+        try:
+            os.chmod(targetpath, tarinfo.mode & (0o777 - umask))
+        except OSError as e:
+            raise tarfile.ExtractError("could not change mode") from e
 
 
 def tar_generator(
