@@ -121,7 +121,7 @@ def test_umask(tmp_path, mocker):
 
     Mock umask in case it is different on your system.
     """
-    mocker.patch("conda_package_streaming.package_streaming.umask", new=0o22)
+    mocker.patch("conda_package_streaming.package_streaming.UMASK", new=0o22)
 
     tar3 = empty_tarfile(name="naughty_umask", mode=0o777)
     extract.extract_stream(stream_stdlib(tar3), tmp_path)
