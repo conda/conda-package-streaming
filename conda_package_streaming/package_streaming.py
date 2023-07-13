@@ -14,8 +14,8 @@ from typing import Generator
 
 # acquire umask taking advantage of import system lock, instead of possibly in
 # multiple threads at once.
-umask = os.umask(0)
-os.umask(umask)
+UMASK = os.umask(0)
+os.umask(UMASK)
 
 try:
     import zstandard
@@ -36,7 +36,7 @@ class CondaComponent(Enum):
 
 
 class TarfileNoSameOwner(tarfile.TarFile):
-    def __init__(self, *args, umask=umask, **kwargs):
+    def __init__(self, *args, umask=UMASK, **kwargs):
         """Open an (uncompressed) tar archive `name'. `mode' is either 'r' to
         read from an existing archive, 'a' to append data to an existing
         file or 'w' to create a new file overwriting an existing one. `mode'
