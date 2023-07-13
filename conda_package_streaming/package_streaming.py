@@ -5,11 +5,17 @@ Unpack conda packages without using a temporary file.
 from __future__ import annotations
 
 import bz2
+import os
 import os.path
 import tarfile
 import zipfile
 from enum import Enum
 from typing import Generator
+
+# acquire umask taking advantage of import system lock, instead of possibly in
+# multiple threads at once.
+UMASK = os.umask(0)
+os.umask(UMASK)
 
 try:
     import zstandard
@@ -30,12 +36,34 @@ class CondaComponent(Enum):
 
 
 class TarfileNoSameOwner(tarfile.TarFile):
+    def __init__(self, *args, umask=UMASK, **kwargs):
+        """Open an (uncompressed) tar archive `name'. `mode' is either 'r' to
+        read from an existing archive, 'a' to append data to an existing
+        file or 'w' to create a new file overwriting an existing one. `mode'
+        defaults to 'r'.
+        If `fileobj' is given, it is used for reading or writing data. If it
+        can be determined, `mode' is overridden by `fileobj's mode.
+        `fileobj' is not closed, when TarFile is closed.
+        """
+        super().__init__(*args, **kwargs)
+        self.umask = umask
+
     def chown(self, tarinfo, targetpath, numeric_owner):
         """
         Override chown to be a no-op, since we don't want to preserve ownership
         here. (tarfile.TarFile only lets us toggle all of (chown, chmod, mtime))
         """
         return
+
+    def chmod(self, tarinfo, targetpath):
+        """
+        Set file permissions of targetpath according to tarinfo, respecting
+        umask.
+        """
+        try:
+            os.chmod(targetpath, tarinfo.mode & (0o777 - self.umask))
+        except OSError as e:
+            raise tarfile.ExtractError("could not change mode") from e
 
 
 def tar_generator(
