@@ -1,14 +1,14 @@
 """
-Convert .tar.bz2 to .conda without temporary files.
+Convert .tar.bz2 to .conda
 
-Streams main `pkg-*` `.tar.zst` into open `ZipFile`, while buffering `info-*`
-`.tar.zst` in memory, writing it out at the end.
+Uses `tempfile.SpooledTemporaryFile` to buffer `pkg-*` `.tar` and `info-*`
+`.tar`, then compress directly into an open `ZipFile` at the end.
+`SpooledTemporaryFile` buffers the first 10MB of the package and its metadata in
+memory, but writes out to disk for larger packages.
 
-Works well for a typical ~10k `info-*`, but the conda format does not guarantee
-a small `info-*`.
-
-Conda packages created this way will also have `info-*` as the last element in
-the `ZipFile`, instead of the first for normal conda packages.
+Conda packages created this way have `info-*` as the last element in the
+`ZipFile`, instead of the first for `.conda` packages created with pre-2.0
+`conda-package-handling`.
 """
 
 from __future__ import annotations
