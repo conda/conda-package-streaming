@@ -103,14 +103,14 @@ def transmute(
             conda_file.writestr("metadata.json", json.dumps(pkg_metadata))
 
             with conda_file.open(
-                f"pkg-{file_id}.tar.zst", "w"
+                f"pkg-{file_id}.tar.zst", "w", force_zip64=True
             ) as pkg_file_zip, data_compress.stream_writer(
                 pkg_file_zip, size=pkg_size, closefd=False
             ) as pkg_stream:
                 shutil.copyfileobj(pkg_file._file, pkg_stream)
 
             with conda_file.open(
-                f"info-{file_id}.tar.zst", "w"
+                f"info-{file_id}.tar.zst", "w", force_zip64=True
             ) as info_file_zip, data_compress.stream_writer(
                 info_file_zip, size=info_size, closefd=False
             ) as info_stream:
