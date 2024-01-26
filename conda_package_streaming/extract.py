@@ -37,7 +37,9 @@ def extract_stream(
     for tar_file, _ in stream:
         # careful not to seek backwards
         def checked_members():
-            # from conda_package_handling
+            # from conda_package_handling. other libraries refuse to extract
+            # anything with / or ../ in the name, and skip realpath(). n.b.
+            # https://bugs.python.org/issue21109
             for member in tar_file:
                 if not is_within_dest_dir(member.name):
                     raise exceptions.SafetyError(f"contains unsafe path: {member.name}")
