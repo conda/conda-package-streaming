@@ -1,6 +1,7 @@
 """
 Test web server.
 """
+
 import logging
 import threading
 import wsgiref.simple_server
