@@ -50,15 +50,3 @@ def test_chmod_error(tmp_path, mocker):
             tmp_path / "test.tar", errorlevel=2
         ) as tar:
             tar.extractall(tmp_path)
-
-
-# class TarfileNoSameOwner(tarfile.TarFile):
-#     def chmod(self, tarinfo, targetpath):
-#         """
-#         Set file permissions of targetpath according to tarinfo, respecting
-#         umask.
-#         """
-#         try:
-#             os.chmod(targetpath, tarinfo.mode & (0o777 - self.umask))
-#         except OSError as e:
-#             raise tarfile.ExtractError("could not change mode") from e
