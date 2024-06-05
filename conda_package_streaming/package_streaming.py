@@ -7,7 +7,6 @@ from __future__ import annotations
 import bz2
 import os
 import os.path
-import re
 import tarfile
 import zipfile
 from enum import Enum
