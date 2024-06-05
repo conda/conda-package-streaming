@@ -1,5 +1,12 @@
 [//]: # (current developments)
 
+## 0.11.0
+
+* Relax `package_streaming.stream_conda_component` to find inner component
+  archives even if a prefix `<prefix>name-1.0-a_0.conda` has been added to the
+  `.conda` filename.
+  (https://github.com/conda/conda-package-handling/issues/230)
+
 ## 0.10.0 (2024-06)
 
 * Use zip64 extensions when converting .tar.bz2 to .conda, if uncompressed size
