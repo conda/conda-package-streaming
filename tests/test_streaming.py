@@ -1,4 +1,6 @@
+import io
 import json
+import tarfile
 
 import pytest
 
@@ -31,3 +33,20 @@ def test_early_exit(conda_paths):
         # stream_conda_info doesn't close a passed-in fileobj, but a
         # filename should be closed.
         assert found, f"index.json not found in {package}"
+
+
+def test_chmod_error(tmp_path, mocker):
+    """
+    Coverage for os.chmod() error handling.
+    """
+    with package_streaming.TarfileNoSameOwner(tmp_path / "test.tar", mode="w") as tar:
+        member = tarfile.TarInfo(name="file")
+        tar.addfile(member, io.BytesIO())
+
+    mocker.patch("os.chmod", side_effect=OSError)
+    with pytest.raises(tarfile.ExtractError):
+        # only logs a debug message if errorlevel<=1
+        with package_streaming.TarfileNoSameOwner(
+            tmp_path / "test.tar", errorlevel=2
+        ) as tar:
+            tar.extractall(tmp_path)

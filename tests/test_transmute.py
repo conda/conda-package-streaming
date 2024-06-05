@@ -88,12 +88,15 @@ def test_transmute_info_filter(tmpdir, testtar_bytes):
     )
 
     with open(Path(tmpdir, "test.conda"), "rb") as fileobj:
-        for component, expected in (CondaComponent.info, {"info/expected"}), (
-            CondaComponent.pkg,
-            {
-                "info/unexpected",
-                "symlink",
-            },
+        for component, expected in (
+            (CondaComponent.info, {"info/expected"}),
+            (
+                CondaComponent.pkg,
+                {
+                    "info/unexpected",
+                    "symlink",
+                },
+            ),
         ):
             items = stream_conda_component("test.conda", fileobj, component)
             assert {member.name for tar, member in items} == expected, items
@@ -129,3 +132,35 @@ def test_transmute_tarbz2_to_tarbz2(tmpdir, testtar_bytes):
         out, testtar, strict=True
     )
     assert missing == mismatched == []
+
+
+def test_transmute_conditional_zip64(tmp_path, mocker):
+    """
+    Test that zip64 is used in transmute after a threshold.
+    """
+
+    LIMIT = 16384
+
+    for test_size, extra_expected in (LIMIT // 2, False), (LIMIT * 2, True):
+        mocker.patch("conda_package_streaming.transmute.CONDA_ZIP64_LIMIT", new=LIMIT)
+        mocker.patch("zipfile.ZIP64_LIMIT", new=LIMIT)
+
+        tmp_tar = tmp_path / f"{test_size}.tar.bz2"
+        with tarfile.open(tmp_tar, "w:bz2") as tar:
+            pkg = tarfile.TarInfo(name="packagedata")
+            data = io.BytesIO(os.urandom(test_size))
+            pkg.size = len(data.getbuffer())
+            tar.addfile(pkg, data)
+
+            info = tarfile.TarInfo(name="info/data")
+            data = io.BytesIO(os.urandom(test_size))
+            info.size = len(data.getbuffer())
+            tar.addfile(info, data)
+
+        out = transmute(str(tmp_tar), tmp_path)
+
+        with ZipFile(out) as e:
+            assert e.filelist[0].extra == b""
+            # when zip64 extension is used, extra contains zip64 headers
+            assert bool(e.filelist[1].extra) == extra_expected
+            assert bool(e.filelist[2].extra) == extra_expected

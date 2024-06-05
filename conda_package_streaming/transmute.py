@@ -35,6 +35,10 @@ ZSTD_COMPRESS_THREADS = 1
 
 CONDA_PACKAGE_FORMAT_VERSION = 2
 
+# Account for growth from "2 GB of /dev/urandom" to not exceed ZIP64_LIMIT after
+# compression
+CONDA_ZIP64_LIMIT = zipfile.ZIP64_LIMIT - (1 << 18) - 1
+
 
 def transmute(
     package,
@@ -103,16 +107,22 @@ def transmute(
             conda_file.writestr("metadata.json", json.dumps(pkg_metadata))
 
             with conda_file.open(
-                f"pkg-{file_id}.tar.zst", "w"
+                f"pkg-{file_id}.tar.zst",
+                "w",
+                force_zip64=(pkg_size > CONDA_ZIP64_LIMIT),
             ) as pkg_file_zip, data_compress.stream_writer(
                 pkg_file_zip, size=pkg_size, closefd=False
             ) as pkg_stream:
                 shutil.copyfileobj(pkg_file._file, pkg_stream)
 
             with conda_file.open(
-                f"info-{file_id}.tar.zst", "w"
+                f"info-{file_id}.tar.zst",
+                "w",
+                force_zip64=(info_size > CONDA_ZIP64_LIMIT),
             ) as info_file_zip, data_compress.stream_writer(
-                info_file_zip, size=info_size, closefd=False
+                info_file_zip,
+                size=info_size,
+                closefd=False,
             ) as info_stream:
                 shutil.copyfileobj(info_file._file, info_stream)
 
