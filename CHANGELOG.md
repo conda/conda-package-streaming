@@ -1,6 +1,7 @@
 [//]: # (current developments)
 
-## 0.10.0 (2024-05)
+## 0.10.0 (2024-06)
+
 * Use zip64 extensions when converting .tar.bz2 to .conda, if uncompressed size
   is close to the 2GB ZIP64_LIMIT. (#79)
 
