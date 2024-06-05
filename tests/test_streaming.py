@@ -1,11 +1,23 @@
 import io
 import json
+import os
+import shutil
 import tarfile
 
 import pytest
 
 from conda_package_streaming import package_streaming
 
+
+@pytest.mark.parametrize("subdir", ["linux-64", "noarch", "win-32", "osx-arm64"])
+def test_package_streaming_with_subdir_prefix(conda_paths, tmp_path, subdir):
+    """Regression test for https://github.com/conda/conda-package-handling/issues/230"""
+    for path in conda_paths:
+        copied_file = tmp_path / f"{subdir}_{os.path.basename(path)}"
+        shutil.copyfile(path, copied_file )
+
+        if str(path).endswith(".conda"):
+            package_streaming.stream_conda_component(copied_file, component="info")
 
 def test_package_streaming(conda_paths):
     for path in conda_paths:
