@@ -14,10 +14,11 @@ def test_package_streaming_with_subdir_prefix(conda_paths, tmp_path, subdir):
     """Regression test for https://github.com/conda/conda-package-handling/issues/230"""
     for path in conda_paths:
         copied_file = tmp_path / f"{subdir}_{os.path.basename(path)}"
-        shutil.copyfile(path, copied_file )
+        shutil.copyfile(path, copied_file)
 
         if str(path).endswith(".conda"):
             package_streaming.stream_conda_component(copied_file, component="info")
+
 
 def test_package_streaming(conda_paths):
     for path in conda_paths:
