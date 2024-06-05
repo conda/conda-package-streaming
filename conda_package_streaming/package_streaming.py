@@ -126,15 +126,19 @@ def stream_conda_component(
 
         zf = zipfile.ZipFile(fileobj or filename)
         file_id, _, _ = os.path.basename(filename).rpartition(".")
-        # this substitution compensates for web downloads from anaconda.org having
-        # the platform as a prefix
-        file_id = re.sub("^(osx|linux|win|noarch)(-.+?)?_", "", file_id)
-        component_name = f"{component}-{file_id}"
+
+        # deal with file_id possibly having a <subdir>_ prefix... compensates for
+        # web downloads from anaconda.org having the platform as a prefix
+        component_prefix = f"{component}-"
+        component_suffix = f"{file_id}.tar.zst"
         component_filename = [
-            info for info in zf.infolist() if info.filename.startswith(component_name)
+            info
+            for info in zf.infolist()
+            if info.filename.startswith(component_prefix)
+            and component_suffix.endswith(info.filename.split("-", 1)[-1])
         ]
         if not component_filename:
-            raise LookupError(f"didn't find {component_name} component in {filename}")
+            raise LookupError(f"didn't find {component} component in {filename}")
         assert len(component_filename) == 1
         reader = zstandard.ZstdDecompressor().stream_reader(
             zf.open(component_filename[0])
