@@ -131,7 +131,7 @@ def stream_conda_component(
         file_id = re.sub("^(osx|linux|win|noarch)(-.+?)?_", "", file_id)
         component_name = f"{component}-{file_id}"
         component_filename = [
-            info for info in zf.infolist() if component_name in info.filename
+            info for info in zf.infolist() if info.filename.startswith(component_name)
         ]
         if not component_filename:
             raise LookupError(f"didn't find {component_name} component in {filename}")
