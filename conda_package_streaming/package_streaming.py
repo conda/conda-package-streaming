@@ -128,7 +128,7 @@ def stream_conda_component(
         file_id, _, _ = os.path.basename(filename).rpartition(".")
         # this substitution compensates for web downloads from anaconda.org having
         # the platform as a prefix
-        file_id = re.sub("^(osx|linux|win)-.+?_", "", file_id)
+        file_id = re.sub("^(osx|linux|win|noarch)(-.+?)?_", "", file_id)
         component_name = f"{component}-{file_id}"
         component_filename = [
             info for info in zf.infolist() if component_name in info.filename
