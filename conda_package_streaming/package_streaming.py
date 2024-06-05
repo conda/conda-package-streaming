@@ -7,6 +7,7 @@ from __future__ import annotations
 import bz2
 import os
 import os.path
+import re
 import tarfile
 import zipfile
 from enum import Enum
@@ -125,9 +126,12 @@ def stream_conda_component(
 
         zf = zipfile.ZipFile(fileobj or filename)
         file_id, _, _ = os.path.basename(filename).rpartition(".")
+        # this substitution compensates for web downloads from anaconda.org having
+        # the platform as a prefix
+        file_id = re.sub("^(osx|linux|win)-.+?_", "", file_id)
         component_name = f"{component}-{file_id}"
         component_filename = [
-            info for info in zf.infolist() if info.filename.startswith(component_name)
+            info for info in zf.infolist() if component_name in info.filename
         ]
         if not component_filename:
             raise LookupError(f"didn't find {component_name} component in {filename}")
