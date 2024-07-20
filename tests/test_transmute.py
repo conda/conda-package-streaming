@@ -1,5 +1,6 @@
 import contextlib
 import io
+import itertools
 import os
 import tarfile
 import time
@@ -7,13 +8,18 @@ from pathlib import Path
 from zipfile import ZipFile
 
 import pytest
+import zstandard
 from conda_package_handling.validate import validate_converted_files_match_streaming
 
 from conda_package_streaming.package_streaming import (
     CondaComponent,
     stream_conda_component,
 )
-from conda_package_streaming.transmute import transmute, transmute_tar_bz2
+from conda_package_streaming.transmute import (
+    transmute,
+    transmute_stream,
+    transmute_tar_bz2,
+)
 
 
 @pytest.fixture
@@ -164,3 +170,27 @@ def test_transmute_conditional_zip64(tmp_path, mocker):
             # when zip64 extension is used, extra contains zip64 headers
             assert bool(e.filelist[1].extra) == extra_expected
             assert bool(e.filelist[2].extra) == extra_expected
+
+
+def test_transmute_stream(tmpdir, conda_paths):
+    """
+    Test example from transmute_stream documentation. Recompress .conda using
+    transmute_stream()
+    """
+    conda_packages = []
+    for path in conda_paths:
+        if path.name.endswith(".conda") and (1 << 20 < os.stat(path).st_size < 1 << 22):
+            conda_packages.append(path)
+
+    for package in conda_packages[:3]:
+        file_id = package.name
+
+        transmute_stream(
+            file_id,
+            tmpdir,
+            compressor=lambda: zstandard.ZstdCompressor(),
+            package_stream=itertools.chain(
+                stream_conda_component(package, component=CondaComponent.pkg),
+                stream_conda_component(package, component=CondaComponent.info),
+            ),
+        )

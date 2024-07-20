@@ -1,5 +1,8 @@
 [//]: # (current developments)
 
+* Add `transmute_stream(...)` to create `.conda` from `(TarFile, TarInfo)`
+  iterators, allowing more creative data sources than just `.tar.bz2` inputs.
+
 ## 0.10.0 (2024-06)
 
 * Use zip64 extensions when converting .tar.bz2 to .conda, if uncompressed size

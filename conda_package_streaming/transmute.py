@@ -20,7 +20,7 @@ import tarfile
 import tempfile
 import zipfile
 from pathlib import Path
-from typing import Callable
+from typing import Callable, Iterator
 
 import zstandard
 
@@ -52,7 +52,7 @@ def transmute(
     is_info: Callable[[str], bool] = lambda filename: filename.startswith("info/"),
 ) -> Path:
     """
-    Convert .tar.bz2 conda :package to .conda-format under path.
+    Convert .tar.bz2 conda package to .conda-format under path.
 
     :param package: path to .tar.bz2 conda package
     :param path: destination path for transmuted .conda package
@@ -69,8 +69,62 @@ def transmute(
     assert package.endswith(".tar.bz2"), "can only convert .tar.bz2 to .conda"
     assert os.path.isdir(path)
     file_id = os.path.basename(package)[: -len(".tar.bz2")]
-    output_path = Path(path, f"{file_id}.conda")
+    package_stream = stream_conda_component(package)
 
+    return transmute_stream(
+        file_id,
+        path,
+        compressor=compressor,
+        is_info=is_info,
+        package_stream=package_stream,
+    )
+
+
+def transmute_stream(
+    file_id,
+    path,
+    *,
+    compressor: Callable[
+        [], zstandard.ZstdCompressor
+    ] = lambda: zstandard.ZstdCompressor(
+        level=ZSTD_COMPRESS_LEVEL, threads=ZSTD_COMPRESS_THREADS
+    ),
+    is_info: Callable[[str], bool] = lambda filename: filename.startswith("info/"),
+    package_stream: Iterator[tuple[tarfile.TarFile, tarfile.TarInfo]],
+):
+    """
+    Convert (TarFile, TarInfo) iterator like those produced by
+    ``stream_conda_component`` to .conda-format under path. Allows for more
+    creative data sources.
+
+    e.g. recompress ``.conda``:
+
+    .. code-block:: python
+
+        transmute_stream(..., package_stream=itertools.chain(
+            stream_conda_component("package.conda",
+            component=CondaComponent.pkg),
+            stream_conda_component("package.conda",
+            component=CondaComponent.info),
+        ))
+
+    This example could move files between the ``pkg-`` and ``info-`` components
+    depending on the ``is_info`` function.
+
+    :param file_id: output filename without extension
+    :param path: destination path for transmuted .conda package
+    :param compressor: A function that creates instances of
+        ``zstandard.ZstdCompressor()`` to override defaults.
+    :param is_info: A function that returns True if a file belongs in the
+        ``info`` component of a `.conda` package.  ``conda-package-handling``
+        (not this package ``conda-package-streaming``) uses a set of regular
+        expressions to keep expected items in the info- component, while other
+        items starting with ``info/`` wind up in the pkg- component.
+    :param package_stream: Iterator of (Tarfile, TarInfo) tuples.
+
+    :return: Path to transmuted package.
+    """
+    output_path = Path(path, f"{file_id}.conda")
     with tempfile.SpooledTemporaryFile() as info_file, tempfile.SpooledTemporaryFile() as pkg_file:
         with tarfile.TarFile(fileobj=info_file, mode="w") as info_tar, tarfile.TarFile(
             fileobj=pkg_file, mode="w"
@@ -78,8 +132,7 @@ def transmute(
             # If we wanted to compress these at a low setting to save temporary
             # space, we could insert a file object that counts bytes written in
             # front of a zstd (level between 1..3) compressor.
-            stream = iter(stream_conda_component(package))
-            for tar, member in stream:
+            for tar, member in package_stream:
                 tar_get = info_tar if is_info(member.name) else pkg_tar
                 if member.isfile():
                     tar_get.addfile(member, tar.extractfile(member))
@@ -134,11 +187,11 @@ def transmute_tar_bz2(
     path,
 ) -> Path:
     """
-    Convert .conda :package to .tar.bz2 format under path.
+    Convert .conda package to .tar.bz2 format under path.
 
     Can recompress .tar.bz2 packages.
 
-    :param package: path to `.conda` or `.tar.bz2` package.
+    :param package: path to .conda or .tar.bz2 package.
     :param path: destination path for transmuted package.
 
     :return: Path to transmuted package.
