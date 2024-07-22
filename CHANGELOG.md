@@ -1,6 +1,6 @@
 [//]: # (current developments)
 
-* Add `transmute_stream(...)` to create `.conda` from `(TarFile, TarInfo)`
+* Add `transmute_stream(...)` to create `.conda` from `(TarFile, TarInfo)`. (#90)
   iterators, allowing more creative data sources than just `.tar.bz2` inputs.
 
 ## 0.10.0 (2024-06)
