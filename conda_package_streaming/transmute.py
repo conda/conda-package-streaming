@@ -191,10 +191,12 @@ def transmute_tar_bz2(
 
     Can recompress .tar.bz2 packages.
 
-    :param package: path to .conda or .tar.bz2 package.
-    :param path: destination path for transmuted package.
+    Args:
+        package: path to .conda or .tar.bz2 package.
+        path: destination path for transmuted package.
 
-    :return: Path to transmuted package.
+    Returns:
+        Path to transmuted package.
     """
     assert package.endswith((".tar.bz2", ".conda")), "Unknown extension"
     assert os.path.isdir(path)
