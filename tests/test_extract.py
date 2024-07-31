@@ -133,9 +133,10 @@ def test_umask(tmp_path, mocker):
     tar3 = empty_tarfile(name="naughty_umask", mode=0o777)
     extract.extract_stream(stream_stdlib(tar3), tmp_path)
     mode = (tmp_path / "naughty_umask").stat().st_mode
-    assert mode & stat.S_IWGRP, "%o" % mode
+    # is the new .extractall(filter=) erasing group-writable?
+    assert mode & stat.S_IWGRP, "%o != %o" % (mode, mode & stat.S_IWGRP)
 
     tar3.seek(0)
     extract.extract_stream(stream(tar3), tmp_path)
     mode = (tmp_path / "naughty_umask").stat().st_mode
-    assert not mode & stat.S_IWGRP, "%o" % mode
+    assert not mode & stat.S_IWGRP, "%o != %o" % (mode, mode & stat.S_IWGRP)
