@@ -16,9 +16,10 @@ from typing import Callable, Iterator
 
 import zstandard
 
+from .conda_fmt import ZSTD_COMPRESS_LEVEL, ZSTD_COMPRESS_THREADS, conda_builder
+
 # streams everything in .tar.bz2 mode
 from .package_streaming import CondaComponent, stream_conda_component
-from .conda_fmt import conda_builder, ZSTD_COMPRESS_LEVEL, ZSTD_COMPRESS_THREADS
 
 
 def transmute(
