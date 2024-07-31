@@ -11,6 +11,7 @@ import pytest
 import zstandard
 from conda_package_handling.validate import validate_converted_files_match_streaming
 
+from conda_package_streaming.conda_fmt import anonymize
 from conda_package_streaming.package_streaming import (
     CondaComponent,
     stream_conda_component,
@@ -148,7 +149,7 @@ def test_transmute_conditional_zip64(tmp_path, mocker):
     LIMIT = 16384
 
     for test_size, extra_expected in (LIMIT // 2, False), (LIMIT * 2, True):
-        mocker.patch("conda_package_streaming.transmute.CONDA_ZIP64_LIMIT", new=LIMIT)
+        mocker.patch("conda_package_streaming.conda_fmt.CONDA_ZIP64_LIMIT", new=LIMIT)
         mocker.patch("zipfile.ZIP64_LIMIT", new=LIMIT)
 
         tmp_tar = tmp_path / f"{test_size}.tar.bz2"
@@ -194,3 +195,13 @@ def test_transmute_stream(tmpdir, conda_paths):
                 stream_conda_component(package, component=CondaComponent.info),
             ),
         )
+
+
+def test_anonymize_helper():
+    ti = tarfile.TarInfo(name="info")
+    ti.uid = ti.gid = 500
+    ti.uname = ti.gname = "somebody"
+    anon = anonymize(ti)
+    assert anon.name == ti.name  # they are also the same object
+    assert anon.uid == anon.gid == 0
+    assert anon.uname == anon.gname == ""

@@ -2,6 +2,8 @@
 
 * Add `transmute_stream(...)` to create `.conda` from `(TarFile, TarInfo)`. (#90)
   iterators, allowing more creative data sources than just `.tar.bz2` inputs.
+* Add `conda_fmt` module with `TarFile` interface for creating `.conda`
+  archives, also used by `transmute`. (#90)
 
 ## 0.10.0 (2024-06)
 

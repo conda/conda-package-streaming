@@ -78,4 +78,5 @@ lazy_wheel
 package_streaming
 extract
 transmute
+conda_fmt
 ```
