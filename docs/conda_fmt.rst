@@ -1,4 +1,4 @@
-transmute module
+conda_fmt module
 ================
 
 .. automodule:: conda_package_streaming.conda_fmt
