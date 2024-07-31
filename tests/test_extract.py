@@ -93,13 +93,20 @@ def test_slip(tmp_path):
 
     tar = empty_tarfile(name="../slip")
 
-    with pytest.raises(exceptions.SafetyError):
+    with pytest.raises(
+        tarfile.FilterError if extract.HAS_TAR_FILTER else exceptions.SafetyError
+    ):
         extract.extract_stream(stream(tar), tmp_path)
 
+    # When we are using tarfile.filter, the leading / will be stripped instead.
     tar2 = empty_tarfile(name="/absolute")
 
-    with pytest.raises(exceptions.SafetyError):
+    if extract.HAS_TAR_FILTER:
         extract.extract_stream(stream(tar2), tmp_path)
+        assert (tmp_path / "absolute").exists()
+    else:
+        with pytest.raises(exceptions.SafetyError):
+            extract.extract_stream(stream(tar2), tmp_path)
 
 
 def test_chown(conda_paths, tmp_path, mocker):
