@@ -46,8 +46,10 @@ def extract_stream(
 
         try:
             if HAS_TAR_FILTER:
+                print("HAS TAR FILTER")
                 tar_file.extractall(path=dest_dir, filter=tarfile.data_filter)
             else:
+                print("NO TAR FILTER")
                 tar_file.extractall(path=dest_dir, members=checked_members())
         except OSError as e:
             if e.errno == ELOOP:
