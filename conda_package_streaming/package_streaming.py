@@ -67,15 +67,20 @@ class TarfileNoSameOwner(tarfile.TarFile):
 
 
 def tar_generator(
-    fileobj, tarfile_open=TarfileNoSameOwner.open, closefd=False
+    fileobj, tarfile_open=TarfileNoSameOwner.open, closefd=False, *, encoding="utf-8"
 ) -> Generator[tuple[tarfile.TarFile, tarfile.TarInfo]]:
     """
     Yield (tar, member) from fileobj.
+
+    Args:
+        fileobj: file-like object
+
+        encoding: "utf-8" passed to TarFile.open(); can be changed for testing.
     """
     # tarfile will not close fileobj because _extfileobj is True
     # caller should take care to close files all the way back to the http request...
     try:
-        with tarfile_open(fileobj=fileobj, mode="r|") as tar:
+        with tarfile_open(fileobj=fileobj, mode="r|", encoding=encoding) as tar:
             for member in tar:
                 yield tar, member
     finally:
@@ -104,7 +109,11 @@ def stream_conda_info(
 
 
 def stream_conda_component(
-    filename, fileobj=None, component: CondaComponent | str = CondaComponent.pkg
+    filename,
+    fileobj=None,
+    component: CondaComponent | str = CondaComponent.pkg,
+    *,
+    encoding="utf-8",
 ) -> Generator[tuple[tarfile.TarFile, tarfile.TarInfo]]:
     """
     Yield members from .conda's embedded {component}- tarball. "info" or "pkg".
@@ -139,4 +148,4 @@ def stream_conda_component(
         reader = bz2.open(fileobj or filename, mode="rb")
     else:
         raise ValueError("unsupported file extension")
-    return tar_generator(reader, closefd=fileobj is None)
+    return tar_generator(reader, closefd=fileobj is None, encoding=encoding)

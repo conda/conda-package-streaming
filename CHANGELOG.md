@@ -4,6 +4,8 @@
   iterators, allowing more creative data sources than just `.tar.bz2` inputs.
 * Add `conda_fmt` module with `TarFile` interface for creating `.conda`
   archives, also used by `transmute`. (#90)
+* Pass `encoding="utf-8"` to `TarFile` instead of the system default, avoiding
+  rare potential issues with non-ASCII filenames. (#93)
 
 ## 0.10.0 (2024-06)
 

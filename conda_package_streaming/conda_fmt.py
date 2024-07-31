@@ -5,6 +5,10 @@ Uses ``tempfile.SpooledTemporaryFile`` to buffer ``pkg-*.tar`` and
 ``info-*.tar``, then compress directly into an open `ZipFile` at the end.
 `SpooledTemporaryFile` buffers the first 10MB of the package and its metadata in
 memory, but writes out to disk for larger packages.
+
+Uses more disk space than ``conda-package-handling`` (temporary uncompressed
+tarballs of the package contents) but accepts streams instead of just
+files-on-the-filesystem.
 """
 
 from __future__ import annotations
@@ -47,10 +51,12 @@ def anonymize(tarinfo: tarfile.TarInfo):
 class CondaTarFile(tarfile.TarFile):
     """
     Subclass of TarFile that adds members to a second ``info`` tar if they match
-    ``is_info(name)``
+    ``is_info(name)``.
 
-    Create this with ``conda_builder(...)`` which sets up the component archives,
-    then wraps them into a ``.conda`` on exit.
+    Create this with ``conda_builder(...)`` which sets up the component
+    archives, then wraps them into a ``.conda`` on exit.
+
+    Only useful for creating, not extracting ``.conda``.
     """
 
     info_tar: tarfile.TarFile
@@ -94,6 +100,7 @@ def conda_builder(
         level=ZSTD_COMPRESS_LEVEL, threads=ZSTD_COMPRESS_THREADS
     ),
     is_info: Callable[[str], bool] = lambda filename: filename.startswith("info/"),
+    encoding="utf-8",
 ) -> Iterator[CondaTarFile]:
     """
     Produce a ``TarFile`` subclass used to build a ``.conda`` package. The
@@ -109,13 +116,22 @@ def conda_builder(
         path: destination path for transmuted .conda package compressor: A
             function that creates instances of ``zstandard.ZstdCompressor()``.
 
+        encoding: passed to TarFile constructor. Keep default "utf-8" for valid
+            .conda.
+
     Yields:
         ``CondaTarFile``
     """
     output_path = Path(path, f"{file_id}.conda")
     with tempfile.SpooledTemporaryFile() as info_file, tempfile.SpooledTemporaryFile() as pkg_file:
-        with tarfile.TarFile(fileobj=info_file, mode="w") as info_tar, CondaTarFile(
-            fileobj=pkg_file, mode="w", info_tar=info_tar, is_info=is_info
+        with tarfile.TarFile(
+            fileobj=info_file, mode="w", encoding=encoding
+        ) as info_tar, CondaTarFile(
+            fileobj=pkg_file,
+            mode="w",
+            info_tar=info_tar,
+            is_info=is_info,
+            encoding=encoding,
         ) as pkg_tar:
             # If we wanted to compress these at a low setting to save temporary
             # space, we could insert a file object that counts bytes written in
