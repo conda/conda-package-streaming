@@ -1,5 +1,8 @@
 [//]: # (current developments)
 
+* Use Python 3.12+ `tarfile.extractall(filter=)` instead of equivalent internal
+  functionality, when available. (#87)
+
 ## 0.10.0 (2024-06)
 
 * Use zip64 extensions when converting .tar.bz2 to .conda, if uncompressed size
