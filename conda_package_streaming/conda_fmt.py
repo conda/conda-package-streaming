@@ -50,8 +50,8 @@ def anonymize(tarinfo: tarfile.TarInfo):
 
 class CondaTarFile(tarfile.TarFile):
     """
-    Subclass of TarFile that adds members to a second ``info`` tar if they match
-    ``is_info(name)``.
+    Subclass of :external+python:py:class:`tarfile.TarFile` that adds members to
+    a second ``info`` tar if they match ``is_info(name)``.
 
     Create this with ``conda_builder(...)`` which sets up the component
     archives, then wraps them into a ``.conda`` on exit.
