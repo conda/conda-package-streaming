@@ -55,11 +55,11 @@ def test_oserror(tmp_path):
     tar = empty_tarfile("empty-test")
 
     class TarELOOP(tarfile.TarFile):
-        def extractall(self, path=None, members=None):
+        def extractall(self, path=None, members=None, filter=None):
             raise OSError(ELOOP, "case sensitivity")
 
     class TarOSError(tarfile.TarFile):
-        def extractall(self, path=None, members=None):
+        def extractall(self, path=None, members=None, filter=None):
             raise OSError("not eloop")
 
     def stream(cls):
