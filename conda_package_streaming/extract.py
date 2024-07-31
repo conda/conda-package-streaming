@@ -17,7 +17,7 @@ __all__ = ["extract_stream", "extract"]
 
 
 def extract_stream(
-    stream: Generator[tuple[tarfile.TarFile, tarfile.TarInfo], None, None],
+    stream: Generator[tuple[tarfile.TarFile, tarfile.TarInfo]],
     dest_dir: Path | str,
 ):
     """
