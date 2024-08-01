@@ -45,7 +45,7 @@ def extract_stream(
                 yield member
 
         try:
-            if HAS_TAR_FILTER:
+            if HAS_TAR_FILTER and False:
                 tar_file.extractall(path=dest_dir, filter=tarfile.tar_filter)
             else:
                 tar_file.extractall(path=dest_dir, members=checked_members())

@@ -128,15 +128,35 @@ def test_umask(tmp_path, mocker):
 
     Mock umask in case it is different on your system.
     """
-    mocker.patch("conda_package_streaming.package_streaming.UMASK", new=0o22)
+    MOCK_UMASK = 0o022
+    mocker.patch("conda_package_streaming.package_streaming.UMASK", new=MOCK_UMASK)
+
+    # [('S_IFREG', 32768), ('UF_HIDDEN', 32768), ('FILE_ATTRIBUTE_INTEGRITY_STREAM', 32768)]
+
+    # Of the high bits 100755 highest bit 1 can mean just "is regular file"
 
     tar3 = empty_tarfile(name="naughty_umask", mode=0o777)
+
+    assert (
+        package_streaming.TarfileNoSameOwner(fileobj=empty_tarfile("file.txt")).umask
+        == MOCK_UMASK
+    )
+
+    stat_check = stat.S_IRGRP
+    stat_name = "S_IRGRP"
+
     extract.extract_stream(stream_stdlib(tar3), tmp_path)
     mode = (tmp_path / "naughty_umask").stat().st_mode
     # is the new .extractall(filter=) erasing group-writable?
-    assert mode & stat.S_IWGRP, "%o != %o" % (mode, mode & stat.S_IWGRP)
+    assert mode & stat.S_IRGRP, f"Has {stat_name}? %o != %o" % (
+        mode,
+        mode & stat_check,
+    )
 
     tar3.seek(0)
     extract.extract_stream(stream(tar3), tmp_path)
     mode = (tmp_path / "naughty_umask").stat().st_mode
-    assert not mode & stat.S_IWGRP, "%o != %o" % (mode, mode & stat.S_IWGRP)
+    assert not mode & stat_check, f"No {stat_name} due to umask? %o != %o" % (
+        mode,
+        mode & stat_check,
+    )
