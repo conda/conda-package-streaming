@@ -14,7 +14,7 @@ from typing import Generator
 from . import exceptions, package_streaming
 
 __all__ = ["extract_stream", "extract"]
-HAS_TAR_FILTER = hasattr(tarfile, "data_filter")
+HAS_TAR_FILTER = hasattr(tarfile, "tar_filter")
 
 
 def extract_stream(
@@ -46,7 +46,7 @@ def extract_stream(
 
         try:
             if HAS_TAR_FILTER:
-                tar_file.extractall(path=dest_dir, filter=tarfile.data_filter)
+                tar_file.extractall(path=dest_dir, filter=tarfile.tar_filter)
             else:
                 tar_file.extractall(path=dest_dir, members=checked_members())
         except OSError as e:
