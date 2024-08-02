@@ -133,8 +133,8 @@ def stream_conda_component(
             raise RuntimeError("Cannot unpack `.conda` without zstandard")
 
         zf = zipfile.ZipFile(fileobj or filename)
-        file_id, _, _ = os.path.basename(filename).rpartition(".")
-        component_name = f"{component}-{file_id}"
+        stem, _, _ = os.path.basename(filename).rpartition(".")
+        component_name = f"{component}-{stem}"
         component_filename = [
             info for info in zf.infolist() if info.filename.startswith(component_name)
         ]

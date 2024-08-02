@@ -91,7 +91,7 @@ class CondaTarFile(tarfile.TarFile):
 
 @contextmanager
 def conda_builder(
-    file_id,
+    stem,
     path,
     *,
     compressor: Callable[
@@ -107,11 +107,11 @@ def conda_builder(
     subclass delegates ``addfile()`` to the ``info-`` component when ``is_info``
     returns True.
 
-    When the context manager exits, ``{path}/{file_id}.conda`` is written with
+    When the context manager exits, ``{path}/{stem}.conda`` is written with
     the component tar archives.
 
     Args:
-        file_id: output filename without extension
+        stem: output filename without extension
 
         path: destination path for transmuted .conda package compressor: A
             function that creates instances of ``zstandard.ZstdCompressor()``.
@@ -122,7 +122,7 @@ def conda_builder(
     Yields:
         ``CondaTarFile``
     """
-    output_path = Path(path, f"{file_id}.conda")
+    output_path = Path(path, f"{stem}.conda")
     with tempfile.SpooledTemporaryFile() as info_file, tempfile.SpooledTemporaryFile() as pkg_file:
         with tarfile.TarFile(
             fileobj=info_file, mode="w", encoding=encoding
@@ -159,7 +159,7 @@ def conda_builder(
             conda_file.writestr("metadata.json", json.dumps(pkg_metadata))
 
             with conda_file.open(
-                f"pkg-{file_id}.tar.zst",
+                f"pkg-{stem}.tar.zst",
                 "w",
                 force_zip64=(pkg_size > CONDA_ZIP64_LIMIT),
             ) as pkg_file_zip, data_compress.stream_writer(
@@ -168,7 +168,7 @@ def conda_builder(
                 shutil.copyfileobj(pkg_file._file, pkg_stream)
 
             with conda_file.open(
-                f"info-{file_id}.tar.zst",
+                f"info-{stem}.tar.zst",
                 "w",
                 force_zip64=(info_size > CONDA_ZIP64_LIMIT),
             ) as info_file_zip, data_compress.stream_writer(

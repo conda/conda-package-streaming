@@ -2,7 +2,7 @@
 
 * Add `transmute_stream(...)` to create `.conda` from `(TarFile, TarInfo)`. (#90)
   iterators, allowing more creative data sources than just `.tar.bz2` inputs.
-* Add `conda_fmt` module with `TarFile` interface for creating `.conda`
+* Add `create` module with `TarFile` interface for creating `.conda`
   archives, also used by `transmute`. (#90)
 * Pass `encoding="utf-8"` to `TarFile` instead of the system default, avoiding
   rare potential issues with non-ASCII filenames. (#93)

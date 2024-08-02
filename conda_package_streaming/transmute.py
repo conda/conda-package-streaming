@@ -16,7 +16,7 @@ from typing import Callable, Iterator
 
 import zstandard
 
-from .conda_fmt import ZSTD_COMPRESS_LEVEL, ZSTD_COMPRESS_THREADS, conda_builder
+from .create import ZSTD_COMPRESS_LEVEL, ZSTD_COMPRESS_THREADS, conda_builder
 
 # streams everything in .tar.bz2 mode
 from .package_streaming import CondaComponent, stream_conda_component
@@ -50,11 +50,11 @@ def transmute(
     """
     assert package.endswith(".tar.bz2"), "can only convert .tar.bz2 to .conda"
     assert os.path.isdir(path)
-    file_id = os.path.basename(package)[: -len(".tar.bz2")]
+    stem = os.path.basename(package)[: -len(".tar.bz2")]
     package_stream = stream_conda_component(package)
 
     return transmute_stream(
-        file_id,
+        stem,
         path,
         compressor=compressor,
         is_info=is_info,
@@ -63,7 +63,7 @@ def transmute(
 
 
 def transmute_stream(
-    file_id,
+    stem,
     path,
     *,
     compressor: Callable[
@@ -93,7 +93,7 @@ def transmute_stream(
     This example could move files between the ``pkg-`` and ``info-`` components
     depending on the ``is_info`` function.
 
-    :param file_id: output filename without extension
+    :param stem: output filename without extension
     :param path: destination path for transmuted .conda package
     :param compressor: A function that creates instances of
         ``zstandard.ZstdCompressor()`` to override defaults.
@@ -106,10 +106,8 @@ def transmute_stream(
 
     :return: Path to transmuted package.
     """
-    output_path = Path(path, f"{file_id}.conda")
-    with conda_builder(
-        file_id, path, compressor=compressor, is_info=is_info
-    ) as conda_tar:
+    output_path = Path(path, f"{stem}.conda")
+    with conda_builder(stem, path, compressor=compressor, is_info=is_info) as conda_tar:
         for tar, member in package_stream:
             if member.isfile():
                 conda_tar.addfile(member, tar.extractfile(member))

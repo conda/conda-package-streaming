@@ -11,7 +11,7 @@ import pytest
 import zstandard
 from conda_package_handling.validate import validate_converted_files_match_streaming
 
-from conda_package_streaming.conda_fmt import anonymize
+from conda_package_streaming.create import anonymize
 from conda_package_streaming.package_streaming import (
     CondaComponent,
     stream_conda_component,
@@ -149,7 +149,7 @@ def test_transmute_conditional_zip64(tmp_path, mocker):
     LIMIT = 16384
 
     for test_size, extra_expected in (LIMIT // 2, False), (LIMIT * 2, True):
-        mocker.patch("conda_package_streaming.conda_fmt.CONDA_ZIP64_LIMIT", new=LIMIT)
+        mocker.patch("conda_package_streaming.create.CONDA_ZIP64_LIMIT", new=LIMIT)
         mocker.patch("zipfile.ZIP64_LIMIT", new=LIMIT)
 
         tmp_tar = tmp_path / f"{test_size}.tar.bz2"
