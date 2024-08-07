@@ -48,3 +48,9 @@ Documentation = "https://conda.github.io/conda-package-streaming/"
 minversion = "7.0"
 addopts = "--cov=conda_package_streaming"
 testpaths = ["tests"]
+
+[tool.coverage.report]
+exclude_lines = ["pragma: no cover", "if TYPE_CHECKING:"]
+
+[tool.coverage.run]
+source = ["conda_package_streaming/", "tests/"]

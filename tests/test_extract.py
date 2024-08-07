@@ -34,18 +34,27 @@ def test_extract_all(conda_paths, tmp_path):
             break
 
 
-def empty_tarfile(name, mode=0o644):
+def empty_tarfile(name, mode=0o644, tar_mode="w"):
     """
     Return BytesIO containing a tarfile with one empty file named :name
     """
     tar = io.BytesIO()
-    t = tarfile.TarFile(mode="w", fileobj=tar)
+    t = tarfile.open(mode=tar_mode, fileobj=tar)
     tarinfo = tarfile.TarInfo(name=name)
     tarinfo.mode = mode
     t.addfile(tarinfo, io.BytesIO())
     t.close()
     tar.seek(0)
     return tar
+
+
+def not_unicode_tarbz2(
+    name=b"\x80\x81".decode("utf-8", errors="surrogateescape"), mode=0o644
+):
+    """
+    Return BytesIO containing a tarfile with one empty file named :name
+    """
+    return empty_tarfile(name=name, tar_mode="w:bz2")
 
 
 def test_oserror(tmp_path):
@@ -132,3 +141,36 @@ def test_umask(tmp_path, mocker):
     extract.extract_stream(stream(tar3), tmp_path)
     mode = (tmp_path / "naughty_umask").stat().st_mode
     assert not mode & stat.S_IWGRP, "%o" % mode
+
+
+def test_encoding():
+    """
+    Some users do not have "utf-8" as the default sys.getfilesystemencoding() or
+    sys.getdefaultencoding(). Instead of trying to change the system encoding,
+    we prove that stream_conda_component honors the new passed-in encoding which
+    is now "utf-8" by default.
+    """
+
+    tar = not_unicode_tarbz2()
+
+    # Use new default encoding of "utf-8" regardless of what the system says.
+    stream = package_streaming.stream_conda_component(
+        "package.tar.bz2", tar, component="pkg"
+    )
+
+    with pytest.raises(UnicodeEncodeError):
+        for t, member in stream:
+            member.name.encode("utf-8")
+            print(t, member)
+
+    tar.seek(0)
+
+    # Prove that we are passing encoding all the way down to the TarFile() used
+    # for extraction.
+    stream = package_streaming.stream_conda_component(
+        "package.tar.bz2", tar, component="pkg", encoding="latin-1"
+    )
+
+    for t, member in stream:
+        member.name.encode("utf-8")
+        print(t, member)

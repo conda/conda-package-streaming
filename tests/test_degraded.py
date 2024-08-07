@@ -27,22 +27,22 @@ def test_degraded(tmpdir):
 
         testtar = Path(tmpdir, "test.tar.bz2")
         with tarfile.open(testtar, "w:bz2") as tar:
-            pass
+            tar.addfile(tarfile.TarInfo(name="jim"))
 
         for (
             tar,
-            member,
+            _,
         ) in conda_package_streaming.package_streaming.stream_conda_component(testtar):
             pass
 
         with pytest.raises(RuntimeError):
             for (
                 tar,
-                member,
+                _,
             ) in conda_package_streaming.package_streaming.stream_conda_component(
                 testconda
             ):
-                pass
+                pass  # pragma: no cover
 
         with pytest.raises(RuntimeError):
             conda_package_streaming.extract.extract(testconda, tmpdir)
