@@ -14,6 +14,7 @@ from typing import Generator
 from . import exceptions, package_streaming
 
 __all__ = ["extract_stream", "extract"]
+HAS_TAR_FILTER = hasattr(tarfile, "tar_filter")
 
 
 def extract_stream(
@@ -44,7 +45,14 @@ def extract_stream(
                 yield member
 
         try:
-            tar_file.extractall(path=dest_dir, members=checked_members())
+            if HAS_TAR_FILTER:
+                tar_file.extractall(
+                    path=dest_dir,
+                    members=checked_members(),
+                    filter=tarfile.fully_trusted_filter,
+                )
+            else:
+                tar_file.extractall(path=dest_dir, members=checked_members())
         except OSError as e:
             if e.errno == ELOOP:
                 raise exceptions.CaseInsensitiveFileSystemError() from e
