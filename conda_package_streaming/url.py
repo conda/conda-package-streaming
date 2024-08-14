@@ -82,7 +82,7 @@ def conda_reader_for_url(url, session=session):
     return filename, conda
 
 
-if __name__ == "__main__":  # pragma nocover
+if __name__ == "__main__":  # pragma: no cover
     import logging
 
     logging.basicConfig(level=logging.DEBUG)
