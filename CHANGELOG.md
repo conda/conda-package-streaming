@@ -2,6 +2,8 @@
 
 * Use Python 3.12+ `tarfile.extractall(filter=)` in addition to equivalent
   internal functionality, when available. (#87)
+* Add Python 3.12 to test matrix.
+* Improve umask handling. (#106)
 * Add `transmute_stream(...)` to create `.conda` from `(TarFile, TarInfo)`. (#90)
   iterators, allowing more creative data sources than just `.tar.bz2` inputs.
 * Add `create` module with `TarFile` interface for creating `.conda`
