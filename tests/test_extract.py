@@ -134,16 +134,16 @@ def test_umask(tmp_path, mocker):
     MOCK_UMASK = 0o022
     mocker.patch("conda_package_streaming.package_streaming.UMASK", new=MOCK_UMASK)
 
+    assert (
+        package_streaming.TarfileNoSameOwner(fileobj=empty_tarfile("file.txt")).umask
+        == MOCK_UMASK
+    )
+
     # [('S_IFREG', 32768), ('UF_HIDDEN', 32768), ('FILE_ATTRIBUTE_INTEGRITY_STREAM', 32768)]
 
     # Of the high bits 100755 highest bit 1 can mean just "is regular file"
 
     tar3 = empty_tarfile(name="naughty_umask", mode=0o777)
-
-    assert (
-        package_streaming.TarfileNoSameOwner(fileobj=empty_tarfile("file.txt")).umask
-        == MOCK_UMASK
-    )
 
     stat_check = stat.S_IRGRP
     stat_name = "S_IRGRP"
@@ -157,7 +157,7 @@ def test_umask(tmp_path, mocker):
     )
 
     # specifically forbid that stat bit
-    MOCK_UMASK |= stat.S_IWGRP
+    MOCK_UMASK |= stat_check
     mocker.patch("conda_package_streaming.package_streaming.UMASK", new=MOCK_UMASK)
 
     tar3.seek(0)
