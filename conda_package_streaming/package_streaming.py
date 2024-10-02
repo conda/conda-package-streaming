@@ -61,7 +61,7 @@ class TarfileNoSameOwner(tarfile.TarFile):
         umask.
         """
         try:
-            os.chmod(targetpath, tarinfo.mode & (0o777 & (~self.umask)))
+            os.chmod(targetpath, tarinfo.mode & (-1 & (~self.umask)))
         except OSError as e:
             raise tarfile.ExtractError("could not change mode") from e
 
