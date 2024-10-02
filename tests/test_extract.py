@@ -64,11 +64,11 @@ def test_oserror(tmp_path):
     tar = empty_tarfile("empty-test")
 
     class TarELOOP(tarfile.TarFile):
-        def extractall(self, path=None, members=None):
+        def extractall(self, path=None, members=None, filter=None):
             raise OSError(ELOOP, "case sensitivity")
 
     class TarOSError(tarfile.TarFile):
-        def extractall(self, path=None, members=None):
+        def extractall(self, path=None, members=None, filter=None):
             raise OSError("not eloop")
 
     def stream(cls):
@@ -105,6 +105,7 @@ def test_slip(tmp_path):
     with pytest.raises(exceptions.SafetyError):
         extract.extract_stream(stream(tar), tmp_path)
 
+    # If we are using tarfile.filter, the leading / will be stripped instead.
     tar2 = empty_tarfile(name="/absolute")
 
     with pytest.raises(exceptions.SafetyError):
@@ -130,16 +131,42 @@ def test_umask(tmp_path, mocker):
 
     Mock umask in case it is different on your system.
     """
-    mocker.patch("conda_package_streaming.package_streaming.UMASK", new=0o22)
+    MOCK_UMASK = 0o022
+    mocker.patch("conda_package_streaming.package_streaming.UMASK", new=MOCK_UMASK)
+
+    assert (
+        package_streaming.TarfileNoSameOwner(fileobj=empty_tarfile("file.txt")).umask
+        == MOCK_UMASK
+    )
+
+    # [('S_IFREG', 32768), ('UF_HIDDEN', 32768), ('FILE_ATTRIBUTE_INTEGRITY_STREAM', 32768)]
+
+    # Of the high bits 100755 highest bit 1 can mean just "is regular file"
 
     tar3 = empty_tarfile(name="naughty_umask", mode=0o777)
+
+    stat_check = stat.S_IRGRP
+    stat_name = "S_IRGRP"
+
     extract.extract_stream(stream_stdlib(tar3), tmp_path)
     mode = (tmp_path / "naughty_umask").stat().st_mode
-    assert mode & stat.S_IWGRP, "%o" % mode
+    # is the new .extractall(filter=) erasing group-writable?
+    assert mode & stat.S_IRGRP, f"Has {stat_name}? %o != %o" % (
+        mode,
+        mode & stat_check,
+    )
+
+    # specifically forbid that stat bit
+    MOCK_UMASK |= stat_check
+    mocker.patch("conda_package_streaming.package_streaming.UMASK", new=MOCK_UMASK)
 
     tar3.seek(0)
     extract.extract_stream(stream(tar3), tmp_path)
     mode = (tmp_path / "naughty_umask").stat().st_mode
+    assert not mode & stat_check, f"No {stat_name} due to umask? %o != %o" % (
+        mode,
+        mode & stat_check,
+    )
     assert not mode & stat.S_IWGRP, "%o" % mode
 
 
