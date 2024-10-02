@@ -36,7 +36,7 @@ class CondaComponent(Enum):
 
 
 class TarfileNoSameOwner(tarfile.TarFile):
-    def __init__(self, *args, umask=UMASK, **kwargs):
+    def __init__(self, *args, umask: int | None = None, **kwargs):
         """Open an (uncompressed) tar archive `name'. `mode' is either 'r' to
         read from an existing archive, 'a' to append data to an existing
         file or 'w' to create a new file overwriting an existing one. `mode'
@@ -46,7 +46,7 @@ class TarfileNoSameOwner(tarfile.TarFile):
         `fileobj' is not closed, when TarFile is closed.
         """
         super().__init__(*args, **kwargs)
-        self.umask = umask
+        self.umask = umask if umask is not None else UMASK
 
     def chown(self, tarinfo, targetpath, numeric_owner):
         """
@@ -61,7 +61,7 @@ class TarfileNoSameOwner(tarfile.TarFile):
         umask.
         """
         try:
-            os.chmod(targetpath, tarinfo.mode & (0o777 - self.umask))
+            os.chmod(targetpath, tarinfo.mode & (-1 & (~self.umask)))
         except OSError as e:
             raise tarfile.ExtractError("could not change mode") from e
 
