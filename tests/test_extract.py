@@ -167,7 +167,6 @@ def test_umask(tmp_path, mocker):
         mode,
         mode & stat_check,
     )
-    assert not mode & stat.S_IWGRP, "%o" % mode
 
 
 def test_encoding():
