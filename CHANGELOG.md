@@ -1,5 +1,7 @@
 [//]: # (current developments)
 
+## 0.11.0 (2024-10)
+
 * Add Python 3.12 to test matrix.
 * Pass Python `tarfile.extractall(filter="fully_trusted")` in addition to
   internal filtering, when available, to avoid Python 3.12+ `DeprecationWarning`
