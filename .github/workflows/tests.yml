@@ -34,7 +34,7 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
@@ -78,12 +78,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Download test results
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
 
       - name: Upload combined test results
         # provides one downloadable archive of all .coverage/test-report.xml files
         # of all matrix runs for further analysis.
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: test-results-${{ github.sha }}-all
           path: test-results-${{ github.sha }}-*
