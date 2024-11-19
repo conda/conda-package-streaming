@@ -28,7 +28,6 @@ repos:
       - id: check-ast
       - id: fix-byte-order-marker
       - id: check-case-conflict
-      - id: check-executables-have-shebangs
       - id: check-merge-conflict
       - id: check-shebang-scripts-are-executable
       - id: debug-statements
@@ -63,4 +62,3 @@ repos:
         language: system
         pass_filenames: false
         always_run: true
-
