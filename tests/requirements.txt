@@ -1,0 +1,9 @@
+boto3
+boto3-stubs[essential]
+bottle
+conda
+pytest >=7
+pytest-cov
+pytest-mock
+requests
+zstandard >=0.15

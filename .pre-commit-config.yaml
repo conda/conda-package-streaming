@@ -5,20 +5,33 @@ repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v5.0.0
     hooks:
+      # standard end of line/end of file cleanup
+      - id: mixed-line-ending
+      - id: end-of-file-fixer
+      - id: trailing-whitespace
+      # ensure syntaxes are valid
+      - id: check-toml
+      - id: check-yaml
+        exclude: ^(conda\.)?recipe/meta.yaml
+      # catch git merge/rebase problems
+      - id: check-merge-conflict
+      # sort requirements files
+      - id: file-contents-sorter
+        files: |
+          (?x)^(
+            docs/requirements.txt |
+            tests/requirements.*\.txt
+          )
+        args: [--unique]
+      # other
       - id: check-added-large-files
       - id: check-ast
       - id: fix-byte-order-marker
       - id: check-case-conflict
-      - id: check-executables-have-shebangs
       - id: check-merge-conflict
       - id: check-shebang-scripts-are-executable
       - id: debug-statements
       - id: detect-private-key
-      - id: mixed-line-ending
-      - id: end-of-file-fixer
-      - id: trailing-whitespace
-      - id: check-yaml
-        exclude: conda.recipe/meta.yaml
   - repo: https://github.com/asottile/pyupgrade
     rev: v3.19.0
     hooks:
@@ -36,3 +49,16 @@ repos:
     rev: 7.1.1
     hooks:
       - id: flake8
+  - repo: meta
+    # see https://pre-commit.com/#meta-hooks
+    hooks:
+      - id: check-hooks-apply
+      - id: check-useless-excludes
+  - repo: local
+    hooks:
+      - id: git-diff
+        name: git diff
+        entry: git diff --exit-code
+        language: system
+        pass_filenames: false
+        always_run: true
