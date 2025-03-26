@@ -46,25 +46,41 @@ class LazyZipOverHTTP:
 
         self._session, self._url, self._chunk_size = session, url, chunk_size
 
+        self._has_streaming_support: bool = True
+        """
+        If the server returns 416 (Range Not Satisfiable), we request the whole file and set
+        this to False. Some package servers (Artifactory) incorrectly respond with 416
+        (Range Not Satisfiable) if the file is smaller than the range requested.
+        """
+
         # initial range request for the end of the file
+        # if the server does not support range requests, this sets _has_streaming_support to False
         tail = self._stream_response(start="", end=CONTENT_CHUNK_SIZE)
         # e.g. {'accept-ranges': 'bytes', 'content-length': '10240',
         # 'content-range': 'bytes 12824-23063/23064', 'last-modified': 'Sat, 16
         # Apr 2022 13:03:02 GMT', 'date': 'Thu, 21 Apr 2022 11:34:04 GMT'}
 
-        if tail.status_code != 206:
+        if self._has_streaming_support and tail.status_code != 206:
             raise HTTPRangeRequestUnsupported("range request is not supported")
 
-        # lowercase content-range to support s3
-        self._length = int(tail.headers["content-range"].partition("/")[-1])
+        if self._has_streaming_support:
+            # lowercase content-range to support s3
+            self._length = int(tail.headers["content-range"].partition("/")[-1])
+        else:
+            # the file is already downloaded
+            self._length = len(tail.content)
+
         self._file = NamedTemporaryFile()
         self.truncate(self._length)
 
         # length is also in Content-Length and Content-Range header
         with self._stay():
-            content_length = int(tail.headers["content-length"])
-            if hasattr(tail, "content"):
-                assert content_length == len(tail.content)
+            if self._has_streaming_support:
+                content_length = int(tail.headers["content-length"])
+                if hasattr(tail, "content"):
+                    assert content_length == len(tail.content)
+            else:
+                content_length = len(tail.content)
             self.seek(self._length - content_length)
             for chunk in tail.iter_content(self._chunk_size):
                 self._file.write(chunk)
@@ -178,16 +194,33 @@ class LazyZipOverHTTP:
     def _stream_response(
         self, start: int | str, end: int, base_headers: dict[str, str] = HEADERS
     ) -> Response:
-        """Return HTTP response to a range request from start to end.
+        """
+        Return HTTP response to a range request from start to end.
+        If the does not support range requests, the whole file is requested.
 
-        :param start: if "", request ``end` bytes from end of file."""
+        :param start: if "", request ``end` bytes from end of file.
+        """
         headers = base_headers.copy()
         headers["Range"] = f"bytes={start}-{end}"
         log.debug("%s", headers["Range"])
         # TODO: Get range requests to be correctly cached
         headers["Cache-Control"] = "no-cache"
         self._request_count += 1
+
+        if self._has_streaming_support:
+            response = self._session.get(self._url, headers=headers, stream=True)
+
+            if response.status_code == 416:
+                # Range Not Satisfiable
+                self._has_streaming_support = False
+            else:
+                response.raise_for_status()
+                return response
+
+        # no streaming support, try to get the whole file
+        del headers["Range"]
         response = self._session.get(self._url, headers=headers, stream=True)
+
         response.raise_for_status()
         return response
 
@@ -214,7 +247,12 @@ class LazyZipOverHTTP:
         self._left[left:right], self._right[left:right] = [start], [end]
 
     def _download(self, start: int, end: int) -> None:
-        """Download bytes from start to end inclusively."""
+        """
+        Download bytes from start to end inclusively. If the server does not support streaming for
+        this file, this does nothing as the entire file is already downloaded.
+        """
+        if not self._has_streaming_support:
+            return
         with self._stay():
             left = bisect_left(self._right, start)
             right = bisect_right(self._left, end)
