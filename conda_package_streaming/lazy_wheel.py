@@ -35,9 +35,7 @@ class LazyZipOverHTTP:
     during initialization.
     """
 
-    def __init__(
-        self, url: str, session: Session, chunk_size: int = CONTENT_CHUNK_SIZE
-    ) -> None:
+    def __init__(self, url: str, session: Session, chunk_size: int = CONTENT_CHUNK_SIZE) -> None:
         # if CONTENT_CHUNK_SIZE is bigger than the file:
         # In [8]: response.headers["Content-Range"]
         # Out[8]: 'bytes 0-3133374/3133375'
@@ -191,9 +189,7 @@ class LazyZipOverHTTP:
         response.raise_for_status()
         return response
 
-    def _merge(
-        self, start: int, end: int, left: int, right: int
-    ) -> Iterator[tuple[int, int]]:
+    def _merge(self, start: int, end: int, left: int, right: int) -> Iterator[tuple[int, int]]:
         """Return an iterator of intervals to be fetched.
 
         Args:

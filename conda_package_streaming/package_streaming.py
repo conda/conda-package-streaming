@@ -88,9 +88,7 @@ def tar_generator(
             fileobj.close()
 
 
-def stream_conda_info(
-    filename, fileobj=None
-) -> Generator[tuple[tarfile.TarFile, tarfile.TarInfo]]:
+def stream_conda_info(filename, fileobj=None) -> Generator[tuple[tarfile.TarFile, tarfile.TarInfo]]:
     """
     Yield members from conda's embedded info/ tarball.
 
@@ -141,9 +139,7 @@ def stream_conda_component(
         if not component_filename:
             raise LookupError(f"didn't find {component_name} component in {filename}")
         assert len(component_filename) == 1
-        reader = zstandard.ZstdDecompressor().stream_reader(
-            zf.open(component_filename[0])
-        )
+        reader = zstandard.ZstdDecompressor().stream_reader(zf.open(component_filename[0]))
     elif str(filename).endswith(".tar.bz2"):
         reader = bz2.open(fileobj or filename, mode="rb")
     else:

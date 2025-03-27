@@ -48,9 +48,7 @@ def empty_tarfile(name, mode=0o644, tar_mode="w"):
     return tar
 
 
-def not_unicode_tarbz2(
-    name=b"\x80\x81".decode("utf-8", errors="surrogateescape"), mode=0o644
-):
+def not_unicode_tarbz2(name=b"\x80\x81".decode("utf-8", errors="surrogateescape"), mode=0o644):
     """
     Return BytesIO containing a tarfile with one empty file named :name
     """
@@ -135,8 +133,7 @@ def test_umask(tmp_path, mocker):
     mocker.patch("conda_package_streaming.package_streaming.UMASK", new=MOCK_UMASK)
 
     assert (
-        package_streaming.TarfileNoSameOwner(fileobj=empty_tarfile("file.txt")).umask
-        == MOCK_UMASK
+        package_streaming.TarfileNoSameOwner(fileobj=empty_tarfile("file.txt")).umask == MOCK_UMASK
     )
 
     # [('S_IFREG', 32768), ('UF_HIDDEN', 32768), ('FILE_ATTRIBUTE_INTEGRITY_STREAM', 32768)]
@@ -180,9 +177,7 @@ def test_encoding():
     tar = not_unicode_tarbz2()
 
     # Use new default encoding of "utf-8" regardless of what the system says.
-    stream = package_streaming.stream_conda_component(
-        "package.tar.bz2", tar, component="pkg"
-    )
+    stream = package_streaming.stream_conda_component("package.tar.bz2", tar, component="pkg")
 
     with pytest.raises(UnicodeEncodeError):
         for t, member in stream:

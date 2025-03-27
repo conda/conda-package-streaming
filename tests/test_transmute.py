@@ -44,7 +44,7 @@ def timeme(message: str = ""):
     begin = time.time()
     yield
     end = time.time()
-    print(f"{message}{end-begin:0.2f}s")
+    print(f"{message}{end - begin:0.2f}s")
 
 
 def test_transmute(conda_paths: list[Path], tmpdir):
@@ -80,9 +80,7 @@ def test_transmute_symlink(tmpdir, testtar_bytes):
     testtar.write_bytes(testtar_bytes)
 
     out = transmute(str(testtar), tmpdir)
-    _, missing, mismatched = validate_converted_files_match_streaming(
-        out, testtar, strict=True
-    )
+    _, missing, mismatched = validate_converted_files_match_streaming(out, testtar, strict=True)
     assert missing == mismatched == []
 
 
@@ -90,9 +88,7 @@ def test_transmute_info_filter(tmpdir, testtar_bytes):
     testtar = Path(tmpdir, "test.tar.bz2")
     testtar.write_bytes(testtar_bytes)
 
-    transmute(
-        str(testtar), tmpdir, is_info=lambda filename: filename == "info/expected"
-    )
+    transmute(str(testtar), tmpdir, is_info=lambda filename: filename == "info/expected")
 
     with open(Path(tmpdir, "test.conda"), "rb") as fileobj:
         for component, expected in (
@@ -135,9 +131,7 @@ def test_transmute_tarbz2_to_tarbz2(tmpdir, testtar_bytes):
     outdir = Path(tmpdir, "output")
     outdir.mkdir()
     out = transmute_tar_bz2(str(testtar), outdir)
-    _, missing, mismatched = validate_converted_files_match_streaming(
-        out, testtar, strict=True
-    )
+    _, missing, mismatched = validate_converted_files_match_streaming(out, testtar, strict=True)
     assert missing == mismatched == []
 
 
