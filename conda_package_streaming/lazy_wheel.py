@@ -51,6 +51,7 @@ class LazyZipOverHTTP:
         If the server returns 416 (Range Not Satisfiable), we request the whole file and set
         this to False. Some package servers (Artifactory) incorrectly respond with 416
         (Range Not Satisfiable) if the file is smaller than the range requested.
+        See https://jfrog.atlassian.net/browse/RTFACT-30882
         """
 
         # initial range request for the end of the file
