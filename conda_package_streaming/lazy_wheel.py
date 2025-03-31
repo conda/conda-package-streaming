@@ -214,7 +214,7 @@ class LazyZipOverHTTP:
         Return HTTP response to a range request from start to end.
         If the does not support range requests, the whole file is requested.
 
-        :param start: if "", request ``end` bytes from end of file.
+        :param start: if "", request `end` bytes from end of file.
         """
         headers = base_headers.copy()
         headers["Range"] = f"bytes={start}-{end}"
