@@ -139,7 +139,11 @@ def test_umask(tmp_path, mocker):
         == MOCK_UMASK
     )
 
-    # [('S_IFREG', 32768), ('UF_HIDDEN', 32768), ('FILE_ATTRIBUTE_INTEGRITY_STREAM', 32768)]
+    # [
+    #   ('S_IFREG', 32768),
+    #   ('UF_HIDDEN', 32768),
+    #   ('FILE_ATTRIBUTE_INTEGRITY_STREAM', 32768)
+    # ]
 
     # Of the high bits 100755 highest bit 1 can mean just "is regular file"
 

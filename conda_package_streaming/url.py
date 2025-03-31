@@ -72,9 +72,10 @@ def conda_reader_for_url(
 
     :param url: URL to conda package
     :param session: The session to use for web requests.
-    :param fall_back_to_full_download: If true, fall back to downloading the entire package
-    instead of streaming it in the case of a specific issue where the server incorrectly
-    responds with 416 (Range Not Satisfiable). See LazyZipOverHTTP for more details.
+    :param fall_back_to_full_download: If true, fall back to downloading the entire
+    package instead of streaming it in the case of a specific issue where the server
+    incorrectly responds with 416 (Range Not Satisfiable). See LazyZipOverHTTP for
+    more details.
     """
     parsed_url = urllib.parse.urlparse(url)
     *_, filename = parsed_url.path.rsplit("/", 1)

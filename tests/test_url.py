@@ -90,9 +90,9 @@ def test_lazy_wheel(package_urls):
                 filename = filename[: -len(".conda")]
                 zf.open(f"info-{filename}.tar.zst").read()
 
-                assert (
-                    conda._request_count == request_count
-                ), "info required extra GET request"
+                assert conda._request_count == request_count, (
+                    "info required extra GET request"
+                )
                 assert conda._request_count <= 3
 
                 conda.prefetch("not-appearing-in-archive.txt")
@@ -105,7 +105,7 @@ def test_lazy_wheel(package_urls):
                 break
     else:
         raise LookupError(
-            "not enough .conda packages found %d %s" % (lazy_tests, package_urls)
+            f"not enough .conda packages found {lazy_tests} {package_urls}"
         )
 
     with pytest.raises(HTTPError):

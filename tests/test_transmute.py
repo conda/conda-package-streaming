@@ -44,7 +44,7 @@ def timeme(message: str = ""):
     begin = time.time()
     yield
     end = time.time()
-    print(f"{message}{end-begin:0.2f}s")
+    print(f"{message}{end - begin:0.2f}s")
 
 
 def test_transmute(conda_paths: list[Path], tmpdir):

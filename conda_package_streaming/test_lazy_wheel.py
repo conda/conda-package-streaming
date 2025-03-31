@@ -88,10 +88,10 @@ class TestLazyZipOverHTTP:
         self, fall_back_to_full_download: bool
     ):
         """
-        Some package servers (Artifactory) incorrectly respond with 416 (Range Not Satisfiable)
-        when the file is smaller than the range requested.
-        This violates RFC 7233, but we cope with it by retrying without Range, requesting the full
-        file if fall_back_to_full_download is set.
+        Some package servers (Artifactory) incorrectly respond with 416
+        (Range Not Satisfiable) when the file is smaller than the range requested.
+        This violates RFC 7233, but we cope with it by retrying without Range,
+        requesting the full file if fall_back_to_full_download is set.
         """
         responses.add(
             responses.GET,

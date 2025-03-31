@@ -47,9 +47,10 @@ class LazyZipOverHTTP:
 
         :param session: The session to use for web requests.
         :param chunk_size: The chunk size to use for downloading.
-        :param fall_back_to_full_download: If true, we fall back to downloading the whole file
-        if the server incorrectly responds with 416 (Range Not Satisfiable) to an HTTP range
-        request (Artifactory does that if the file is smaller than the range requested).
+        :param fall_back_to_full_download: If true, we fall back to downloading
+        the whole file if the server incorrectly responds with 416
+        (Range Not Satisfiable) to an HTTP range request (Artifactory does that
+        if the file is smaller than the range requested).
         """
         # if CONTENT_CHUNK_SIZE is bigger than the file:
         # In [8]: response.headers["Content-Range"]
@@ -70,7 +71,8 @@ class LazyZipOverHTTP:
         """
 
         # initial range request for the end of the file
-        # if the server does not support range requests, this sets _has_streaming_support to False
+        # if the server does not support range requests, this sets
+        # _has_streaming_support to False
         tail = self._stream_response(start="", end=CONTENT_CHUNK_SIZE)
         # e.g. {'accept-ranges': 'bytes', 'content-length': '10240',
         # 'content-range': 'bytes 12824-23063/23064', 'last-modified': 'Sat, 16
@@ -233,9 +235,10 @@ class LazyZipOverHTTP:
                 # fallback disabled, print helpful error message
                 raise HTTPError(
                     "The server returned 416 (Range Not Satisfiable). "
-                    "If you're using Artifactory, you've likely encountered a well-known bug "
-                    "in Artifactory that occurs if the file is smaller than the range requested. "
-                    "Set the fall_back_to_full_download flag to work around this issue. ",
+                    "If you're using Artifactory, you've likely encountered a "
+                    "well-known bug in Artifactory that occurs if the file is smaller"
+                    "than the range requested. Set the fall_back_to_full_download flag "
+                    "to work around this issue. ",
                     response=response,
                 )
             else:
@@ -273,8 +276,9 @@ class LazyZipOverHTTP:
 
     def _download(self, start: int, end: int) -> None:
         """
-        Download bytes from start to end inclusively. If the server does not support streaming for
-        this file, this does nothing as the entire file is already downloaded.
+        Download bytes from start to end inclusively. If the server does not support
+        streaming for this file, this does nothing as the entire file is already
+        downloaded.
         """
         # these assertions should hold, but read() violates them
         # assert 0 <= start <= end
