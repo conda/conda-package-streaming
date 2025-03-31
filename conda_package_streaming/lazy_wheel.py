@@ -276,8 +276,10 @@ class LazyZipOverHTTP:
         Download bytes from start to end inclusively. If the server does not support streaming for
         this file, this does nothing as the entire file is already downloaded.
         """
-        if not self._has_streaming_support:
-            return
+        # these assertions should hold, but read() violates them
+        # assert 0 <= start <= end
+        # assert end < self._length
+
         with self._stay():
             left = bisect_left(self._right, start)
             right = bisect_right(self._left, end)
