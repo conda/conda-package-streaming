@@ -10,7 +10,7 @@ from tempfile import NamedTemporaryFile
 from typing import Any, Iterator
 from zipfile import BadZipfile, ZipFile
 
-from requests import Session
+from requests import HTTPError, Session
 from requests.models import CONTENT_CHUNK_SIZE, Response
 
 # from pip 22.0.3 with fixes & remove imports from pip
@@ -36,8 +36,21 @@ class LazyZipOverHTTP:
     """
 
     def __init__(
-        self, url: str, session: Session, chunk_size: int = CONTENT_CHUNK_SIZE
+        self,
+        url: str,
+        session: Session,
+        chunk_size: int = CONTENT_CHUNK_SIZE,
+        fall_back_to_full_download: bool = False,
     ) -> None:
+        """
+        Initialize a LazyZipOverHTTP object.
+
+        :param session: The session to use for web requests.
+        :param chunk_size: The chunk size to use for downloading.
+        :param fall_back_to_full_download: If true, we fall back to downloading the whole file
+        if the server incorrectly responds with 416 (Range Not Satisfiable) to an HTTP range
+        request (Artifactory does that if the file is smaller than the range requested).
+        """
         # if CONTENT_CHUNK_SIZE is bigger than the file:
         # In [8]: response.headers["Content-Range"]
         # Out[8]: 'bytes 0-3133374/3133375'
@@ -46,10 +59,12 @@ class LazyZipOverHTTP:
 
         self._session, self._url, self._chunk_size = session, url, chunk_size
 
+        self._fall_back_to_full_download: bool = fall_back_to_full_download
         self._has_streaming_support: bool = True
         """
-        If the server returns 416 (Range Not Satisfiable), we request the whole file and set
-        this to False. Some package servers (Artifactory) incorrectly respond with 416
+        If the server returns 416 (Range Not Satisfiable) and the fallback is enabled,
+        we request the whole file and set this to False.
+        Some package servers (Artifactory) incorrectly respond with 416
         (Range Not Satisfiable) if the file is smaller than the range requested.
         See https://jfrog.atlassian.net/browse/RTFACT-30882
         """
@@ -211,9 +226,18 @@ class LazyZipOverHTTP:
         if self._has_streaming_support:
             response = self._session.get(self._url, headers=headers, stream=True)
 
-            if response.status_code == 416:
-                # Range Not Satisfiable
+            if response.status_code == 416 and self._fall_back_to_full_download:
+                # Range Not Satisfiable -> enable fallback
                 self._has_streaming_support = False
+            elif response.status_code == 416:
+                # fallback disabled, print helpful error message
+                raise HTTPError(
+                    "The server returned 416 (Range Not Satisfiable). "
+                    "If you're using Artifactory, you've likely encountered a well-known bug "
+                    "in Artifactory that occurs if the file is smaller than the range requested. "
+                    "Set the fall_back_to_full_download flag to work around this issue. ",
+                    response=response,
+                )
             else:
                 response.raise_for_status()
                 return response

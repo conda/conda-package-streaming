@@ -1,7 +1,9 @@
 import re
 
+import pytest
 import requests
 import responses
+from requests import HTTPError
 from requests.models import PreparedRequest
 from responses import matchers
 
@@ -60,8 +62,9 @@ class TestLazyZipOverHTTP:
 
         return _callback
 
+    @pytest.mark.parametrize("fall_back_to_full_download", [True, False])
     @responses.activate
-    def test_init_stream_successful(self):
+    def test_init_stream_successful(self, fall_back_to_full_download: bool):
         responses.add_callback(
             responses.GET,
             "https://example.com/test.zip",
@@ -72,16 +75,23 @@ class TestLazyZipOverHTTP:
         )
 
         session = requests.Session()
-        lazy_zip = LazyZipOverHTTP("https://example.com/test.zip", session)
+        lazy_zip = LazyZipOverHTTP(
+            "https://example.com/test.zip",
+            session,
+            fall_back_to_full_download=fall_back_to_full_download,
+        )
         lazy_zip.read()
 
+    @pytest.mark.parametrize("fall_back_to_full_download", [True, False])
     @responses.activate
-    def test_init_stream_retry_without_range(self):
+    def test_init_stream_retry_without_range_with_fallback(
+        self, fall_back_to_full_download: bool
+    ):
         """
         Some package servers (Artifactory) incorrectly respond with 416 (Range Not Satisfiable)
         when the file is smaller than the range requested.
         This violates RFC 7233, but we cope with it by retrying without Range, requesting the full
-        file.
+        file if fall_back_to_full_download is set.
         """
         responses.add(
             responses.GET,
@@ -98,5 +108,22 @@ class TestLazyZipOverHTTP:
         )
 
         session = requests.Session()
-        lazy_zip = LazyZipOverHTTP("https://example.com/test.zip", session)
-        lazy_zip.read()
+
+        if fall_back_to_full_download:
+            # this should work
+            lazy_zip = LazyZipOverHTTP(
+                "https://example.com/test.zip", session, fall_back_to_full_download=True
+            )
+            lazy_zip.read()
+            return
+
+        # otherwise, the constructor should raise an exception
+        with pytest.raises(
+            HTTPError,
+            match="Set the fall_back_to_full_download flag to work around this issue.",
+        ):
+            LazyZipOverHTTP(
+                "https://example.com/test.zip",
+                session,
+                fall_back_to_full_download=False,
+            )
