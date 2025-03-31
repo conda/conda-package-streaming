@@ -2,6 +2,7 @@ import io
 import tempfile
 from contextlib import closing, contextmanager
 from pathlib import Path
+from unittest.mock import MagicMock, patch
 from zipfile import ZipFile
 
 import pytest
@@ -125,6 +126,26 @@ def test_lazy_wheel(package_urls):
             break
     else:
         raise LookupError("no .tar.bz2 packages found")
+
+
+@pytest.mark.parametrize("fall_back_to_full_download", [True, False])
+@patch("conda_package_streaming.url.LazyConda")
+def test_conda_reader_for_url_passes_to_lazy_conda_correctly(
+    lazy_conda_mock: MagicMock, fall_back_to_full_download: bool
+):
+    url = "https://example.com/package.conda"
+    session = Session()
+
+    filename, conda = conda_reader_for_url(
+        url, session, fall_back_to_full_download=fall_back_to_full_download
+    )
+
+    assert filename == "package.conda"
+    lazy_conda_mock.assert_called_once_with(
+        url,
+        session,
+        fall_back_to_full_download=fall_back_to_full_download,
+    )
 
 
 def test_no_file_after_info():
