@@ -57,7 +57,6 @@ select = [
   "I",  # isort
   "UP"  # pyupgrade
 ]
-line-length = 100
 
 [tool.ruff.format]
 line-ending = "auto"
