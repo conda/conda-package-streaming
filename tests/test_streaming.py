@@ -46,5 +46,7 @@ def test_chmod_error(tmp_path, mocker):
     mocker.patch("os.chmod", side_effect=OSError)
     with pytest.raises(tarfile.ExtractError):
         # only logs a debug message if errorlevel<=1
-        with package_streaming.TarfileNoSameOwner(tmp_path / "test.tar", errorlevel=2) as tar:
+        with package_streaming.TarfileNoSameOwner(
+            tmp_path / "test.tar", errorlevel=2
+        ) as tar:
             tar.extractall(tmp_path)

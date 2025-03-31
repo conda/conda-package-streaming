@@ -39,7 +39,9 @@ def test_degraded(tmpdir):
             for (
                 tar,
                 _,
-            ) in conda_package_streaming.package_streaming.stream_conda_component(testconda):
+            ) in conda_package_streaming.package_streaming.stream_conda_component(
+                testconda
+            ):
                 pass  # pragma: no cover
 
         with pytest.raises(RuntimeError):

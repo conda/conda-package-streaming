@@ -94,7 +94,9 @@ def conda_builder(
     stem,
     path,
     *,
-    compressor: Callable[[], zstandard.ZstdCompressor] = lambda: zstandard.ZstdCompressor(
+    compressor: Callable[
+        [], zstandard.ZstdCompressor
+    ] = lambda: zstandard.ZstdCompressor(
         level=ZSTD_COMPRESS_LEVEL, threads=ZSTD_COMPRESS_THREADS
     ),
     is_info: Callable[[str], bool] = lambda filename: filename.startswith("info/"),
@@ -121,7 +123,10 @@ def conda_builder(
         ``CondaTarFile``
     """
     output_path = Path(path, f"{stem}.conda")
-    with tempfile.SpooledTemporaryFile() as info_file, tempfile.SpooledTemporaryFile() as pkg_file:
+    with (
+        tempfile.SpooledTemporaryFile() as info_file,
+        tempfile.SpooledTemporaryFile() as pkg_file,
+    ):
         with tarfile.TarFile(
             fileobj=info_file, mode="w", encoding=encoding
         ) as info_tar, CondaTarFile(
@@ -150,7 +155,8 @@ def conda_builder(
             "x",  # x to not append to existing
             compresslevel=zipfile.ZIP_STORED,
         ) as conda_file:
-            # Use a maximum of one Zstd compressor, stream_writer at a time to save memory.
+            # Use a maximum of one Zstd compressor, stream_writer at a time to save
+            # # memory.
             data_compress = compressor()
 
             pkg_metadata = {"conda_pkg_format_version": CONDA_PACKAGE_FORMAT_VERSION}
