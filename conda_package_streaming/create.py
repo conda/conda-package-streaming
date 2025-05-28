@@ -27,7 +27,7 @@ import zstandard
 # increase to reduce speed and increase compression (levels above 19 use much
 # more memory)
 ZSTD_COMPRESS_LEVEL = 19
-# increase to reduce compression and increase speed
+# increase for greater speed
 ZSTD_COMPRESS_THREADS = 1
 
 CONDA_PACKAGE_FORMAT_VERSION = 2

@@ -18,13 +18,18 @@ UMASK = os.umask(0)
 os.umask(UMASK)
 
 try:
-    import zstandard
+    import compression.zstd as zstd  # Python 3.14+
 except ImportError:
-    import warnings
+    try:
+        import pyzstd as zstd
+    except ImportError:
+        import warnings
 
-    warnings.warn("zstandard could not be imported. Running without .conda support.")
+        warnings.warn(
+            "zstandard could not be imported. Running without .conda support."
+        )
 
-    zstandard = None
+        zstd = None
 
 
 class CondaComponent(Enum):
@@ -129,8 +134,10 @@ def stream_conda_component(
     writing out the file objects yourself.
     """
     if str(filename).endswith(".conda"):
-        if zstandard is None:
-            raise RuntimeError("Cannot unpack `.conda` without zstandard")
+        if zstd is None:
+            raise RuntimeError(
+                "Cannot unpack `.conda` without pyzstd or compression.zstd"
+            )
 
         zf = zipfile.ZipFile(fileobj or filename)
         stem, _, _ = os.path.basename(filename).rpartition(".")
@@ -141,9 +148,7 @@ def stream_conda_component(
         if not component_filename:
             raise LookupError(f"didn't find {component_name} component in {filename}")
         assert len(component_filename) == 1
-        reader = zstandard.ZstdDecompressor().stream_reader(
-            zf.open(component_filename[0])
-        )
+        reader = zstd.open(zf.open(component_filename[0]))
     elif str(filename).endswith(".tar.bz2"):
         reader = bz2.open(fileobj or filename, mode="rb")
     else:
