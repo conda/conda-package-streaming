@@ -150,14 +150,15 @@ def test_umask(tmp_path, mocker, tar_filter):
     """
     if tar_filter is not None and not HAS_TAR_FILTER:
         pytest.skip("Requires tar_filter")
-    current_umask = os.umask(0)
     try:
         MOCK_UMASK = 0o022
-        os.umask(MOCK_UMASK)
+        current_umask = os.umask(MOCK_UMASK)
         mocker.patch("conda_package_streaming.package_streaming.UMASK", new=MOCK_UMASK)
 
         assert (
-            package_streaming.TarfileNoSameOwner(fileobj=empty_tarfile("file.txt")).umask
+            package_streaming.TarfileNoSameOwner(
+                fileobj=empty_tarfile("file.txt")
+            ).umask
             == MOCK_UMASK
         )
 
@@ -170,16 +171,19 @@ def test_umask(tmp_path, mocker, tar_filter):
         # Of the high bits 100755 highest bit 1 can mean just "is regular file"
 
         name = "naughty_umask"
-        files_to_check = [tmp_path / name, tmp_path / name / name]
         tar3 = empty_tarfile(name=name, mode=0o777, create_subdir=True)
 
         stat_check = stat.S_IRGRP
         stat_name = "S_IRGRP"
 
-        extract.extract_stream(stream_stdlib(tar3), tmp_path, tar_filter=tar_filter)
+        root_path = tmp_path / "stdlib"
+        root_path.mkdir()
+        files_to_check = [root_path / name, root_path / name / name]
+
+        extract.extract_stream(stream_stdlib(tar3), root_path, tar_filter=tar_filter)
         for file in files_to_check:
             mode = file.stat().st_mode
-            # is the new .extractall(filter=) erasing group-writable?
+            # is the new .extractall(filter=) erasing "stat_name"?
             assert mode & stat_check, f"{file} has {stat_name}? %o != %o" % (
                 mode,
                 mode & stat_check,
@@ -190,14 +194,22 @@ def test_umask(tmp_path, mocker, tar_filter):
         mocker.patch("conda_package_streaming.package_streaming.UMASK", new=MOCK_UMASK)
         os.umask(MOCK_UMASK)
 
+        root_path = tmp_path / "cps"
+        root_path.mkdir()
+        files_to_check = [root_path / name, root_path / name / name]
+
         tar3.seek(0)
-        extract.extract_stream(stream(tar3), tmp_path, tar_filter=tar_filter)
+        extract.extract_stream(stream(tar3), root_path, tar_filter=tar_filter)
         for file in files_to_check:
             mode = file.stat().st_mode
-            assert not (mode & stat_check), f"{file}: No {stat_name} due to umask? %o != %o" % (
-                mode,
-                mode & stat_check,
-            )
+            if mode & stat_check:
+                assert not (mode & stat_check), (
+                    f"{file}: No {stat_name} due to umask? %o != %o"
+                    % (
+                        mode,
+                        mode & stat_check,
+                    )
+                )
     finally:
         os.umask(current_umask)
 
