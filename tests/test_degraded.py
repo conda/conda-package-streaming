@@ -14,7 +14,8 @@ import pytest
 
 def test_degraded(tmpdir):
     try:
-        sys.modules["zstandard"] = None  # type: ignore
+        sys.modules["pyzstd"] = None  # type: ignore
+        sys.modules["compression.zstd"] = None  # type: ignore
 
         import conda_package_streaming.extract
         import conda_package_streaming.package_streaming
@@ -48,9 +49,10 @@ def test_degraded(tmpdir):
             conda_package_streaming.extract.extract(testconda, tmpdir)
 
     finally:
-        sys.modules.pop("zstandard", None)
+        sys.modules.pop("compression.zstd", None)
+        sys.modules.pop("pyzstd", None)
 
         import conda_package_streaming.package_streaming
 
         importlib.reload(conda_package_streaming.package_streaming)
-        assert conda_package_streaming.package_streaming.zstandard
+        assert conda_package_streaming.package_streaming.zstd

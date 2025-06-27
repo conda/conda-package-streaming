@@ -1,6 +1,8 @@
 [//]: # (current developments)
 
-* Skip setting permissions if `tarinfo.mode` is `None`. (#140)
+* Use `pyzstd` or `compression.zstd` (part of Python 3.14), instead of
+  `zstandard / python-zstandard`, for decompression. create/transmute is tied to
+  the `zstandard` API for now.
 
 ## 0.11.0 (2024-10)
 
