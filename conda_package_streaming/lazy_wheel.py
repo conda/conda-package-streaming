@@ -49,8 +49,7 @@ class LazyZipOverHTTP:
         :param chunk_size: The chunk size to use for downloading.
         :param fall_back_to_full_download: If true, we fall back to downloading
         the whole file if the server incorrectly responds with 416
-        (Range Not Satisfiable) to an HTTP range request (Artifactory does that
-        if the file is smaller than the range requested).
+        (Range Not Satisfiable) to an HTTP range request.
         """
         # if CONTENT_CHUNK_SIZE is bigger than the file:
         # In [8]: response.headers["Content-Range"]
@@ -62,13 +61,12 @@ class LazyZipOverHTTP:
 
         self._fall_back_to_full_download: bool = fall_back_to_full_download
         self._has_streaming_support: bool = True
-        """
-        If the server returns 416 (Range Not Satisfiable) and the fallback is enabled,
-        we request the whole file and set this to False.
-        Some package servers (Artifactory) incorrectly respond with 416
-        (Range Not Satisfiable) if the file is smaller than the range requested.
-        See https://jfrog.atlassian.net/browse/RTFACT-30882
-        """
+
+        # If the server returns 416 (Range Not Satisfiable) and the fallback is
+        # enabled, we request the whole file and set this to False. Some package
+        # servers incorrectly respond with 416 (Range Not Satisfiable) if the file
+        # is smaller than the range requested. See
+        # https://jfrog.atlassian.net/browse/RTFACT-30882
 
         # initial range request for the end of the file
         # if the server does not support range requests, this sets
