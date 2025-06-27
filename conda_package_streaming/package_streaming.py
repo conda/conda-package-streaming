@@ -9,8 +9,8 @@ import os
 import os.path
 import tarfile
 import zipfile
+from collections.abc import Generator
 from enum import Enum
-from typing import Generator
 
 # acquire umask taking advantage of import system lock, instead of possibly in
 # multiple threads at once.

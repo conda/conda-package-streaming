@@ -18,9 +18,10 @@ import shutil
 import tarfile
 import tempfile
 import zipfile
+from collections.abc import Iterator
 from contextlib import contextmanager
 from pathlib import Path
-from typing import Callable, Iterator
+from typing import Callable
 
 import zstandard
 
@@ -127,15 +128,16 @@ def conda_builder(
         tempfile.SpooledTemporaryFile() as info_file,
         tempfile.SpooledTemporaryFile() as pkg_file,
     ):
-        with tarfile.TarFile(
-            fileobj=info_file, mode="w", encoding=encoding
-        ) as info_tar, CondaTarFile(
-            fileobj=pkg_file,
-            mode="w",
-            info_tar=info_tar,
-            is_info=is_info,
-            encoding=encoding,
-        ) as pkg_tar:
+        with (
+            tarfile.TarFile(fileobj=info_file, mode="w", encoding=encoding) as info_tar,
+            CondaTarFile(
+                fileobj=pkg_file,
+                mode="w",
+                info_tar=info_tar,
+                is_info=is_info,
+                encoding=encoding,
+            ) as pkg_tar,
+        ):
             # If we wanted to compress these at a low setting to save temporary
             # space, we could insert a file object that counts bytes written in
             # front of a zstd (level between 1..3) compressor.
@@ -162,22 +164,28 @@ def conda_builder(
             pkg_metadata = {"conda_pkg_format_version": CONDA_PACKAGE_FORMAT_VERSION}
             conda_file.writestr("metadata.json", json.dumps(pkg_metadata))
 
-            with conda_file.open(
-                f"pkg-{stem}.tar.zst",
-                "w",
-                force_zip64=(pkg_size > CONDA_ZIP64_LIMIT),
-            ) as pkg_file_zip, data_compress.stream_writer(
-                pkg_file_zip, size=pkg_size, closefd=False
-            ) as pkg_stream:
+            with (
+                conda_file.open(
+                    f"pkg-{stem}.tar.zst",
+                    "w",
+                    force_zip64=(pkg_size > CONDA_ZIP64_LIMIT),
+                ) as pkg_file_zip,
+                data_compress.stream_writer(
+                    pkg_file_zip, size=pkg_size, closefd=False
+                ) as pkg_stream,
+            ):
                 shutil.copyfileobj(pkg_file._file, pkg_stream)
 
-            with conda_file.open(
-                f"info-{stem}.tar.zst",
-                "w",
-                force_zip64=(info_size > CONDA_ZIP64_LIMIT),
-            ) as info_file_zip, data_compress.stream_writer(
-                info_file_zip,
-                size=info_size,
-                closefd=False,
-            ) as info_stream:
+            with (
+                conda_file.open(
+                    f"info-{stem}.tar.zst",
+                    "w",
+                    force_zip64=(info_size > CONDA_ZIP64_LIMIT),
+                ) as info_file_zip,
+                data_compress.stream_writer(
+                    info_file_zip,
+                    size=info_size,
+                    closefd=False,
+                ) as info_stream,
+            ):
                 shutil.copyfileobj(info_file._file, info_stream)

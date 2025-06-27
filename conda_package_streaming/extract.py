@@ -7,9 +7,9 @@ from __future__ import annotations
 
 import os
 import tarfile
+from collections.abc import Generator
 from errno import ELOOP
 from pathlib import Path
-from typing import Generator
 
 from . import exceptions, package_streaming
 
