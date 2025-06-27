@@ -64,9 +64,8 @@ class LazyZipOverHTTP:
 
         # If the server returns 416 (Range Not Satisfiable) and the fallback is
         # enabled, we request the whole file and set this to False. Some package
-        # servers incorrectly respond with 416 (Range Not Satisfiable) if the file
-        # is smaller than the range requested. See
-        # https://jfrog.atlassian.net/browse/RTFACT-30882
+        # servers incorrectly respond with 416 (Range Not Satisfiable) if the
+        # file is smaller than the range requested.
 
         # initial range request for the end of the file
         # if the server does not support range requests, this sets
@@ -233,10 +232,9 @@ class LazyZipOverHTTP:
                 # fallback disabled, print helpful error message
                 raise HTTPError(
                     "The server returned 416 (Range Not Satisfiable). "
-                    "If you're using Artifactory, you've likely encountered a "
-                    "well-known bug in Artifactory that occurs if the file is smaller"
+                    "This can occur on a buggy server if the file is smaller "
                     "than the range requested. Set the fall_back_to_full_download flag "
-                    "to work around this issue. ",
+                    "to work around this issue.",
                     response=response,
                 )
             else:
