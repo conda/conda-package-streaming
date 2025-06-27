@@ -1,12 +1,15 @@
 import io
+import os
 import stat
 import tarfile
 from errno import ELOOP
+from pathlib import Path
 
 import pytest
 
 from conda_package_streaming import exceptions, extract, package_streaming
 
+HAS_TAR_FILTER = hasattr(tarfile, "tar_filter")
 MAX_CONDAS = 8
 
 
@@ -34,15 +37,25 @@ def test_extract_all(conda_paths, tmp_path):
             break
 
 
-def empty_tarfile(name, mode=0o644, tar_mode="w"):
+def empty_tarfile(name, mode=0o644, tar_mode="w", create_subdir=False):
     """
     Return BytesIO containing a tarfile with one empty file named :name
     """
     tar = io.BytesIO()
     t = tarfile.open(mode=tar_mode, fileobj=tar)
-    tarinfo = tarfile.TarInfo(name=name)
-    tarinfo.mode = mode
-    t.addfile(tarinfo, io.BytesIO())
+    if create_subdir:
+        tarinfo = tarfile.TarInfo(name=name)
+        # Add execute bit for directory
+        tarinfo.mode = mode | 0o111
+        tarinfo.type = tarfile.DIRTYPE
+        t.addfile(tarinfo, io.BytesIO())
+        tarinfo = tarfile.TarInfo(name=str(Path(name, name)))
+        tarinfo.mode = mode
+        t.addfile(tarinfo, io.BytesIO())
+    else:
+        tarinfo = tarfile.TarInfo(name=name)
+        tarinfo.mode = mode
+        t.addfile(tarinfo, io.BytesIO())
     t.close()
     tar.seek(0)
     return tar
@@ -125,52 +138,80 @@ def test_chown(conda_paths, tmp_path, mocker):
                 break
 
 
-def test_umask(tmp_path, mocker):
+@pytest.mark.parametrize(
+    "tar_filter",
+    (pytest.param(None, id="no tar filter"), pytest.param("data", id="data_filter")),
+)
+def test_umask(tmp_path, mocker, tar_filter):
     """
     Demonstrate that umask-respecting tar implementation works.
 
     Mock umask in case it is different on your system.
     """
-    MOCK_UMASK = 0o022
-    mocker.patch("conda_package_streaming.package_streaming.UMASK", new=MOCK_UMASK)
+    if tar_filter is not None and not HAS_TAR_FILTER:
+        pytest.skip("Requires tar_filter")
+    try:
+        MOCK_UMASK = 0o022
+        current_umask = os.umask(MOCK_UMASK)
+        mocker.patch("conda_package_streaming.package_streaming.UMASK", new=MOCK_UMASK)
 
-    assert (
-        package_streaming.TarfileNoSameOwner(fileobj=empty_tarfile("file.txt")).umask
-        == MOCK_UMASK
-    )
+        assert (
+            package_streaming.TarfileNoSameOwner(
+                fileobj=empty_tarfile("file.txt")
+            ).umask
+            == MOCK_UMASK
+        )
 
-    # [
-    #   ('S_IFREG', 32768),
-    #   ('UF_HIDDEN', 32768),
-    #   ('FILE_ATTRIBUTE_INTEGRITY_STREAM', 32768)
-    # ]
+        # [
+        #   ('S_IFREG', 32768),
+        #   ('UF_HIDDEN', 32768),
+        #   ('FILE_ATTRIBUTE_INTEGRITY_STREAM', 32768)
+        # ]
 
-    # Of the high bits 100755 highest bit 1 can mean just "is regular file"
+        # Of the high bits 100755 highest bit 1 can mean just "is regular file"
 
-    tar3 = empty_tarfile(name="naughty_umask", mode=0o777)
+        name = "naughty_umask"
+        tar3 = empty_tarfile(name=name, mode=0o777, create_subdir=True)
 
-    stat_check = stat.S_IRGRP
-    stat_name = "S_IRGRP"
+        stat_check = stat.S_IRGRP
+        stat_name = "S_IRGRP"
 
-    extract.extract_stream(stream_stdlib(tar3), tmp_path)
-    mode = (tmp_path / "naughty_umask").stat().st_mode
-    # is the new .extractall(filter=) erasing group-writable?
-    assert mode & stat.S_IRGRP, f"Has {stat_name}? %o != %o" % (
-        mode,
-        mode & stat_check,
-    )
+        root_path = tmp_path / "stdlib"
+        root_path.mkdir()
+        files_to_check = [root_path / name, root_path / name / name]
 
-    # specifically forbid that stat bit
-    MOCK_UMASK |= stat_check
-    mocker.patch("conda_package_streaming.package_streaming.UMASK", new=MOCK_UMASK)
+        extract.extract_stream(stream_stdlib(tar3), root_path, tar_filter=tar_filter)
+        for file in files_to_check:
+            mode = file.stat().st_mode
+            # is the new .extractall(filter=) erasing "stat_name"?
+            assert mode & stat_check, f"{file} has {stat_name}? %o != %o" % (
+                mode,
+                mode & stat_check,
+            )
 
-    tar3.seek(0)
-    extract.extract_stream(stream(tar3), tmp_path)
-    mode = (tmp_path / "naughty_umask").stat().st_mode
-    assert not mode & stat_check, f"No {stat_name} due to umask? %o != %o" % (
-        mode,
-        mode & stat_check,
-    )
+        # specifically forbid that stat bit
+        MOCK_UMASK |= stat_check
+        mocker.patch("conda_package_streaming.package_streaming.UMASK", new=MOCK_UMASK)
+        os.umask(MOCK_UMASK)
+
+        root_path = tmp_path / "cps"
+        root_path.mkdir()
+        files_to_check = [root_path / name, root_path / name / name]
+
+        tar3.seek(0)
+        extract.extract_stream(stream(tar3), root_path, tar_filter=tar_filter)
+        for file in files_to_check:
+            mode = file.stat().st_mode
+            if mode & stat_check:
+                assert not (mode & stat_check), (
+                    f"{file}: No {stat_name} due to umask? %o != %o"
+                    % (
+                        mode,
+                        mode & stat_check,
+                    )
+                )
+    finally:
+        os.umask(current_umask)
 
 
 def test_encoding():

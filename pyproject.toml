@@ -50,7 +50,7 @@ exclude_lines = ["pragma: no cover", "if TYPE_CHECKING:"]
 [tool.coverage.run]
 source = ["conda_package_streaming/", "tests/"]
 
-[tool.ruff]
+[tool.ruff.lint]
 select = [
   "F",  # pyflakes
   "E",  # pycodestyle (errors)
