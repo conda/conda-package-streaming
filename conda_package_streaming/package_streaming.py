@@ -9,8 +9,8 @@ import os
 import os.path
 import tarfile
 import zipfile
+from collections.abc import Generator
 from enum import Enum
-from typing import Generator
 
 # acquire umask taking advantage of import system lock, instead of possibly in
 # multiple threads at once.
@@ -60,6 +60,9 @@ class TarfileNoSameOwner(tarfile.TarFile):
         Set file permissions of targetpath according to tarinfo, respecting
         umask.
         """
+        if tarinfo.mode is None:
+            return
+
         try:
             os.chmod(targetpath, tarinfo.mode & (-1 & (~self.umask)))
         except OSError as e:

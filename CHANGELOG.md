@@ -1,5 +1,8 @@
 [//]: # (current developments)
 
+* Skip setting permissions if `tarinfo.mode` is `None`. (#140)
+* Set minimum Python version to 3.9.
+
 ## 0.11.0 (2024-10)
 
 * Add Python 3.12 to test matrix.

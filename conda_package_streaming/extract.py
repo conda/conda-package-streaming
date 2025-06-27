@@ -7,9 +7,9 @@ from __future__ import annotations
 
 import os
 import tarfile
+from collections.abc import Generator
 from errno import ELOOP
 from pathlib import Path
-from typing import Generator
 
 from . import exceptions, package_streaming
 
@@ -20,6 +20,7 @@ HAS_TAR_FILTER = hasattr(tarfile, "tar_filter")
 def extract_stream(
     stream: Generator[tuple[tarfile.TarFile, tarfile.TarInfo]],
     dest_dir: Path | str,
+    tar_filter: str | None = None,
 ):
     """
     Pipe ``stream_conda_component`` output here to extract every member into
@@ -50,7 +51,7 @@ def extract_stream(
             # checked_members().
             tar_args = {"path": dest_dir, "members": checked_members()}
             if HAS_TAR_FILTER:
-                tar_args["filter"] = "fully_trusted"
+                tar_args["filter"] = tar_filter or "fully_trusted"
             tar_file.extractall(**tar_args)
         except OSError as e:
             if e.errno == ELOOP:

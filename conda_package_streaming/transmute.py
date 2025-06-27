@@ -11,8 +11,9 @@ from __future__ import annotations
 
 import os
 import tarfile
+from collections.abc import Iterator
 from pathlib import Path
-from typing import Callable, Iterator
+from typing import Callable
 
 import zstandard
 
