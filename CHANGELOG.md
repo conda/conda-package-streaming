@@ -1,7 +1,15 @@
 [//]: # (current developments)
 
+## 0.12.0 (2025-06)
+
 * Skip setting permissions if `tarinfo.mode` is `None`. (#140)
-* Set minimum Python version to 3.9.
+* Set minimum Python version to 3.9. (#142)
+* Add flag to deal with package servers that reply `416 Range Not
+  Satisfiable` if requested range is larger than entire file, when
+  using lazy
+  [`conda_reader_for_url`](https://conda.github.io/conda-package-streaming/url.html#conda_package_streaming.url.conda_reader_for_url).
+  (#132)
+* Format with Ruff (#133)
 
 ## 0.11.0 (2024-10)
 
