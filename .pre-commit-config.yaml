@@ -2,12 +2,7 @@
 ci:
     autofix_prs: false
 repos:
-  - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.14.4
-    hooks:
-      - id: ruff
-        args: [ --fix ]
-      - id: ruff-format
+  # generic verification and formatting
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v6.0.0
     hooks:
@@ -34,16 +29,27 @@ repos:
       - id: check-shebang-scripts-are-executable
       - id: debug-statements
       - id: detect-private-key
+  - repo: https://github.com/adamchainz/blacken-docs
+    rev: 1.20.0
+    hooks:
+      # auto format Python codes within docstrings
+      - id: blacken-docs
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.14.4
+    hooks:
+      # lint & attempt to correct failures (e.g. pyupgrade)
+      - id: ruff-check
+        args: [--fix]
+      # compatible replacement for black
+      - id: ruff-format
+  - repo: https://github.com/python-jsonschema/check-jsonschema
+    rev: 0.34.1
+    hooks:
+      # verify github syntaxes
+      - id: check-github-workflows
+      - id: check-dependabot
   - repo: meta
     # see https://pre-commit.com/#meta-hooks
     hooks:
       - id: check-hooks-apply
       - id: check-useless-excludes
-  - repo: local
-    hooks:
-      - id: git-diff
-        name: git diff
-        entry: git diff --exit-code
-        language: system
-        pass_filenames: false
-        always_run: true

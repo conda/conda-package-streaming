@@ -38,17 +38,20 @@ docs = ["furo", "sphinx", "myst-parser", "mdit-py-plugins>=0.3.0"]
 Home = "https://github.com/conda/conda-package-streaming"
 Documentation = "https://conda.github.io/conda-package-streaming/"
 
+[tool.coverage.report]
+exclude_lines = ["pragma: no cover", "if TYPE_CHECKING:"]
+
+[tool.coverage.run]
+source = ["conda_package_streaming/", "tests/"]
+
 # pyproject.toml
 [tool.pytest.ini_options]
 minversion = "7.0"
 addopts = "--cov=conda_package_streaming"
 testpaths = ["tests"]
 
-[tool.coverage.report]
-exclude_lines = ["pragma: no cover", "if TYPE_CHECKING:"]
-
-[tool.coverage.run]
-source = ["conda_package_streaming/", "tests/"]
+[tool.ruff]
+show-fixes = true
 
 [tool.ruff.lint]
 select = [
