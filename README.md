@@ -25,6 +25,7 @@ caller to decide when to stop reading.
 From a url,
 ```python
 from conda_package_streaming.url import stream_conda_info
+
 # url = (ends with .conda or .tar.bz2)
 for tar, member in stream_conda_info(url):
     if member.name == "info/index.json":
@@ -36,6 +37,7 @@ From s3,
 ```python
 client = boto3.client("s3")
 from conda_package_streaming.s3 import stream_conda_info
+
 # key = (ends with .conda or .tar.bz2)
 for tar, member in stream_conda_info(client, bucket, key):
     if member.name == "info/index.json":
@@ -46,6 +48,7 @@ for tar, member in stream_conda_info(client, bucket, key):
 From a filename,
 ```python
 from conda_package_streaming import package_streaming
+
 # filename = (ends with .conda or .tar.bz2)
 for tar, member in package_streaming.stream_conda_info(filename):
     if member.name == "info/index.json":
@@ -59,6 +62,7 @@ from contextlib import closing
 
 from conda_package_streaming.url import conda_reader_for_url
 from conda_package_streaming.package_streaming import stream_conda_component
+
 filename, conda = conda_reader_for_url(url)
 
 # file object must be seekable for `.conda` format, but merely readable for `.tar.bz2`
