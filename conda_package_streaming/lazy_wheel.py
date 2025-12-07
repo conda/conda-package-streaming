@@ -5,9 +5,10 @@ from __future__ import annotations
 import logging
 import zipfile
 from bisect import bisect_left, bisect_right
+from collections.abc import Iterator
 from contextlib import contextmanager
 from tempfile import NamedTemporaryFile
-from typing import Any, Iterator
+from typing import Any
 from zipfile import BadZipfile, ZipFile
 
 from requests import HTTPError, Session

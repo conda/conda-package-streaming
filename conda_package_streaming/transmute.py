@@ -11,8 +11,9 @@ from __future__ import annotations
 
 import os
 import tarfile
+from collections.abc import Iterator
 from pathlib import Path
-from typing import Callable, Iterator
+from typing import Callable
 
 import zstandard
 
@@ -83,12 +84,13 @@ def transmute_stream(
 
     .. code-block:: python
 
-        transmute_stream(..., package_stream=itertools.chain(
-            stream_conda_component("package.conda",
-            component=CondaComponent.pkg),
-            stream_conda_component("package.conda",
-            component=CondaComponent.info),
-        ))
+        transmute_stream(
+            ...,
+            package_stream=itertools.chain(
+                stream_conda_component("package.conda", component=CondaComponent.pkg),
+                stream_conda_component("package.conda", component=CondaComponent.info),
+            ),
+        )
 
     This example could move files between the ``pkg-`` and ``info-`` components
     depending on the ``is_info`` function.
