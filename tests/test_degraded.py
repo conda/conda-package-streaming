@@ -14,7 +14,7 @@ import pytest
 
 def test_degraded(tmpdir):
     try:
-        sys.modules["pyzstd"] = None  # type: ignore
+        sys.modules["backports.zstd"] = None  # type: ignore
         sys.modules["compression.zstd"] = None  # type: ignore
 
         import conda_package_streaming.extract
@@ -50,7 +50,7 @@ def test_degraded(tmpdir):
 
     finally:
         sys.modules.pop("compression.zstd", None)
-        sys.modules.pop("pyzstd", None)
+        sys.modules.pop("backports.zstd", None)
 
         import conda_package_streaming.package_streaming
 

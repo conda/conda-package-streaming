@@ -125,7 +125,7 @@ def test_slip(tmp_path):
         extract.extract_stream(stream(tar2), tmp_path)
 
 
-def test_chown(conda_paths, tmp_path, mocker):
+def test_chown(conda_paths, tmp_path):
     for package in conda_paths[:2]:
         print(package)
         with open(package, "rb") as fileobj:
@@ -142,7 +142,7 @@ def test_chown(conda_paths, tmp_path, mocker):
     "tar_filter",
     (pytest.param(None, id="no tar filter"), pytest.param("data", id="data_filter")),
 )
-def test_umask(tmp_path, mocker, tar_filter):
+def test_umask(tmp_path, monkeypatch, tar_filter):
     """
     Demonstrate that umask-respecting tar implementation works.
 
@@ -153,7 +153,7 @@ def test_umask(tmp_path, mocker, tar_filter):
     try:
         MOCK_UMASK = 0o022
         current_umask = os.umask(MOCK_UMASK)
-        mocker.patch("conda_package_streaming.package_streaming.UMASK", new=MOCK_UMASK)
+        monkeypatch.setattr("conda_package_streaming.package_streaming.UMASK", MOCK_UMASK)
 
         assert (
             package_streaming.TarfileNoSameOwner(
@@ -191,7 +191,7 @@ def test_umask(tmp_path, mocker, tar_filter):
 
         # specifically forbid that stat bit
         MOCK_UMASK |= stat_check
-        mocker.patch("conda_package_streaming.package_streaming.UMASK", new=MOCK_UMASK)
+        monkeypatch.setattr("conda_package_streaming.package_streaming.UMASK", MOCK_UMASK)
         os.umask(MOCK_UMASK)
 
         root_path = tmp_path / "cps"

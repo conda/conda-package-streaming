@@ -22,7 +22,10 @@ from contextlib import contextmanager
 from pathlib import Path
 from typing import Callable, Iterator
 
-import zstandard
+try:
+    import compression.zstd as zstd
+except ImportError:
+    import backports.zstd as zstd
 
 # increase to reduce speed and increase compression (levels above 19 use much
 # more memory)
@@ -89,16 +92,25 @@ class CondaTarFile(tarfile.TarFile):
             return super().addfile(tarinfo, fileobj)
 
 
+class _ZstdFile(zstd.ZstdFile):
+    """
+    ZstdFile adding pledged_input_size.
+
+    For the older zstandard binding, a pledged size was important for
+    decompression memory usage. Check if that is still true in compression.zstd.
+    """
+
+    def __init__(self, *args, pledged_input_size=0, **kwargs):
+        super().__init__(*args, **kwargs)
+        self._compressor.set_pledged_input_size(pledged_input_size)
+
+
 @contextmanager
 def conda_builder(
     stem,
     path,
     *,
-    compressor: Callable[
-        [], zstandard.ZstdCompressor
-    ] = lambda: zstandard.ZstdCompressor(
-        level=ZSTD_COMPRESS_LEVEL, threads=ZSTD_COMPRESS_THREADS
-    ),
+    compressor: Callable,
     is_info: Callable[[str], bool] = lambda filename: filename.startswith("info/"),
     encoding="utf-8",
 ) -> Iterator[CondaTarFile]:
@@ -155,10 +167,6 @@ def conda_builder(
             "x",  # x to not append to existing
             compresslevel=zipfile.ZIP_STORED,
         ) as conda_file:
-            # Use a maximum of one Zstd compressor, stream_writer at a time to save
-            # # memory.
-            data_compress = compressor()
-
             pkg_metadata = {"conda_pkg_format_version": CONDA_PACKAGE_FORMAT_VERSION}
             conda_file.writestr("metadata.json", json.dumps(pkg_metadata))
 
@@ -166,8 +174,8 @@ def conda_builder(
                 f"pkg-{stem}.tar.zst",
                 "w",
                 force_zip64=(pkg_size > CONDA_ZIP64_LIMIT),
-            ) as pkg_file_zip, data_compress.stream_writer(
-                pkg_file_zip, size=pkg_size, closefd=False
+            ) as pkg_file_zip, _ZstdFile(
+                pkg_file_zip, mode="w", pledged_input_size=pkg_size
             ) as pkg_stream:
                 shutil.copyfileobj(pkg_file._file, pkg_stream)
 
@@ -175,9 +183,7 @@ def conda_builder(
                 f"info-{stem}.tar.zst",
                 "w",
                 force_zip64=(info_size > CONDA_ZIP64_LIMIT),
-            ) as info_file_zip, data_compress.stream_writer(
-                info_file_zip,
-                size=info_size,
-                closefd=False,
+            ) as info_file_zip, _ZstdFile(
+                info_file_zip, mode="w", pledged_input_size=info_size
             ) as info_stream:
                 shutil.copyfileobj(info_file._file, info_stream)

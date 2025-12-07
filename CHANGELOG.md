@@ -1,8 +1,7 @@
 [//]: # (current developments)
 
-* Use `pyzstd` or `compression.zstd` (part of Python 3.14), instead of
-  `zstandard / python-zstandard`, for decompression. create/transmute is tied to
-  the `zstandard` API for now.
+* Use `zstd` or `backports.zstd` (before / after Python 3.14), instead of
+  `zstandard / python-zstandard.
 
 ## 0.11.0 (2024-10)
 

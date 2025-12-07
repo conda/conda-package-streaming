@@ -21,7 +21,7 @@ try:
     import compression.zstd as zstd  # Python 3.14+
 except ImportError:
     try:
-        import pyzstd as zstd
+        import backports.zstd as zstd
     except ImportError:
         import warnings
 

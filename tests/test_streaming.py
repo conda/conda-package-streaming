@@ -35,7 +35,7 @@ def test_early_exit(conda_paths):
         assert found, f"index.json not found in {package}"
 
 
-def test_chmod_error(tmp_path, mocker):
+def test_chmod_error(tmp_path, monkeypatch):
     """
     Coverage for os.chmod() error handling.
     """
@@ -43,7 +43,10 @@ def test_chmod_error(tmp_path, mocker):
         member = tarfile.TarInfo(name="file")
         tar.addfile(member, io.BytesIO())
 
-    mocker.patch("os.chmod", side_effect=OSError)
+    def not_chmod(*args):
+        raise OSError()
+
+    monkeypatch.setattr("os.chmod", not_chmod)
     with pytest.raises(tarfile.ExtractError):
         # only logs a debug message if errorlevel<=1
         with package_streaming.TarfileNoSameOwner(
