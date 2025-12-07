@@ -153,7 +153,9 @@ def test_umask(tmp_path, monkeypatch, tar_filter):
     try:
         MOCK_UMASK = 0o022
         current_umask = os.umask(MOCK_UMASK)
-        monkeypatch.setattr("conda_package_streaming.package_streaming.UMASK", MOCK_UMASK)
+        monkeypatch.setattr(
+            "conda_package_streaming.package_streaming.UMASK", MOCK_UMASK
+        )
 
         assert (
             package_streaming.TarfileNoSameOwner(
@@ -191,7 +193,9 @@ def test_umask(tmp_path, monkeypatch, tar_filter):
 
         # specifically forbid that stat bit
         MOCK_UMASK |= stat_check
-        monkeypatch.setattr("conda_package_streaming.package_streaming.UMASK", MOCK_UMASK)
+        monkeypatch.setattr(
+            "conda_package_streaming.package_streaming.UMASK", MOCK_UMASK
+        )
         os.umask(MOCK_UMASK)
 
         root_path = tmp_path / "cps"

@@ -172,20 +172,26 @@ def conda_builder(
             pkg_metadata = {"conda_pkg_format_version": CONDA_PACKAGE_FORMAT_VERSION}
             conda_file.writestr("metadata.json", json.dumps(pkg_metadata))
 
-            with conda_file.open(
-                f"pkg-{stem}.tar.zst",
-                "w",
-                force_zip64=(pkg_size > CONDA_ZIP64_LIMIT),
-            ) as pkg_file_zip, _ZstdFile(
-                pkg_file_zip, mode="w", pledged_input_size=pkg_size
-            ) as pkg_stream:
+            with (
+                conda_file.open(
+                    f"pkg-{stem}.tar.zst",
+                    "w",
+                    force_zip64=(pkg_size > CONDA_ZIP64_LIMIT),
+                ) as pkg_file_zip,
+                _ZstdFile(
+                    pkg_file_zip, mode="w", pledged_input_size=pkg_size
+                ) as pkg_stream,
+            ):
                 shutil.copyfileobj(pkg_file._file, pkg_stream)
 
-            with conda_file.open(
-                f"info-{stem}.tar.zst",
-                "w",
-                force_zip64=(info_size > CONDA_ZIP64_LIMIT),
-            ) as info_file_zip, _ZstdFile(
-                info_file_zip, mode="w", pledged_input_size=info_size
-            ) as info_stream:
+            with (
+                conda_file.open(
+                    f"info-{stem}.tar.zst",
+                    "w",
+                    force_zip64=(info_size > CONDA_ZIP64_LIMIT),
+                ) as info_file_zip,
+                _ZstdFile(
+                    info_file_zip, mode="w", pledged_input_size=info_size
+                ) as info_stream,
+            ):
                 shutil.copyfileobj(info_file._file, info_stream)
