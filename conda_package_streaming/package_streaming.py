@@ -139,7 +139,7 @@ def stream_conda_component(
     if str(filename).endswith(".conda"):
         if zstd is None:
             raise RuntimeError(
-                "Cannot unpack `.conda` without pyzstd or compression.zstd"
+                "Cannot unpack `.conda` without `backports.zstd` or `compression.zstd`"
             )
 
         zf = zipfile.ZipFile(fileobj or filename)
