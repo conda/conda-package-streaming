@@ -6,4 +6,3 @@ pytest >=7
 pytest-cov
 pytest-mock
 requests
-zstandard >=0.15
