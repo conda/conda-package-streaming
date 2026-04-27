@@ -26,7 +26,7 @@ except ImportError:
         import warnings
 
         warnings.warn(
-            "zstandard could not be imported. Running without .conda support."
+            "zstd module could not be imported. Running without .conda support."
         )
 
         zstd = None

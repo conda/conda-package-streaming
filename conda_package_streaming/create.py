@@ -29,9 +29,19 @@ except ImportError:
     import backports.zstd as zstd
 
 if TYPE_CHECKING:
-    from typing import Callable
+    from collections.abc import Callable
+    from typing import BinaryIO, Protocol
 
-    import zstandard
+    class LegacyCompressor(Protocol):
+        def stream_writer(
+            self,
+            writer: BinaryIO,
+            *,
+            size: int,
+            closefd: bool,
+        ) -> BinaryIO: ...
+
+    LegacyCompressorOrFactory = LegacyCompressor | Callable[[], LegacyCompressor]
 
 # increase to reduce speed and increase compression (levels above 19 use much
 # more memory)
@@ -111,16 +121,48 @@ class _ZstdFile(zstd.ZstdFile):
         self._compressor.set_pledged_input_size(pledged_input_size)
 
 
+def _zstd_options(compression_threads: int) -> dict[object, int] | None:
+    if compression_threads <= 1 or not hasattr(zstd, "CompressionParameter"):
+        return None
+    return {zstd.CompressionParameter.nb_workers: compression_threads}
+
+
+def _open_writer(
+    output,
+    *,
+    pledged_input_size: int,
+    compressor: LegacyCompressorOrFactory | None,
+    compression_level: int,
+    compression_threads: int,
+):
+    if compressor is not None:
+        legacy_compressor = compressor() if callable(compressor) else compressor
+        if not hasattr(legacy_compressor, "stream_writer"):
+            msg = "compressor must provide stream_writer(...)"
+            raise TypeError(msg)
+        return legacy_compressor.stream_writer(
+            output,
+            size=pledged_input_size,
+            closefd=False,
+        )
+
+    return _ZstdFile(
+        output,
+        mode="w",
+        pledged_input_size=pledged_input_size,
+        level=compression_level,
+        options=_zstd_options(compression_threads),
+    )
+
+
 @contextmanager
 def conda_builder(
     stem,
     path,
     *,
-    compressor: Callable[[], zstandard.ZstdCompressor] = lambda: (
-        zstandard.ZstdCompressor(
-            level=ZSTD_COMPRESS_LEVEL, threads=ZSTD_COMPRESS_THREADS
-        )
-    ),
+    compressor: LegacyCompressorOrFactory | None = None,
+    compression_level: int = ZSTD_COMPRESS_LEVEL,
+    compression_threads: int = ZSTD_COMPRESS_THREADS,
     is_info: Callable[[str], bool] = lambda filename: filename.startswith("info/"),
     encoding="utf-8",
 ) -> Iterator[CondaTarFile]:
@@ -135,8 +177,16 @@ def conda_builder(
     Args:
         stem: output filename without extension
 
-        path: destination path for transmuted .conda package compressor: A
-            function that creates instances of ``zstandard.ZstdCompressor()``.
+        path: destination path for transmuted .conda package.
+
+        compressor: Optional legacy ``zstandard`` compressor object (or factory
+            returning one) with ``stream_writer(...)``.
+
+        compression_level: zstd compression level for ``compression.zstd`` or
+            ``backports.zstd`` code path.
+
+        compression_threads: Number of zstd worker threads for
+            ``compression.zstd`` or ``backports.zstd`` code path.
 
         encoding: passed to TarFile constructor. Keep default "utf-8" for valid
             .conda.
@@ -187,8 +237,12 @@ def conda_builder(
                     "w",
                     force_zip64=(pkg_size > CONDA_ZIP64_LIMIT),
                 ) as pkg_file_zip,
-                _ZstdFile(
-                    pkg_file_zip, mode="w", pledged_input_size=pkg_size
+                _open_writer(
+                    pkg_file_zip,
+                    pledged_input_size=pkg_size,
+                    compressor=compressor,
+                    compression_level=compression_level,
+                    compression_threads=compression_threads,
                 ) as pkg_stream,
             ):
                 shutil.copyfileobj(pkg_file._file, pkg_stream)
@@ -199,8 +253,12 @@ def conda_builder(
                     "w",
                     force_zip64=(info_size > CONDA_ZIP64_LIMIT),
                 ) as info_file_zip,
-                _ZstdFile(
-                    info_file_zip, mode="w", pledged_input_size=info_size
+                _open_writer(
+                    info_file_zip,
+                    pledged_input_size=info_size,
+                    compressor=compressor,
+                    compression_level=compression_level,
+                    compression_threads=compression_threads,
                 ) as info_stream,
             ):
                 shutil.copyfileobj(info_file._file, info_stream)

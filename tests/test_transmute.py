@@ -8,8 +8,12 @@ from pathlib import Path
 from zipfile import ZipFile
 
 import pytest
-import zstandard
 from conda_package_handling.validate import validate_converted_files_match_streaming
+
+try:
+    import compression.zstd as zstd
+except ImportError:
+    import backports.zstd as zstd
 
 from conda_package_streaming.create import anonymize
 from conda_package_streaming.package_streaming import (
@@ -186,10 +190,14 @@ def test_transmute_stream(tmpdir, conda_paths):
     for package in conda_packages[:3]:
         file_id = package.name
 
+        class LegacyCompressor:
+            def stream_writer(self, writer, *, size, closefd):
+                return zstd.open(writer, mode="wb")
+
         transmute_stream(
             file_id,
             tmpdir,
-            compressor=lambda: zstandard.ZstdCompressor(),
+            compressor=LegacyCompressor(),
             package_stream=itertools.chain(
                 stream_conda_component(package, component=CondaComponent.pkg),
                 stream_conda_component(package, component=CondaComponent.info),

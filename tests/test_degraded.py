@@ -1,6 +1,6 @@
 """
-Allow conda_package_streaming to work in .tar.bz2-only mode if zstandard is not
-available (please immediately install zstandard if this is the case).
+Allow conda_package_streaming to work in .tar.bz2-only mode if zstd support is
+not available.
 """
 
 import importlib
