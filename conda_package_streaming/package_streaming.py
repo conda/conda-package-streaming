@@ -55,6 +55,18 @@ class TarfileNoSameOwner(tarfile.TarFile):
         """
         return
 
+    def utime(self, tarinfo, targetpath):
+        """
+        Override utime to be a no-op. conda packages' tarinfo mtime is
+        canonicalised to a constant at build time via
+        ``conda_package_handling.utils.anonymize_tarinfo``, so preserving
+        it on disk yields no observable information. stdlib tarfile's
+        per-member ``os.utime`` call was ~5 % of extract wall time on a
+        typical scientific-Python env (141 ms / 3080 ms total, 6268 calls
+        in the measured profile). Skip it. See #174.
+        """
+        return
+
     def chmod(self, tarinfo, targetpath):
         """
         Set file permissions of targetpath according to tarinfo, respecting
