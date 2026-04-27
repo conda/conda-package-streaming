@@ -117,6 +117,7 @@ def stream_conda_component(
     component: CondaComponent | str = CondaComponent.pkg,
     *,
     encoding="utf-8",
+    zf: zipfile.ZipFile | None = None,
 ) -> Generator[tuple[tarfile.TarFile, tarfile.TarInfo]]:
     """
     Yield members from .conda's embedded {component}- tarball. "info" or "pkg".
@@ -130,12 +131,19 @@ def stream_conda_component(
     first result and then ignore the rest of this generator. ``extractall`` takes
     care of some directory permissions/mtime issues, compared to ``extract`` or
     writing out the file objects yourself.
+
+    ``zf``: an optional pre-opened ``zipfile.ZipFile`` for .conda
+    archives. Callers that stream both the ``pkg`` and ``info``
+    components (e.g. ``conda_package_handling.streaming._stream_components``)
+    can open the zip once and pass it in both times, avoiding the
+    duplicate central-directory parse. See #173.
     """
     if str(filename).endswith(".conda"):
         if zstandard is None:
             raise RuntimeError("Cannot unpack `.conda` without zstandard")
 
-        zf = zipfile.ZipFile(fileobj or filename)
+        if zf is None:
+            zf = zipfile.ZipFile(fileobj or filename)
         stem, _, _ = os.path.basename(filename).rpartition(".")
         component_name = f"{component}-{stem}"
         component_filename = [
