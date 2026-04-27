@@ -1,5 +1,8 @@
 [//]: # (current developments)
 
+* Use `zstd` or `backports.zstd` (before / after Python 3.14), instead of
+  `zstandard / python-zstandard.
+
 ## 0.12.0 (2025-06)
 
 * Skip setting permissions if `tarinfo.mode` is `None`. (#140)

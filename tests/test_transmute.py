@@ -8,8 +8,12 @@ from pathlib import Path
 from zipfile import ZipFile
 
 import pytest
-import zstandard
 from conda_package_handling.validate import validate_converted_files_match_streaming
+
+try:
+    import compression.zstd as zstd
+except ImportError:
+    import backports.zstd as zstd
 
 from conda_package_streaming.create import anonymize
 from conda_package_streaming.package_streaming import (
@@ -141,7 +145,7 @@ def test_transmute_tarbz2_to_tarbz2(tmpdir, testtar_bytes):
     assert missing == mismatched == []
 
 
-def test_transmute_conditional_zip64(tmp_path, mocker):
+def test_transmute_conditional_zip64(tmp_path, monkeypatch):
     """
     Test that zip64 is used in transmute after a threshold.
     """
@@ -149,8 +153,8 @@ def test_transmute_conditional_zip64(tmp_path, mocker):
     LIMIT = 16384
 
     for test_size, extra_expected in (LIMIT // 2, False), (LIMIT * 2, True):
-        mocker.patch("conda_package_streaming.create.CONDA_ZIP64_LIMIT", new=LIMIT)
-        mocker.patch("zipfile.ZIP64_LIMIT", new=LIMIT)
+        monkeypatch.setattr("conda_package_streaming.create.CONDA_ZIP64_LIMIT", LIMIT)
+        monkeypatch.setattr("zipfile.ZIP64_LIMIT", LIMIT)
 
         tmp_tar = tmp_path / f"{test_size}.tar.bz2"
         with tarfile.open(tmp_tar, "w:bz2") as tar:
@@ -186,10 +190,14 @@ def test_transmute_stream(tmpdir, conda_paths):
     for package in conda_packages[:3]:
         file_id = package.name
 
+        class LegacyCompressor:
+            def stream_writer(self, writer, *, size, closefd):
+                return zstd.open(writer, mode="wb")
+
         transmute_stream(
             file_id,
             tmpdir,
-            compressor=lambda: zstandard.ZstdCompressor(),
+            compressor=LegacyCompressor(),
             package_stream=itertools.chain(
                 stream_conda_component(package, component=CondaComponent.pkg),
                 stream_conda_component(package, component=CondaComponent.info),
