@@ -27,10 +27,10 @@ def transmute(
     package,
     path,
     *,
-    compressor: Callable[
-        [], zstandard.ZstdCompressor
-    ] = lambda: zstandard.ZstdCompressor(
-        level=ZSTD_COMPRESS_LEVEL, threads=ZSTD_COMPRESS_THREADS
+    compressor: Callable[[], zstandard.ZstdCompressor] = lambda: (
+        zstandard.ZstdCompressor(
+            level=ZSTD_COMPRESS_LEVEL, threads=ZSTD_COMPRESS_THREADS
+        )
     ),
     is_info: Callable[[str], bool] = lambda filename: filename.startswith("info/"),
 ) -> Path:
@@ -67,10 +67,10 @@ def transmute_stream(
     stem,
     path,
     *,
-    compressor: Callable[
-        [], zstandard.ZstdCompressor
-    ] = lambda: zstandard.ZstdCompressor(
-        level=ZSTD_COMPRESS_LEVEL, threads=ZSTD_COMPRESS_THREADS
+    compressor: Callable[[], zstandard.ZstdCompressor] = lambda: (
+        zstandard.ZstdCompressor(
+            level=ZSTD_COMPRESS_LEVEL, threads=ZSTD_COMPRESS_THREADS
+        )
     ),
     is_info: Callable[[str], bool] = lambda filename: filename.startswith("info/"),
     package_stream: Iterator[tuple[tarfile.TarFile, tarfile.TarInfo]],

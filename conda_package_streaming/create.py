@@ -21,12 +21,17 @@ import zipfile
 from collections.abc import Iterator
 from contextlib import contextmanager
 from pathlib import Path
-from typing import Callable
+from typing import TYPE_CHECKING
 
 try:
     import compression.zstd as zstd
 except ImportError:
     import backports.zstd as zstd
+
+if TYPE_CHECKING:
+    from typing import Callable
+
+    import zstandard
 
 # increase to reduce speed and increase compression (levels above 19 use much
 # more memory)
@@ -111,7 +116,11 @@ def conda_builder(
     stem,
     path,
     *,
-    compressor: Callable,
+    compressor: Callable[[], zstandard.ZstdCompressor] = lambda: (
+        zstandard.ZstdCompressor(
+            level=ZSTD_COMPRESS_LEVEL, threads=ZSTD_COMPRESS_THREADS
+        )
+    ),
     is_info: Callable[[str], bool] = lambda filename: filename.startswith("info/"),
     encoding="utf-8",
 ) -> Iterator[CondaTarFile]:
