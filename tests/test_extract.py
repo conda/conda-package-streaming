@@ -150,6 +150,23 @@ def test_slip_through_pre_existing_symlink(tmp_path):
         extract.extract_stream(stream(tar), dest_dir)
 
 
+def test_dest_dir_is_a_regular_file(tmp_path):
+    """
+    A ``dest_dir`` that exists but is a regular file should propagate the
+    canonical error from ``extractall`` rather than from the entry-time
+    scandir guard. The scandir branch swallows ``OSError`` and falls
+    through, so the user-visible message is unchanged from the pre-B20
+    behaviour.
+    """
+    not_a_dir = tmp_path / "regular_file"
+    not_a_dir.write_text("not a directory")
+
+    tar = empty_tarfile(name="any_member")
+
+    with pytest.raises((NotADirectoryError, FileExistsError)):
+        extract.extract_stream(stream(tar), not_a_dir)
+
+
 def test_chown(conda_paths, tmp_path, mocker):
     for package in conda_paths[:2]:
         print(package)
