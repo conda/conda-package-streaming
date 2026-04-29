@@ -32,6 +32,21 @@ def extract_stream(
     dest_dir = os.path.realpath(dest_dir)
     dest_dir_with_sep = dest_dir if dest_dir.endswith(os.sep) else dest_dir + os.sep
 
+    # The fast path's safety claim relies on the filesystem tree under
+    # ``dest_dir`` containing only paths *we* created — which is only
+    # true when ``dest_dir`` was empty when extract started. If a caller
+    # hands us a ``dest_dir`` that already contains a symlink, a member
+    # whose name traverses through that pre-existing symlink would
+    # escape under the string-only check. We do one ``scandir`` call up
+    # front; if anything is in there already, we conservatively start
+    # the entire stream in fallback mode.
+    try:
+        with os.scandir(dest_dir) as it:
+            dest_dir_was_empty = next(it, None) is None
+    except FileNotFoundError:
+        # ``extractall`` will create ``dest_dir`` for us.
+        dest_dir_was_empty = True
+
     # Per-member safety check. Historically this called
     # ``os.path.realpath(os.path.join(dest_dir, name))`` which walks the
     # joined path and issues one ``lstat`` per path component — roughly
@@ -52,25 +67,26 @@ def extract_stream(
     # redirect writes outside ``dest_dir``.
     #
     # Across the full macOS conda-forge package cache (186 archives,
-    # 30 299 members, 1 274 symlinks), 81 % of members extract via the
+    # 30,299 members, 1,274 symlinks), 81 % of members extract via the
     # fast path and 142 / 186 archives never trigger the fallback. See
     # #175 for the compatibility survey and before/after numbers.
     for tar_file, _ in stream:
 
         def checked_members():
-            seen_risky = False
+            seen_risky = not dest_dir_was_empty
             for member in tar_file:
                 name = member.name
                 if not seen_risky:
-                    # is this member itself risky, or does its name itself
-                    # require the full realpath check?
-                    split_parts = name.replace("\\", "/").split("/")
+                    # In tar, member names are always ``/``-separated
+                    # (POSIX 1003.1) and ``tarfile`` exposes them
+                    # verbatim, so a single ``split("/")`` is enough
+                    # on every platform.
                     if (
                         member.issym()
                         or member.islnk()
                         or name.startswith("/")
                         or name.startswith(os.sep)
-                        or ".." in split_parts
+                        or ".." in name.split("/")
                     ):
                         seen_risky = True
 
@@ -80,6 +96,7 @@ def extract_stream(
                         dest_dir_with_sep,
                     )
                 else:
+                    # ``join`` + ``normpath`` are pure string ops, no syscalls.
                     normalized = os.path.normpath(os.path.join(dest_dir, name))
                     ok = normalized == dest_dir or normalized.startswith(
                         dest_dir_with_sep,
