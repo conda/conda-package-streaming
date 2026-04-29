@@ -46,6 +46,12 @@ def extract_stream(
     except FileNotFoundError:
         # ``extractall`` will create ``dest_dir`` for us.
         dest_dir_was_empty = True
+    except OSError:
+        # ``dest_dir`` exists but isn't readable as a directory
+        # (regular file, permission denied, etc.). Be conservative —
+        # take the fallback for the whole stream, and let
+        # ``extractall`` surface the canonical error.
+        dest_dir_was_empty = False
 
     # Per-member safety check. Historically this called
     # ``os.path.realpath(os.path.join(dest_dir, name))`` which walks the
