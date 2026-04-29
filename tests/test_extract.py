@@ -125,6 +125,31 @@ def test_slip(tmp_path):
         extract.extract_stream(stream(tar2), tmp_path)
 
 
+@pytest.mark.skipif(
+    not hasattr(os, "symlink"), reason="platform does not support symlinks"
+)
+def test_slip_through_pre_existing_symlink(tmp_path):
+    """
+    The fast path is only sound for an initially-empty ``dest_dir``. If a
+    caller hands us a ``dest_dir`` that already contains a symlink, a
+    member whose name traverses through that symlink would otherwise
+    escape under the string-only check; entry-time scandir must flip us
+    into fallback mode for the whole stream so ``realpath`` catches it.
+    """
+    dest_dir = tmp_path / "dest"
+    dest_dir.mkdir()
+    outside = tmp_path / "outside"
+    outside.mkdir()
+    # Pre-existing symlink under dest_dir pointing OUT of dest_dir.
+    os.symlink(outside, dest_dir / "foo")
+
+    # Member whose name traverses the pre-existing ``foo`` symlink.
+    tar = empty_tarfile(name="foo/escape")
+
+    with pytest.raises(exceptions.SafetyError):
+        extract.extract_stream(stream(tar), dest_dir)
+
+
 def test_chown(conda_paths, tmp_path, mocker):
     for package in conda_paths[:2]:
         print(package)
