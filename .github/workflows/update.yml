@@ -12,6 +12,9 @@ on:
     types:
       - created
 
+permissions:
+  contents: read
+
 jobs:
   update:
     if: >-
@@ -29,6 +32,10 @@ jobs:
         )
       )
     runs-on: ubuntu-slim
+    permissions:
+      contents: write
+      pull-requests: write
+      issues: write
     steps:
       - if: github.event_name == 'issue_comment'
         uses: peter-evans/create-or-update-comment@e8674b075228eee787fea43ef493e45ece1004c9 # v5.0.0
@@ -40,9 +47,11 @@ jobs:
 
       - if: github.event.comment.body == '@conda-bot render'
         name: Configure git origin
+        env:
+          PR_API_URL: ${{ github.event.issue.pull_request.url }}
         run: |
-          echo REPOSITORY=$(curl --silent ${{ github.event.issue.pull_request.url }} | jq --raw-output '.head.repo.full_name') >> $GITHUB_ENV
-          echo REF=$(curl --silent ${{ github.event.issue.pull_request.url }} | jq --raw-output '.head.ref') >> $GITHUB_ENV
+          echo REPOSITORY=$(curl --silent "$PR_API_URL" | jq --raw-output '.head.repo.full_name') >> $GITHUB_ENV
+          echo REF=$(curl --silent "$PR_API_URL" | jq --raw-output '.head.ref') >> $GITHUB_ENV
 
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
@@ -80,7 +89,7 @@ jobs:
       - if: github.event.comment.body != '@conda-bot render'
         id: create
         # no-op if no commits were made
-        uses: peter-evans/create-pull-request@c0f553fe549906ede9cf27b5156039d195d2ece0 # v8.1.0
+        uses: peter-evans/create-pull-request@5f6978faf089d4d20b00c7766989d076bb2fc7f1 # v8.1.1
         with:
           push-to-fork: ${{ env.FORK }}
           token: ${{ secrets.SYNC_TOKEN }}
