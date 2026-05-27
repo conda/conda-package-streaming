@@ -330,6 +330,10 @@ def test_compression_level_thread_defaults(tmpdir, testtar_bytes):
 
     assert out.exists()
     assert out.name == "test.conda"
+    _, missing, mismatched = validate_converted_files_match_streaming(
+        out, testtar, strict=True
+    )
+    assert missing == mismatched == []
 
 
 def test_compression_explicit_values(tmpdir, testtar_bytes):
@@ -348,3 +352,7 @@ def test_compression_explicit_values(tmpdir, testtar_bytes):
 
     assert out.exists()
     assert out.name == "test.conda"
+    _, missing, mismatched = validate_converted_files_match_streaming(
+        out, testtar, strict=True
+    )
+    assert missing == mismatched == []
