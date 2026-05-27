@@ -1,6 +1,6 @@
 [//]: # (current developments)
 
-* Use `zstd` or `backports.zstd` (before / after Python 3.14), instead of
+* Use `compression.zstd` or `backports.zstd` (before / after Python 3.14), instead of
   `zstandard / python-zstandard. (#137)
 * Set minimum Python version to 3.10 (#138)
 
