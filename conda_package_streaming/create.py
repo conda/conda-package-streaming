@@ -121,10 +121,16 @@ class _ZstdFile(zstd.ZstdFile):
         self._compressor.set_pledged_input_size(pledged_input_size)
 
 
-def _zstd_options(compression_threads: int) -> dict[object, int] | None:
+def _zstd_options(
+    compression_level: int,
+    compression_threads: int,
+) -> dict[object, int] | None:
     if compression_threads <= 1 or not hasattr(zstd, "CompressionParameter"):
         return None
-    return {zstd.CompressionParameter.nb_workers: compression_threads}
+    return {
+        zstd.CompressionParameter.compression_level: compression_level,
+        zstd.CompressionParameter.nb_workers: compression_threads,
+    }
 
 
 def _open_writer(
@@ -146,12 +152,18 @@ def _open_writer(
             closefd=False,
         )
 
+    options = _zstd_options(compression_level, compression_threads)
+    zstd_kwargs = (
+        {"options": options}
+        if options is not None
+        else {"level": compression_level}
+    )
+
     return _ZstdFile(
         output,
         mode="w",
         pledged_input_size=pledged_input_size,
-        level=compression_level,
-        options=_zstd_options(compression_threads),
+        **zstd_kwargs,
     )
 
 
