@@ -315,8 +315,11 @@ def test_compression_level_thread_defaults(tmpdir, testtar_bytes):
     testtar = Path(tmpdir, "test.tar.bz2")
     testtar.write_bytes(testtar_bytes)
 
-    # Transmute with None values should use defaults (ZSTD_COMPRESS_LEVEL=19, ZSTD_COMPRESS_THREADS=1)
-    # This test verifies that the defaults are applied and the .conda file is created successfully
+    # Transmute with None values should use defaults (ZSTD_COMPRESS_LEVEL=19,
+    # ZSTD_COMPRESS_THREADS=1)
+    #
+    # This test verifies that the defaults are applied and the .conda file is
+    # created successfully
     out = transmute_stream(
         "test",
         tmpdir,
