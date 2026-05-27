@@ -219,3 +219,129 @@ def test_anonymize_helper():
     assert anon.name == ti.name  # they are also the same object
     assert anon.uid == anon.gid == 0
     assert anon.uname == anon.gname == ""
+
+
+def test_compression_params_mutual_exclusivity_level(tmpdir, testtar_bytes):
+    """Test for error if compressor= and level options are passed."""
+    testtar = Path(tmpdir, "test.tar.bz2")
+    testtar.write_bytes(testtar_bytes)
+
+    class LegacyCompressor:
+        def stream_writer(self, writer, *, size, closefd):
+            return zstd.open(writer, mode="wb")
+
+    with pytest.raises(
+        ValueError,
+        match="`compressor` overrides `compression_level` and `compression_threads`",
+    ):
+        transmute_stream(
+            "test",
+            tmpdir,
+            compressor=LegacyCompressor(),
+            compression_level=19,
+            package_stream=stream_conda_component(testtar),
+        )
+
+
+def test_compression_params_mutual_exclusivity_threads(tmpdir, testtar_bytes):
+    """Test for error if compressor= and threads options are passed."""
+    testtar = Path(tmpdir, "test.tar.bz2")
+    testtar.write_bytes(testtar_bytes)
+
+    class LegacyCompressor:
+        def stream_writer(self, writer, *, size, closefd):
+            return zstd.open(writer, mode="wb")
+
+    with pytest.raises(
+        ValueError,
+        match="`compressor`",
+    ):
+        transmute_stream(
+            "test",
+            tmpdir,
+            compressor=LegacyCompressor(),
+            compression_threads=4,
+            package_stream=stream_conda_component(testtar),
+        )
+
+
+def test_compression_params_mutual_exclusivity_both(tmpdir, testtar_bytes):
+    """Test that compressor is mutually exclusive with both compression parameters"""
+    testtar = Path(tmpdir, "test.tar.bz2")
+    testtar.write_bytes(testtar_bytes)
+
+    class LegacyCompressor:
+        def stream_writer(self, writer, *, size, closefd):
+            return zstd.open(writer, mode="wb")
+
+    with pytest.raises(
+        ValueError,
+        match="`compressor`",
+    ):
+        transmute_stream(
+            "test",
+            tmpdir,
+            compressor=LegacyCompressor(),
+            compression_level=19,
+            compression_threads=4,
+            package_stream=stream_conda_component(testtar),
+        )
+
+
+def test_compressor_missing_stream_writer(tmpdir, testtar_bytes):
+    """Test that compressor must have stream_writer method"""
+    testtar = Path(tmpdir, "test.tar.bz2")
+    testtar.write_bytes(testtar_bytes)
+
+    class BadCompressor:
+        """Compressor without stream_writer method"""
+
+        pass
+
+    with pytest.raises(
+        TypeError,
+        match="compressor must provide stream_writer",
+    ):
+        transmute_stream(
+            "test",
+            tmpdir,
+            compressor=BadCompressor(),
+            package_stream=stream_conda_component(testtar),
+        )
+
+
+def test_compression_level_thread_defaults(tmpdir, testtar_bytes):
+    """Test that compression_level and compression_threads use defaults when None"""
+    testtar = Path(tmpdir, "test.tar.bz2")
+    testtar.write_bytes(testtar_bytes)
+
+    # Transmute with None values should use defaults (ZSTD_COMPRESS_LEVEL=19, ZSTD_COMPRESS_THREADS=1)
+    # This test verifies that the defaults are applied and the .conda file is created successfully
+    out = transmute_stream(
+        "test",
+        tmpdir,
+        compression_level=None,
+        compression_threads=None,
+        package_stream=stream_conda_component(testtar),
+    )
+
+    assert out.exists()
+    assert out.name == "test.conda"
+
+
+def test_compression_explicit_values(tmpdir, testtar_bytes):
+    """Test that explicit compression parameters are used"""
+    testtar = Path(tmpdir, "test.tar.bz2")
+    testtar.write_bytes(testtar_bytes)
+
+    # Use explicit compression values
+    out = transmute_stream(
+        "test",
+        tmpdir,
+        compression_level=10,
+        compression_threads=2,
+        package_stream=stream_conda_component(testtar),
+    )
+
+    assert out.exists()
+    assert out.name == "test.conda"
