@@ -179,7 +179,7 @@ def conda_builder(
 
         path: destination path for transmuted .conda package.
 
-        compressor: Optional legacy ``zstandard`` compressor object (or factory
+        compressor: DEPRECATED. Legacy ``zstandard`` compressor object (or factory
             returning one) with ``stream_writer(...)``.
 
         compression_level: zstd compression level for ``compression.zstd`` or

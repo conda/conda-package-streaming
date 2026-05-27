@@ -40,7 +40,7 @@ def transmute(
 
     :param package: path to .tar.bz2 conda package
     :param path: destination path for transmuted .conda package
-    :param compressor: Optional legacy ``zstandard`` compressor object (or
+    :param compressor: DEPRECATED. Legacy ``zstandard`` compressor object (or
         factory returning one) with ``stream_writer(...)``.
     :param compression_level: zstd compression level for ``compression.zstd`` or
         ``backports.zstd`` code path.
@@ -102,7 +102,7 @@ def transmute_stream(
 
     :param stem: output filename without extension
     :param path: destination path for transmuted .conda package
-    :param compressor: Optional legacy ``zstandard`` compressor object (or
+    :param compressor: DEPRECATED. Legacy ``zstandard`` compressor object (or
         factory returning one) with ``stream_writer(...)``.
     :param compression_level: zstd compression level for ``compression.zstd`` or
         ``backports.zstd`` code path.

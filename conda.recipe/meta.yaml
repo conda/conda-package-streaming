@@ -21,11 +21,11 @@ build:
 requirements:
   host:
     - flit-core
-    - python >=3.9
+    - python >=3.10
     - pip
   run:
-    - zstandard >=0.15
-    - python >=3.9
+    - backports.zstd
+    - python >=3.10
     # allow optional 'requests'
 
 test:

@@ -190,6 +190,7 @@ def test_transmute_stream(tmpdir, conda_paths):
     for package in conda_packages[:3]:
         file_id = package.name
 
+        # the only place we test the old compressor= API
         class LegacyCompressor:
             def stream_writer(self, writer, *, size, closefd):
                 return zstd.open(writer, mode="wb")
