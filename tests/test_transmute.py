@@ -188,7 +188,7 @@ def test_transmute_stream(tmpdir, conda_paths):
             conda_packages.append(path)
 
     for package in conda_packages[:3]:
-        file_id = package.name
+        file_id = package.stem
 
         # the only place we test the old compressor= API
         class LegacyCompressor:
@@ -204,6 +204,11 @@ def test_transmute_stream(tmpdir, conda_paths):
                 stream_conda_component(package, component=CondaComponent.info),
             ),
         )
+
+        _, missing, mismatched = validate_converted_files_match_streaming(
+            tmpdir / package.name, package, strict=True
+        )
+        assert missing == mismatched == []
 
 
 def test_anonymize_helper():
