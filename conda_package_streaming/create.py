@@ -121,27 +121,18 @@ class _ZstdFile(zstd.ZstdFile):
         self._compressor.set_pledged_input_size(pledged_input_size)
 
 
-def _zstd_options(
-    compression_level: int,
-    compression_threads: int,
-) -> dict[object, int] | None:
-    if compression_threads <= 1 or not hasattr(zstd, "CompressionParameter"):
-        return None
-    return {
-        zstd.CompressionParameter.compression_level: compression_level,
-        zstd.CompressionParameter.nb_workers: compression_threads,
-    }
-
-
 def _open_writer(
     output,
     *,
     pledged_input_size: int,
     compressor: LegacyCompressorOrFactory | None,
-    compression_level: int,
-    compression_threads: int,
+    compression_level: int | None = None,
+    compression_threads: int | None = None,
 ):
     if compressor is not None:
+        if compression_level is not None or compression_threads is not None:
+            msg = "`compressor` overrides `compression_level` and `compression_threads`"
+            raise ValueError(msg)
         legacy_compressor = compressor() if callable(compressor) else compressor
         if not hasattr(legacy_compressor, "stream_writer"):
             msg = "compressor must provide stream_writer(...)"
@@ -152,18 +143,19 @@ def _open_writer(
             closefd=False,
         )
 
-    options = _zstd_options(compression_level, compression_threads)
-    zstd_kwargs = (
-        {"options": options}
-        if options is not None
-        else {"level": compression_level}
-    )
+    if compression_level is None:
+        compression_level = ZSTD_COMPRESS_LEVEL
+    if compression_threads is None:
+        compression_threads = ZSTD_COMPRESS_THREADS
 
     return _ZstdFile(
         output,
         mode="w",
         pledged_input_size=pledged_input_size,
-        **zstd_kwargs,
+        options={
+            zstd.CompressionParameter.compression_level: compression_level,
+            zstd.CompressionParameter.nb_workers: compression_threads,
+        },
     )
 
 
@@ -173,8 +165,8 @@ def conda_builder(
     path,
     *,
     compressor: LegacyCompressorOrFactory | None = None,
-    compression_level: int = ZSTD_COMPRESS_LEVEL,
-    compression_threads: int = ZSTD_COMPRESS_THREADS,
+    compression_level: int | None = None,
+    compression_threads: int | None = None,
     is_info: Callable[[str], bool] = lambda filename: filename.startswith("info/"),
     encoding="utf-8",
 ) -> Iterator[CondaTarFile]:
@@ -191,14 +183,17 @@ def conda_builder(
 
         path: destination path for transmuted .conda package.
 
-        compressor: DEPRECATED. Legacy ``zstandard`` compressor object (or factory
-            returning one) with ``stream_writer(...)``.
+        compressor: Legacy ``zstandard`` compressor object (or factory
+            returning one) with ``stream_writer(...)``. Mutually exclusive with
+            ``compression_level`` and ``compression_threads``.
 
         compression_level: zstd compression level for ``compression.zstd`` or
-            ``backports.zstd`` code path.
+            ``backports.zstd`` code path. Defaults to ``ZSTD_COMPRESS_LEVEL`` if not
+            specified and ``compressor`` is None.
 
         compression_threads: Number of zstd worker threads for
-            ``compression.zstd`` or ``backports.zstd`` code path.
+            ``compression.zstd`` or ``backports.zstd`` code path. Defaults to
+            ``ZSTD_COMPRESS_THREADS`` if not specified and ``compressor`` is None.
 
         encoding: passed to TarFile constructor. Keep default "utf-8" for valid
             .conda.

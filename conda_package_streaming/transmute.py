@@ -15,7 +15,7 @@ from collections.abc import Iterator
 from pathlib import Path
 from typing import TYPE_CHECKING
 
-from .create import ZSTD_COMPRESS_LEVEL, ZSTD_COMPRESS_THREADS, conda_builder
+from .create import conda_builder
 
 # streams everything in .tar.bz2 mode
 from .package_streaming import CondaComponent, stream_conda_component
@@ -31,8 +31,8 @@ def transmute(
     path,
     *,
     compressor: LegacyCompressorOrFactory | None = None,
-    compression_level: int = ZSTD_COMPRESS_LEVEL,
-    compression_threads: int = ZSTD_COMPRESS_THREADS,
+    compression_level: int | None = None,
+    compression_threads: int | None = None,
     is_info: Callable[[str], bool] = lambda filename: filename.startswith("info/"),
 ) -> Path:
     """
@@ -40,12 +40,15 @@ def transmute(
 
     :param package: path to .tar.bz2 conda package
     :param path: destination path for transmuted .conda package
-    :param compressor: DEPRECATED. Legacy ``zstandard`` compressor object (or
-        factory returning one) with ``stream_writer(...)``.
+    :param compressor: Legacy ``zstandard`` compressor object (or factory
+        returning one) with ``stream_writer(...)``. Mutually exclusive with
+        ``compression_level`` and ``compression_threads``.
     :param compression_level: zstd compression level for ``compression.zstd`` or
-        ``backports.zstd`` code path.
+        ``backports.zstd`` code path. Defaults to ``ZSTD_COMPRESS_LEVEL`` if not
+        specified and ``compressor`` is None.
     :param compression_threads: Number of zstd worker threads for
-        ``compression.zstd`` or ``backports.zstd`` code path.
+        ``compression.zstd`` or ``backports.zstd`` code path. Defaults to
+        ``ZSTD_COMPRESS_THREADS`` if not specified and ``compressor`` is None.
     :param is_info: A function that returns True if a file belongs in the
         ``info`` component of a `.conda` package.  ``conda-package-handling``
         (not this package ``conda-package-streaming``) uses a set of regular
@@ -75,8 +78,8 @@ def transmute_stream(
     path,
     *,
     compressor: LegacyCompressorOrFactory | None = None,
-    compression_level: int = ZSTD_COMPRESS_LEVEL,
-    compression_threads: int = ZSTD_COMPRESS_THREADS,
+    compression_level: int | None = None,
+    compression_threads: int | None = None,
     is_info: Callable[[str], bool] = lambda filename: filename.startswith("info/"),
     package_stream: Iterator[tuple[tarfile.TarFile, tarfile.TarInfo]],
 ):
@@ -102,12 +105,15 @@ def transmute_stream(
 
     :param stem: output filename without extension
     :param path: destination path for transmuted .conda package
-    :param compressor: DEPRECATED. Legacy ``zstandard`` compressor object (or
-        factory returning one) with ``stream_writer(...)``.
+    :param compressor: Legacy ``zstandard`` compressor object (or factory
+        returning one) with ``stream_writer(...)``. Mutually exclusive with
+        ``compression_level`` and ``compression_threads``.
     :param compression_level: zstd compression level for ``compression.zstd`` or
-        ``backports.zstd`` code path.
+        ``backports.zstd`` code path. Defaults to ``ZSTD_COMPRESS_LEVEL`` if not
+        specified and ``compressor`` is None.
     :param compression_threads: Number of zstd worker threads for
-        ``compression.zstd`` or ``backports.zstd`` code path.
+        ``compression.zstd`` or ``backports.zstd`` code path. Defaults to
+        ``ZSTD_COMPRESS_THREADS`` if not specified and ``compressor`` is None.
     :param is_info: A function that returns True if a file belongs in the
         ``info`` component of a `.conda` package.  ``conda-package-handling``
         (not this package ``conda-package-streaming``) uses a set of regular
