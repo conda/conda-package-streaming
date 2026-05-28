@@ -17,8 +17,8 @@ classifiers = [
   "Programming Language :: Python :: Implementation :: PyPy",
 ]
 dynamic = ["version"]
-requires-python = ">=3.9"
-dependencies = ["requests", "zstandard >=0.15"]
+requires-python = ">=3.10"
+dependencies = ["requests", "backports.zstd ; python_version<'3.14'"]
 
 [project.optional-dependencies]
 test = [

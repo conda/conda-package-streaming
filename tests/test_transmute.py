@@ -8,8 +8,12 @@ from pathlib import Path
 from zipfile import ZipFile
 
 import pytest
-import zstandard
 from conda_package_handling.validate import validate_converted_files_match_streaming
+
+try:
+    import compression.zstd as zstd
+except ImportError:
+    import backports.zstd as zstd
 
 from conda_package_streaming.create import anonymize
 from conda_package_streaming.package_streaming import (
@@ -141,7 +145,7 @@ def test_transmute_tarbz2_to_tarbz2(tmpdir, testtar_bytes):
     assert missing == mismatched == []
 
 
-def test_transmute_conditional_zip64(tmp_path, mocker):
+def test_transmute_conditional_zip64(tmp_path, monkeypatch):
     """
     Test that zip64 is used in transmute after a threshold.
     """
@@ -149,8 +153,8 @@ def test_transmute_conditional_zip64(tmp_path, mocker):
     LIMIT = 16384
 
     for test_size, extra_expected in (LIMIT // 2, False), (LIMIT * 2, True):
-        mocker.patch("conda_package_streaming.create.CONDA_ZIP64_LIMIT", new=LIMIT)
-        mocker.patch("zipfile.ZIP64_LIMIT", new=LIMIT)
+        monkeypatch.setattr("conda_package_streaming.create.CONDA_ZIP64_LIMIT", LIMIT)
+        monkeypatch.setattr("zipfile.ZIP64_LIMIT", LIMIT)
 
         tmp_tar = tmp_path / f"{test_size}.tar.bz2"
         with tarfile.open(tmp_tar, "w:bz2") as tar:
@@ -184,17 +188,27 @@ def test_transmute_stream(tmpdir, conda_paths):
             conda_packages.append(path)
 
     for package in conda_packages[:3]:
-        file_id = package.name
+        file_id = package.stem
+
+        # also testing usage of LegacyCompressor here
+        class LegacyCompressor:
+            def stream_writer(self, writer, *, size, closefd):
+                return zstd.open(writer, mode="wb")
 
         transmute_stream(
             file_id,
             tmpdir,
-            compressor=lambda: zstandard.ZstdCompressor(),
+            compressor=LegacyCompressor(),
             package_stream=itertools.chain(
                 stream_conda_component(package, component=CondaComponent.pkg),
                 stream_conda_component(package, component=CondaComponent.info),
             ),
         )
+
+        _, missing, mismatched = validate_converted_files_match_streaming(
+            tmpdir / package.name, package, strict=True
+        )
+        assert missing == mismatched == []
 
 
 def test_anonymize_helper():
@@ -205,3 +219,140 @@ def test_anonymize_helper():
     assert anon.name == ti.name  # they are also the same object
     assert anon.uid == anon.gid == 0
     assert anon.uname == anon.gname == ""
+
+
+def test_compression_params_mutual_exclusivity_level(tmpdir, testtar_bytes):
+    """Test for error if compressor= and level options are passed."""
+    testtar = Path(tmpdir, "test.tar.bz2")
+    testtar.write_bytes(testtar_bytes)
+
+    class LegacyCompressor:
+        def stream_writer(self, writer, *, size, closefd):
+            return zstd.open(writer, mode="wb")
+
+    with pytest.raises(
+        ValueError,
+        match="`compressor` overrides `compression_level` and `compression_threads`",
+    ):
+        transmute_stream(
+            "test",
+            tmpdir,
+            compressor=LegacyCompressor(),
+            compression_level=19,
+            package_stream=stream_conda_component(testtar),
+        )
+
+
+def test_compression_params_mutual_exclusivity_threads(tmpdir, testtar_bytes):
+    """Test for error if compressor= and threads options are passed."""
+    testtar = Path(tmpdir, "test.tar.bz2")
+    testtar.write_bytes(testtar_bytes)
+
+    class LegacyCompressor:
+        def stream_writer(self, writer, *, size, closefd):
+            return zstd.open(writer, mode="wb")
+
+    with pytest.raises(
+        ValueError,
+        match="`compressor`",
+    ):
+        transmute_stream(
+            "test",
+            tmpdir,
+            compressor=LegacyCompressor(),
+            compression_threads=4,
+            package_stream=stream_conda_component(testtar),
+        )
+
+
+def test_compression_params_mutual_exclusivity_both(tmpdir, testtar_bytes):
+    """Test that compressor is mutually exclusive with both compression parameters"""
+    testtar = Path(tmpdir, "test.tar.bz2")
+    testtar.write_bytes(testtar_bytes)
+
+    class LegacyCompressor:
+        def stream_writer(self, writer, *, size, closefd):
+            return zstd.open(writer, mode="wb")
+
+    with pytest.raises(
+        ValueError,
+        match="`compressor`",
+    ):
+        transmute_stream(
+            "test",
+            tmpdir,
+            compressor=LegacyCompressor(),
+            compression_level=19,
+            compression_threads=4,
+            package_stream=stream_conda_component(testtar),
+        )
+
+
+def test_compressor_missing_stream_writer(tmpdir, testtar_bytes):
+    """Test that compressor must have stream_writer method"""
+    testtar = Path(tmpdir, "test.tar.bz2")
+    testtar.write_bytes(testtar_bytes)
+
+    class BadCompressor:
+        """Compressor without stream_writer method"""
+
+        pass
+
+    with pytest.raises(
+        TypeError,
+        match="compressor must provide stream_writer",
+    ):
+        transmute_stream(
+            "test",
+            tmpdir,
+            compressor=BadCompressor(),
+            package_stream=stream_conda_component(testtar),
+        )
+
+
+def test_compression_level_thread_defaults(tmpdir, testtar_bytes):
+    """Test that compression_level and compression_threads use defaults when None"""
+    testtar = Path(tmpdir, "test.tar.bz2")
+    testtar.write_bytes(testtar_bytes)
+
+    # Transmute with None values should use defaults (ZSTD_COMPRESS_LEVEL=19,
+    # ZSTD_COMPRESS_THREADS=1)
+    #
+    # This test verifies that the defaults are applied and the .conda file is
+    # created successfully
+    out = transmute_stream(
+        "test",
+        tmpdir,
+        compression_level=None,
+        compression_threads=None,
+        package_stream=stream_conda_component(testtar),
+    )
+
+    assert out.exists()
+    assert out.name == "test.conda"
+    _, missing, mismatched = validate_converted_files_match_streaming(
+        out, testtar, strict=True
+    )
+    assert missing == mismatched == []
+
+
+def test_compression_explicit_values(tmpdir, testtar_bytes):
+    """Test that explicit compression parameters are used"""
+    testtar = Path(tmpdir, "test.tar.bz2")
+    testtar.write_bytes(testtar_bytes)
+
+    # Use explicit compression values
+    out = transmute_stream(
+        "test",
+        tmpdir,
+        compression_level=10,
+        compression_threads=2,
+        package_stream=stream_conda_component(testtar),
+    )
+
+    assert out.exists()
+    assert out.name == "test.conda"
+    _, missing, mismatched = validate_converted_files_match_streaming(
+        out, testtar, strict=True
+    )
+    assert missing == mismatched == []
