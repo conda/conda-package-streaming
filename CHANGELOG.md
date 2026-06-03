@@ -1,8 +1,11 @@
 [//]: # (current developments)
 
+## 0.13.0 (2026-06)
+
 * Use `compression.zstd` or `backports.zstd` (before / after Python 3.14), instead of
   `zstandard / python-zstandard. (#137)
-* Set minimum Python version to 3.10 (#138)
+* Set minimum Python version to 3.10 (#137)
+* Accept pre-opened `ZipFile` via `zf=` kwarg on `stream_conda_component` (#173)
 
 ## 0.12.0 (2025-06)
 
