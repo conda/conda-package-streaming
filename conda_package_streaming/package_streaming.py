@@ -132,11 +132,18 @@ def stream_conda_component(
     care of some directory permissions/mtime issues, compared to ``extract`` or
     writing out the file objects yourself.
 
-    ``zf``: an optional pre-opened ``zipfile.ZipFile`` for .conda
-    archives. Callers that stream both the ``pkg`` and ``info``
-    components (e.g. ``conda_package_handling.streaming._stream_components``)
-    can open the zip once and pass it in both times, avoiding the
-    duplicate central-directory parse. See #173.
+    Args:
+        filename: path or file-like object to the .conda or .tar.bz2 file
+
+        component: "pkg" or "info" component to extract
+
+        encoding: "utf-8" passed to TarFile.open(); can be changed for testing.
+
+        zf: optional pre-opened ``zipfile.ZipFile`` for .conda archives.
+            When provided, reuses the already-opened ZipFile instead of
+            parsing the central directory again. Callers that stream both
+            the ``pkg`` and ``info`` components can open the zip once and
+            pass it in both times, avoiding duplicate parsing. See #173.
     """
     if str(filename).endswith(".conda"):
         if zstandard is None:
