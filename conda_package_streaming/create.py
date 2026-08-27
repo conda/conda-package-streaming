@@ -18,30 +18,29 @@ import shutil
 import tarfile
 import tempfile
 import zipfile
-from collections.abc import Iterator
+from collections.abc import Callable
 from contextlib import contextmanager
 from pathlib import Path
-from typing import TYPE_CHECKING
+from typing import BinaryIO, Generator, Protocol
 
 try:
     import compression.zstd as zstd
 except ImportError:
     import backports.zstd as zstd
 
-if TYPE_CHECKING:
-    from collections.abc import Callable
-    from typing import BinaryIO, Protocol
 
-    class LegacyCompressor(Protocol):
-        def stream_writer(
-            self,
-            writer: BinaryIO,
-            *,
-            size: int,
-            closefd: bool,
-        ) -> BinaryIO: ...
+class LegacyCompressor(Protocol):
+    def stream_writer(
+        self,
+        writer: BinaryIO,
+        *,
+        size: int,
+        closefd: bool,
+    ) -> BinaryIO: ...
 
-    LegacyCompressorOrFactory = LegacyCompressor | Callable[[], LegacyCompressor]
+
+LegacyCompressorOrFactory = LegacyCompressor | Callable[[], LegacyCompressor]
+
 
 # increase to reduce speed and increase compression (levels above 19 use much
 # more memory)
@@ -169,7 +168,7 @@ def conda_builder(
     compression_threads: int | None = None,
     is_info: Callable[[str], bool] = lambda filename: filename.startswith("info/"),
     encoding="utf-8",
-) -> Iterator[CondaTarFile]:
+) -> Generator[CondaTarFile]:
     """
     Produce a ``TarFile`` subclass used to build a ``.conda`` package. The
     subclass delegates ``addfile()`` to the ``info-`` component when ``is_info``
