@@ -33,11 +33,11 @@ jobs:
           git config --global user.name 'Conda Bot'
           git config --global user.email '18747875+conda-bot@users.noreply.github.com'
 
-      - uses: conda/actions/combine-durations@0f4ec1506e74c12799813dc66e613a39077ea864 # v26.7.0
+      - uses: conda/actions/combine-durations@8153f7f73472ac36d654d5111be19abaecc48cc6 # v26.10.0
         id: durations
         continue-on-error: true
 
-      - uses: conda/actions/template-files@0f4ec1506e74c12799813dc66e613a39077ea864 # v26.7.0
+      - uses: conda/actions/template-files@8153f7f73472ac36d654d5111be19abaecc48cc6 # v26.10.0
         id: templates
         continue-on-error: true
 
